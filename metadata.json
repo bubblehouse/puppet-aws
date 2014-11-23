@@ -7,11 +7,15 @@
   "source": "https://github.com/bubblehouse/shacklyn-bootstrap.git",
   "project_page": "https://github.com/bubblehouse/shacklyn-bootstrap",
   "issues_url": "https://github.com/bubblehouse/shacklyn-bootstrap/issues",
-  "dependencies": [
-    {
-      "name": "puppetlabs-stdlib",
-      "version_range": ">= 1.0.0"
-    }
-  ]
+  "dependencies": [{
+    "name": "puppetlabs-stdlib",
+    "version_range": ">= 2.2.1"
+  }, {
+    "name": "puppetlabs-apt",
+    "version_range": ">= 1.7.0"
+  }, {
+    "name": "nanliu-staging",
+    "version_range": ">= 1.0.2"
+  }]
 }
 
