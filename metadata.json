@@ -4,9 +4,9 @@
   "author": "shacklyn",
   "summary": "Bootstrap utilities for EC2 and CloudFormation",
   "license": "MIT",
-  "source": "https://github.com/philchristensen/shacklyn-bootstrap.git",
-  "project_page": "https://github.com/philchristensen/shacklyn-bootstrap",
-  "issues_url": "https://github.com/philchristensen/shacklyn-bootstrap/issues",
+  "source": "https://github.com/bubblehouse/shacklyn-bootstrap.git",
+  "project_page": "https://github.com/bubblehouse/shacklyn-bootstrap",
+  "issues_url": "https://github.com/bubblehouse/shacklyn-bootstrap/issues",
   "dependencies": [
     {
       "name": "puppetlabs-stdlib",
