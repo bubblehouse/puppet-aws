@@ -10,11 +10,14 @@ Facter.add('cfn_params') do
       resp = cloudformation.describe_stacks(
         stack_name: Facter.value(:cfn_stack_name)
       )
-      Hash[resp[:stacks][0][:parameters].collect { |p|
+      params = resp[:stacks][0][:parameters]
+      params.each { |p|
         Facter.add("cfn_#{p[:parameter_key]}") do
           setcode { p[:parameter_value] }
         end
-        return [p[:parameter_key], p[:parameter_value]]
+      }
+      Hash[params.collect { |p|
+        [p[:parameter_key], p[:parameter_value]]
       }]
     rescue Aws::EC2::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud
