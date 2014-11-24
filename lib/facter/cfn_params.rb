@@ -13,7 +13,7 @@ Facter.add('cfn_params') do
       Hash[resp[:stacks][0][:parameters].collect { |p|
         [p[:parameter_key], p[:parameter_value]]
       }]
-    rescue Aws::EC2::Errors::ServiceError => e
+    rescue Aws::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud
       function_notice(e)
       nil

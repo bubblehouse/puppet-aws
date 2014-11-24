@@ -1,0 +1,73 @@
+{
+    "Description" : "Shacklyn stack", 
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    
+    "Parameters": {
+        "DefaultKeyPair": {
+            "Default": "bubblehouse-master_20140323",
+            "Description": "The default keypair to use for EC2 instances.",
+            "Type": "String"
+        },
+        "DhcpDomainName": {
+            "Default": "shacklyn.net",
+            "Description": "The domain to configure for this network.",
+            "Type": "String"
+        },
+        "DhcpNs1": {
+            "Default": "AmazonProvidedDNS",
+            "Description": "The primary nameserver for this network.",
+            "Type": "String"
+        },
+        "DhcpNs2": {
+            "Default": "",
+            "Description": "The secondary nameserver for this network.",
+            "Type": "String"
+        },
+        "DhcpNtp": {
+            "Default": "",
+            "Description": "The NTP server for this network.",
+            "Type": "String"
+        },
+        "DhcpNetbios": {
+            "Default": "",
+            "Description": "The Netbios server for this network.",
+            "Type": "String"
+        },
+        "GatewayAccessCidr": {
+            "Default": "158.222.179.105/32",
+            "AllowedPattern": "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}",
+            "ConstraintDescription": "That doesn't look like a CIDR block.",
+            "Description": "The IP from which you'll administer the NAT gateway.",
+            "Type": "String"
+        }
+    },
+    
+    "Resources" : {
+        "hub" : {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : "https://s3.amazonaws.com/cf.shacklyn.net/shacklyn-net-cfn.json",
+                "Parameters" : {
+                    "BaseName": "hub",
+                    "BaseNetwork": "10.0.0.0/16",
+                    "DhcpDomainName": { "Ref" : "DhcpDomainName" },
+                    "DhcpNs1": { "Ref" : "DhcpNs1" },
+                    "DhcpNs2": { "Ref" : "DhcpNs2" },
+                    "DhcpNtp": { "Ref" : "DhcpNtp" },
+                    "DhcpNetbios": { "Ref" : "DhcpNetbios" },
+                    "GatewayAccessCidr": { "Ref" : "GatewayAccessCidr" },
+                    "GatewayKeyPair": { "Ref" : "DefaultKeyPair" },
+                    "ManagementAZ": "a",
+                    "ManagementPrivateCidr": "10.0.0.0/24",
+                    "ManagementPublicCidr": "10.0.1.0/24",
+                    "PrimaryAZ": "d",
+                    "PrimaryPrivateCidr": "10.0.2.0/24",
+                    "PrimaryPublicCidr": "10.0.3.0/24",
+                    "SecondaryAZ": "e",
+                    "SecondaryPrivateCidr": "10.0.4.0/24",
+                    "SecondaryPublicCidr": "10.0.5.0/24"
+                }
+            }
+        }
+    }
+}

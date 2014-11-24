@@ -68,7 +68,7 @@ class bootstrap(
     require => Package['python-pip']
   }
 
-  package { "awscli":
+  package { "aws-cfn-bootstrap":
     ensure => latest,
     source => "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz",
     provider => pip,
@@ -145,4 +145,6 @@ class bootstrap(
     ]),
     mode => "0755"
   }
+
+  
 }

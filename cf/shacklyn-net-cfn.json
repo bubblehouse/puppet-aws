@@ -1,0 +1,547 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+
+    "Description": "Shacklyn network stack",
+
+    "Parameters": {
+        "BaseName": {
+            "Description": "The base name for this network.",
+            "Type": "String"
+        },
+        "BaseNetwork": {
+            "AllowedPattern": "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}",
+            "ConstraintDescription": "That doesn't look like a CIDR block.",
+            "Description": "This network's CIDR block.",
+            "Type": "String"
+        },
+        "DhcpDomainName": {
+            "Description": "The domain to configure for this network.",
+            "Type": "String"
+        },
+        "DhcpNs1": {
+            "Description": "The primary nameserver for this network.",
+            "Type": "String"
+        },
+        "DhcpNs2": {
+            "Description": "The secondary nameserver for this network.",
+            "Type": "String"
+        },
+        "DhcpNtp": {
+            "Description": "The NTP server for this network.",
+            "Type": "String"
+        },
+        "DhcpNetbios": {
+            "Description": "The Netbios server for this network.",
+            "Type": "String"
+        },
+        "GatewayAccessCidr": {
+            "AllowedPattern": "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}",
+            "ConstraintDescription": "That doesn't look like a CIDR block.",
+            "Description": "Limit SSH access to the NAT gateway to this CIDR block.",
+            "Type": "String"
+        },
+        "GatewayKeyPair": {
+            "Description": "The keypair to use for the NAT instance.",
+            "Type": "String"
+        },
+        "ManagementAZ": {
+            "AllowedValues": [ "a", "b", "c", "d", "e" ],
+            "Description": "AZ for management and deploy tools only.",
+            "Type": "String"
+        },
+        "ManagementPrivateCidr": {
+            "AllowedPattern": "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}",
+            "ConstraintDescription": "That doesn't look like a CIDR block.",
+            "Description": "CIDR block for the PRIVATE management network.",
+            "Type": "String"
+        },
+        "ManagementPublicCidr": {
+            "AllowedPattern": "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}",
+            "ConstraintDescription": "That doesn't look like a CIDR block.",
+            "Description": "CIDR block for the PUBLIC management network.",
+            "Type": "String"
+        },
+        "PrimaryAZ": {
+            "AllowedValues": [ "a", "b", "c", "d", "e" ],
+            "Description": "AZ for redundant services.",
+            "Type": "String"
+        },
+        "PrimaryPrivateCidr": {
+            "AllowedPattern": "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}",
+            "ConstraintDescription": "That doesn't look like a CIDR block.",
+            "Description": "CIDR block for the PRIVATE primary network.",
+            "Type": "String"
+        },
+        "PrimaryPublicCidr": {
+            "AllowedPattern": "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}",
+            "ConstraintDescription": "That doesn't look like a CIDR block.",
+            "Description": "CIDR block for the PUBLIC primary network.",
+            "Type": "String"
+        },
+        "SecondaryAZ": {
+            "AllowedValues": [ "a", "b", "c", "d", "e" ],
+            "Description": "AZ for redundant services.",
+            "Type": "String"
+        },
+        "SecondaryPrivateCidr": {
+            "AllowedPattern": "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}",
+            "ConstraintDescription": "That doesn't look like a CIDR block.",
+            "Description": "CIDR block for the PRIVATE secondary network.",
+            "Type": "String"
+        },
+        "SecondaryPublicCidr": {
+            "AllowedPattern": "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}/\\d{1,2}",
+            "ConstraintDescription": "That doesn't look like a CIDR block.",
+            "Description": "CIDR block for the PUBLIC secondary network.",
+            "Type": "String"
+        }
+    },
+
+    "Conditions": {
+        "UpdateDhcpDns" : { "Fn::Not" : [{ "Fn::Equals" : [{ "Ref" : "DhcpNs1" }, "AmazonProvidedDNS"] }] }
+    },
+
+    "Outputs" : {
+        "vpcId" : {
+            "Value" : { "Ref" : "network" },
+            "Description" : "VPC container ID"
+        },
+        "natSecurityGroupId" : {
+            "Value" : { "Ref" : "natSg" },
+            "Description" : "Security group for NAT gateway"
+        },
+        "managementPrivateSubnetId" : {
+            "Value" : { "Ref" : "managementPublicSubnet" },
+            "Description" : "Management private subnet ID"
+        },
+        "managementPublicSubnetId" : {
+            "Value" : { "Ref" : "managementPublicSubnet" },
+            "Description" : "Management public subnet ID"
+        },
+        "primaryPrivateSubnetId" : {
+            "Value" : { "Ref" : "primaryPrivateSubnet" },
+            "Description" : "Primary private subnet ID"
+        },
+        "primaryPublicSubnetId" : {
+            "Value" : { "Ref" : "primaryPublicSubnet" },
+            "Description" : "Primary public subnet ID"
+        },
+        "secondaryPrivateSubnetId" : {
+            "Value" : { "Ref" : "secondaryPrivateSubnet" },
+            "Description" : "Secondary private subnet ID"
+        },
+        "secondaryPublicSubnetId" : {
+            "Value" : { "Ref" : "secondaryPublicSubnet" },
+            "Description" : "Secondary public subnet ID"
+        }
+    },
+    
+    "Resources": {
+        "nat" : {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : "https://s3.amazonaws.com/cf.shacklyn.net/shacklyn-asg-cfn.json",
+                "Parameters" : {
+                    "AvailabiltyZoneIds": { "Fn::Join" : ["", [{ "Ref" : "AWS::Region" }, { "Ref" : "ManagementAZ" }] ]},
+                    "BaseInstanceTag": { "Fn::Join" : ["-", ["nat", { "Ref" : "BaseName" }] ]},
+                    "InstanceType": "t2.micro",
+                    "KeyPairName": { "Ref" : "GatewayKeyPair" },
+                    "PuppetEnvironment": { "Ref" : "BaseName" },
+                    "SecurityGroupIds": { "Ref" : "natSg" },
+                    "SelectedImageId": "ami-864d84ee",
+                    "EC2SubnetIds": { "Ref" : "managementPublicSubnet" },
+                    "ConfigureAsGateway": "true",
+                    "NumInstances": "1",
+                    "ElasticNetworkInterfaceID": { "Ref" : "natGatewayInterface" },
+                    "EndpointDNSName": { "Fn::Join" : ["-", ["nat", { "Ref" : "BaseName" }] ]},
+                    "EndpointZone": { "Ref" : "DhcpDomainName" }
+                }
+            }
+        },
+        "network": {
+           "Type" : "AWS::EC2::VPC",
+           "Properties" : {
+              "CidrBlock" : { "Ref" : "BaseNetwork" },
+              "EnableDnsSupport" : true,
+              "EnableDnsHostnames" : true,
+              "InstanceTenancy" : "default",
+              "Tags" : [{
+                  "Key": "Name",
+                  "Value": { "Ref" : "BaseName" }
+              }]
+           }
+        },
+        "dhcpOptionSet": {
+            "Type" : "AWS::EC2::DHCPOptions",
+            "Properties" : {
+                "DomainName" : { "Ref" : "DhcpDomainName" },
+                "DomainNameServers" : { "Fn::If" : [
+                    "UpdateDhcpDns",
+                    [ { "Ref" : "DhcpNs1" }, { "Ref" : "DhcpNs2" } ],
+                    [ "AmazonProvidedDNS" ]
+                ]},
+                "Tags" : [{
+                    "Key": "Name",
+                    "Value": { "Fn::Join": ["-", [{ "Ref" : "BaseName"}, "default"]]}
+                }]
+            }
+        },
+        "dhcpOptionSetAssociation": {
+            "Type" : "AWS::EC2::VPCDHCPOptionsAssociation",
+            "Properties" : {
+                "DhcpOptionsId" : { "Ref" : "dhcpOptionSet" },
+                "VpcId" : { "Ref" : "network" }
+            }
+        },
+        "publicGateway": {
+            "Type" : "AWS::EC2::InternetGateway",
+            "Properties" : {
+                "Tags" : [{
+                    "Key": "Name",
+                    "Value": { "Fn::Join": ["-", [{ "Ref" : "BaseName"}, "public"]]}
+                }]
+            }
+        },
+        "natSg": {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+                "VpcId" : { "Ref" : "network" },
+                "GroupDescription" : { "Fn::Join" : [ " ", ["[cfn] Access rules for the", { "Ref" : "BaseName" }, " NAT gateway"]] },
+                "SecurityGroupIngress" : [{
+                    "CidrIp" : { "Ref" : "BaseNetwork"},
+                    "IpProtocol" : -1,
+                    "FromPort" : -1,
+                    "ToPort" : -1
+                }, {
+                    "CidrIp" : { "Ref" : "GatewayAccessCidr"},
+                    "IpProtocol" : 6,
+                    "FromPort" : 22,
+                    "ToPort" : 22
+                }],
+                "Tags" :  [{
+                    "Key": "Name",
+                    "Value": { "Fn::Join": ["-", [{ "Ref" : "BaseName"}, "nat"]]}
+                }]
+            }
+        },
+        "natGatewayInterface": {
+            "Type" : "AWS::EC2::NetworkInterface",
+            "Properties" : {
+                "Description" : { "Fn::Join" : [ " ", ["Private outbound traffic for the", { "Ref" : "BaseName" }, "network"]] },
+                "SourceDestCheck" : false,
+                "GroupSet": [ { "Ref" : "natSg"} ],
+                "SubnetId" : { "Ref" : "managementPublicSubnet" },
+                "Tags" : [{
+                    "Key": "Name",
+                    "Value": { "Fn::Join": ["-", [{ "Ref" : "BaseName"}, "private-gateway"]]}
+                }]
+            }
+        },
+        "gatewayAssociation" : {
+            "Type" : "AWS::EC2::VPCGatewayAttachment",
+            "Properties" : {
+                "InternetGatewayId" : { "Ref" : "publicGateway"},
+                "VpcId" : { "Ref" : "network" }
+            }
+        },
+        "firewall": {
+            "Type" : "AWS::EC2::NetworkAcl",
+            "Properties" : {
+                "VpcId" : { "Ref" : "network" },
+                "Tags" : [{
+                    "Key": "Name",
+                    "Value": { "Fn::Join": ["-", [{ "Ref" : "BaseName"}, "rules"]]}
+                }]
+            }
+        },
+        "firewallRuleForLocalIngressTraffic": {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "RuleNumber" : 100,
+                "CidrBlock" : { "Ref" : "BaseNetwork" },
+                "NetworkAclId" : { "Ref": "firewall" },
+                "Protocol" : "-1",
+                "RuleAction" : "allow",
+                "Egress" : false
+            }
+        },
+        "firewallRuleForLocalEgressTraffic": {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "RuleNumber" : 100,
+                "CidrBlock" : "0.0.0.0/0",
+                "NetworkAclId" : { "Ref": "firewall" },
+                "Protocol" : "-1",
+                "RuleAction" : "allow",
+                "Egress" : true
+            }
+        },
+        "firewallRuleForTcpEphemeral": {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "RuleNumber" : 101,
+                "CidrBlock" : "0.0.0.0/0",
+                "NetworkAclId" : { "Ref": "firewall" },
+                "PortRange" : {
+                    "From": 32768,
+                    "To": 65535
+                },
+                "Protocol" : "6",
+                "RuleAction" : "allow",
+                "Egress" : false
+            }
+        },
+        "firewallRuleForUdpEphemeral": {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "RuleNumber" : 102,
+                "CidrBlock" : "0.0.0.0/0",
+                "NetworkAclId" : { "Ref": "firewall" },
+                "PortRange" : {
+                    "From": 32768,
+                    "To": 65535
+                },
+                "Protocol" : "17",
+                "RuleAction" : "allow",
+                "Egress" : false
+            }
+        },
+        "firewallRuleForSsh": {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "RuleNumber" : 200,
+                "CidrBlock" : { "Ref": "GatewayAccessCidr"},
+                "NetworkAclId" : { "Ref": "firewall" },
+                "PortRange" : {
+                    "From": 22,
+                    "To": 22
+                },
+                "Protocol" : "6",
+                "RuleAction" : "allow",
+                "Egress" : false
+            }
+        },
+        "firewallRuleForHttp": {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "RuleNumber" : 201,
+                "CidrBlock" : "0.0.0.0/0",
+                "NetworkAclId" : { "Ref": "firewall" },
+                "PortRange" : {
+                    "From": 80,
+                    "To": 80
+                },
+                "Protocol" : "6",
+                "RuleAction" : "allow",
+                "Egress" : false
+            }
+        },
+        "firewallRuleForHttps": {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "RuleNumber" : 202,
+                "CidrBlock" : "0.0.0.0/0",
+                "NetworkAclId" : { "Ref": "firewall" },
+                "PortRange" : {
+                    "From": 443,
+                    "To": 443
+                },
+                "Protocol" : "6",
+                "RuleAction" : "allow",
+                "Egress" : false
+            }
+        },
+        "publicRoute": {
+            "Type" : "AWS::EC2::RouteTable",
+            "Properties" : {
+                "VpcId" : { "Ref" : "network" },
+                "Tags" : [{
+                    "Key": "Name",
+                    "Value": { "Fn::Join": ["-", [{ "Ref" : "BaseName"}, "public"]]}
+                }]
+            }
+        },
+        "publicRouteToPublicGateway": {
+            "Type" : "AWS::EC2::Route",
+            "Properties" : {
+                "DestinationCidrBlock" : "0.0.0.0/0",
+                "GatewayId" : { "Ref" : "publicGateway" },
+                "RouteTableId" : { "Ref" : "publicRoute"}
+            }
+        },
+        "privateRoute": {
+            "Type" : "AWS::EC2::RouteTable",
+            "Properties" : {
+                "VpcId" : { "Ref" : "network" },
+                "Tags" : [{
+                    "Key": "Name",
+                    "Value": { "Fn::Join": ["-", [{ "Ref" : "BaseName"}, "private"]]}
+                }]
+            }
+        },
+        "privateRouteToPrivateGateway": {
+            "Type" : "AWS::EC2::Route",
+            "Properties" : {
+                "DestinationCidrBlock" : "0.0.0.0/0",
+                "NetworkInterfaceId" : { "Ref" : "natGatewayInterface" },
+                "RouteTableId" : { "Ref" : "privateRoute" }
+            }
+        },
+        "managementPublicSubnet": {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "AvailabilityZone" : { "Fn::Join": ["", [{ "Ref" : "AWS::Region" }, { "Ref" : "ManagementAZ"}]]},
+                "CidrBlock" : { "Ref" : "ManagementPublicCidr"},
+                "VpcId" : { "Ref" : "network" },
+                "Tags" : [{
+                    "Key": "Name",
+                    "Value": { "Fn::Join": ["-", [{ "Ref" : "BaseName"}, "mgmt-public", { "Ref" : "ManagementAZ"}]]}
+                }]
+            }
+        },
+        "managementPublicAclAssociation": {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "managementPublicSubnet" },
+                "NetworkAclId" : { "Ref" : "firewall" }
+            }
+        },
+        "managementPublicRouteTableAssociation": {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "managementPublicSubnet" },
+                "RouteTableId" : { "Ref" : "publicRoute"}
+            }
+        },
+        "managementPrivateSubnet": {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "AvailabilityZone" : { "Fn::Join": ["", [{ "Ref" : "AWS::Region" }, { "Ref" : "ManagementAZ"}]]},
+                "CidrBlock" : { "Ref" : "ManagementPrivateCidr"},
+                "VpcId" : { "Ref" : "network" },
+                "Tags" : [{
+                    "Key": "Name",
+                    "Value": { "Fn::Join": ["-", [{ "Ref" : "BaseName"}, "mgmt-private", { "Ref" : "ManagementAZ"}]]}
+                }]
+            }
+        },
+        "managementPrivateAclAssociation": {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "managementPrivateSubnet" },
+                "NetworkAclId" : { "Ref" : "firewall" }
+            }
+        },
+        "managementPrivateRouteTableAssociation": {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "managementPrivateSubnet" },
+                "RouteTableId" : { "Ref" : "privateRoute"}
+            }
+        },
+        "primaryPublicSubnet": {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "AvailabilityZone" : { "Fn::Join": ["", [{ "Ref" : "AWS::Region" }, { "Ref" : "PrimaryAZ"}]]},
+                "CidrBlock" : { "Ref" : "PrimaryPublicCidr"},
+                "VpcId" : { "Ref" : "network" },
+                "Tags" : [{
+                    "Key": "Name",
+                    "Value": { "Fn::Join": ["-", [{ "Ref" : "BaseName"}, "public", { "Ref" : "PrimaryAZ"}]]}
+                }]
+            }
+        },
+        "primaryPublicAclAssociation": {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "primaryPublicSubnet" },
+                "NetworkAclId" : { "Ref" : "firewall" }
+            }
+        },
+        "primaryPublicRouteTableAssociation": {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "primaryPublicSubnet" },
+                "RouteTableId" : { "Ref" : "publicRoute"}
+            }
+        },
+        "primaryPrivateSubnet": {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "AvailabilityZone" : { "Fn::Join": ["", [{ "Ref" : "AWS::Region" }, { "Ref" : "PrimaryAZ"}]]},
+                "CidrBlock" : { "Ref" : "PrimaryPrivateCidr"},
+                "VpcId" : { "Ref" : "network" },
+                "Tags" : [{
+                    "Key": "Name",
+                    "Value": { "Fn::Join": ["-", [{ "Ref" : "BaseName"}, "private", { "Ref" : "PrimaryAZ"}]]}
+                }]
+            }
+        },
+        "primaryPrivateAclAssociation": {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "primaryPrivateSubnet" },
+                "NetworkAclId" : { "Ref" : "firewall" }
+            }
+        },
+        "primaryPrivateRouteTableAssociation": {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "primaryPrivateSubnet" },
+                "RouteTableId" : { "Ref" : "privateRoute"}
+            }
+        },
+        "secondaryPublicSubnet": {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "AvailabilityZone" : { "Fn::Join": ["", [{ "Ref" : "AWS::Region" }, { "Ref" : "SecondaryAZ"}]]},
+                "CidrBlock" : { "Ref" : "SecondaryPublicCidr"},
+                "VpcId" : { "Ref" : "network" },
+                "Tags" : [{
+                    "Key": "Name",
+                    "Value": { "Fn::Join": ["-", [{ "Ref" : "BaseName"}, "public", { "Ref" : "SecondaryAZ"}]]}
+                }]
+            }
+        },
+        "secondaryPublicAclAssociation": {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "secondaryPublicSubnet" },
+                "NetworkAclId" : { "Ref" : "firewall" }
+            }
+        },
+        "secondaryPublicRouteTableAssociation": {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "secondaryPublicSubnet" },
+                "RouteTableId" : { "Ref" : "publicRoute"}
+            }
+        },
+        "secondaryPrivateSubnet": {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "AvailabilityZone" : { "Fn::Join": ["", [{ "Ref" : "AWS::Region" }, { "Ref" : "SecondaryAZ"}]]},
+                "CidrBlock" : { "Ref" : "SecondaryPrivateCidr"},
+                "VpcId" : { "Ref" : "network" },
+                "Tags" : [{
+                    "Key": "Name",
+                    "Value": { "Fn::Join": ["-", [{ "Ref" : "BaseName"}, "private", { "Ref" : "SecondaryAZ"}]]}
+                }]
+            }
+        },
+        "secondaryPrivateAclAssociation": {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "secondaryPrivateSubnet" },
+                "NetworkAclId" : { "Ref" : "firewall" }
+            }
+        },
+        "secondaryPrivateRouteTableAssociation": {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : { "Ref" : "secondaryPrivateSubnet" },
+                "RouteTableId" : { "Ref" : "privateRoute"}
+            }
+        }
+    }
+}

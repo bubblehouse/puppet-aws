@@ -1,0 +1,667 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+
+    "Description": "Shacklyn fixed autoscale stack",
+
+    "Parameters": {
+        "AvailabiltyZoneIds": {
+            "Description": "Comma-separated list of availability zone IDs.",
+            "Type": "CommaDelimitedList"
+        },
+        "BaseInstanceTag": {
+            "Description": "The base instance tag/hostname.",
+            "Type": "String"
+        },
+        "EndpointDNSName": {
+            "Description": "The domain to register for this ASGs endpoint (either an ELB or a fixed EIP).",
+            "Type": "String"
+        },
+        "EndpointZone": {
+            "Description": "The the zone of the endpoint.",
+            "Type": "String"
+        },
+        "InstanceType": {
+            "Description": "EC2 instance type, e.g. m1.small, m1.large, etc.",
+            "Type": "String"
+        },
+        "KeyPairName": {
+            "Description": "Name of an SSH Keypair to use.",
+            "Type": "String"
+        },
+        "PuppetEnvironment": {
+            "Description": "Puppet environment to add the new server to.",
+            "Type": "String"
+        },
+        "SecurityGroupIds": {
+            "Description": "Comma-separated list of security group IDs for the created instances.",
+            "Type": "CommaDelimitedList"
+        },
+        "SelectedImageId": {
+            "Description": "The ID of an Ubuntu LTS 14.04 AMI to boot from (stock: ami-864d84ee).",
+            "Type": "String"
+        },
+        "EC2SubnetIds": {
+            "Description": "Comma-separated list of private subnet IDs.",
+            "Type": "CommaDelimitedList"
+        },
+        "ELBSubnetIds": {
+            "Default": "",
+            "Description": "To create an loadBalancer, enter a comma-separated list of public subnet IDs.",
+            "Type": "CommaDelimitedList"
+        },
+        "ELBSecurityGroupIds": {
+            "Default": "",
+            "Description": "Comma-separated list of ELB security group IDs.",
+            "Type": "CommaDelimitedList"
+        },
+        "ElasticNetworkInterfaceID": {
+            "Description": "For an autoscale group of 1, attach this static interface to the instance on creation.",
+            "Type": "String"
+        },
+        "NumInstances" : {
+            "Description": "Number of instances in this group.",
+            "Type": "String"
+        },
+        "ConfigureAsGateway" : {
+            "Default": "true",
+            "AllowedValues" : ["true", "false"],
+            "ConstraintDescription" : "You must specify true or false.",
+            "Description": "Should this instance perform the source-destination check?",
+            "Type": "String"
+        },
+        "RootVolumeSize" : {
+            "Default": "30",
+            "Description": "How big should this instance's encrypted volume be (gigabytes)?",
+            "Type": "Number"
+        },
+        "EncryptedVolumeSize" : {
+            "Default": "0",
+            "Description": "How big should this instance's encrypted volume be (gigabytes)?",
+            "Type": "Number"
+        }
+    },
+
+    "Conditions" : {
+        "NeedsPublicAddress" : { "Fn::Equals" : [{ "Fn::Join" : [",", { "Ref" : "ELBSubnetIds"}] }, ""] },
+        "NeedsEncryptedVolume" : { "Fn::Not": [{ "Fn::Equals" : [{ "Ref" : "EncryptedVolumeSize"}, "0"] }] },
+        "NeedsLoadBalancer" : { "Fn::Not": [{ "Fn::Equals" : [{ "Fn::Join" : [",", { "Ref" : "ELBSubnetIds"}] }, ""] }] },
+        "ConfigureNAT" : { "Fn::Equals" : [{ "Ref" : "ConfigureAsGateway" }, "true"]},
+        "DisableSourceDestCheckOnInstance" : { "Fn::And" : [
+            { "Fn::Equals" : [{ "Ref" : "ConfigureAsGateway" }, "false"]},
+            { "Fn::Equals" : [{ "Ref" : "ElasticNetworkInterfaceID"}, ""] }
+        ] },
+        "NeedsStaticIp" : { "Fn::And" : [
+            { "Fn::Equals" : [{ "Ref" : "NumInstances"}, "1"] },
+            { "Fn::Equals" : [{ "Fn::Join" : [",", { "Ref" : "ELBSubnetIds"}] }, ""] }
+        ] },
+        "AssociateStaticIpToInstance" : { "Fn::And" : [
+            { "Fn::Equals" : [{ "Ref" : "NumInstances"}, "1"] },
+            { "Fn::Equals" : [{ "Ref" : "ElasticNetworkInterfaceID"}, ""] },
+            { "Fn::Equals" : [{ "Fn::Join" : [",", { "Ref" : "ELBSubnetIds"}] }, ""] }
+        ] },
+        "AssociateStaticIpToInterface" : { "Fn::And" : [
+            { "Fn::Equals" : [{ "Ref" : "NumInstances"}, "1"] },
+            { "Fn::Equals" : [{ "Fn::Join" : [",", { "Ref" : "ELBSubnetIds"}] }, ""] },
+            { "Fn::Not": [{ "Fn::Equals" : [{ "Ref" : "ElasticNetworkInterfaceID"}, ""] }] }
+        ] },
+        "AttachNetworkInterface" : { "Fn::Not": [{ "Fn::Equals" : [{ "Ref" : "ElasticNetworkInterfaceID"}, ""] }] }
+    },
+
+    "Resources": {
+        "loadBalancerRecordSetGroup" : {
+            "Type" : "AWS::Route53::RecordSetGroup",
+            "Condition": "NeedsLoadBalancer",
+            "DependsOn": ["autoScaleGroup"],
+            "Properties" : {
+                "HostedZoneName" : { "Fn::Join" : ["", [{ "Ref" : "EndpointZone"}, "."]] },
+                "RecordSets" : [{
+                    "Name" : { "Fn::Join" : ["", [{ "Ref" : "EndpointDNSName"}, ".", { "Ref" : "EndpointZone"}, "."]] },
+                    "Type" : "A",
+                    "AliasTarget" : {
+                        "HostedZoneId" : { "Fn::GetAtt" : ["loadBalancer", "CanonicalHostedZoneNameID"] },
+                        "DNSName" : { "Fn::GetAtt" : ["loadBalancer", "CanonicalHostedZoneName"] }
+                    }
+                }]
+            }
+        },
+        "eipRecordSetGroup" : {
+            "Type" : "AWS::Route53::RecordSetGroup",
+            "Condition": "NeedsStaticIp",
+            "DependsOn": ["autoScaleGroup"],
+            "Properties" : {
+                "HostedZoneName" : { "Fn::Join" : ["", [{ "Ref" : "EndpointZone"}, "."]] },
+                "RecordSets" : [{
+                    "Name" : { "Fn::Join" : ["", [{ "Ref" : "EndpointDNSName"}, ".", { "Ref" : "EndpointZone"}, "."]] },
+                    "Type" : "A",
+                    "TTL": 300,
+                    "ResourceRecords" : [
+                        { "Ref" : "staticAddress" }
+                    ]
+                }]
+            }
+        },
+        "staticAddress" : {
+            "Type" : "AWS::EC2::EIP",
+            "Condition": "NeedsStaticIp",
+            "Properties" : {
+                "Domain" : "vpc"
+            }
+        },
+        "staticAddressAssociation" : {
+           "Type": "AWS::EC2::EIPAssociation",
+           "Condition": "AssociateStaticIpToInterface",
+           "Properties": {
+              "AllocationId": { "Fn::GetAtt" : ["staticAddress", "AllocationId"] },
+              "NetworkInterfaceId": { "Ref" : "ElasticNetworkInterfaceID" }
+           }
+        },
+        "autoScaleQueue": {
+            "Type" : "AWS::SQS::Queue",
+            "Properties" : {
+
+            }
+        },
+        "autoScaleSubscriptionPolicy": {
+            "Type" : "AWS::SQS::QueuePolicy",
+            "Properties" : {
+                "Queues" : [ {"Ref" : "autoScaleQueue"} ],
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {"AWS" :"*"},
+                        "Action": ["SQS:SendMessage"],
+                        "Resource": "*",
+                        "Sid": "autoScaleSubscriptionPolicy",
+                        "Condition": {
+                            "ArnEquals": {
+                                "aws:SourceArn": {"Ref" : "autoScaleTopic"}
+                            }
+                        }
+                    }]
+                }
+            }
+        },
+        "autoScaleTopic": {
+            "Type" : "AWS::SNS::Topic",
+            "Properties" : {
+                "Subscription" : [{
+                    "Endpoint" : { "Fn::GetAtt" : [ "autoScaleQueue", "Arn" ] },
+                    "Protocol" : "sqs"
+                }]
+            }
+        },
+        "autoScaleGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "DependsOn": ["launchConfiguration"],
+            "Properties": {
+                "AvailabilityZones": { "Ref": "AvailabiltyZoneIds" },
+                "LaunchConfigurationName": { "Ref": "launchConfiguration" },
+                "LoadBalancerNames": [ { "Ref": "loadBalancer" } ],
+                "NotificationConfiguration" : {
+                    "TopicARN" : { "Ref" : "autoScaleTopic" },
+                    "NotificationTypes" : [
+                        "autoscaling:TEST_NOTIFICATION",
+                        "autoscaling:EC2_INSTANCE_LAUNCH",
+                        "autoscaling:EC2_INSTANCE_LAUNCH_ERROR",
+                        "autoscaling:EC2_INSTANCE_TERMINATE",
+                        "autoscaling:EC2_INSTANCE_TERMINATE_ERROR"
+                    ]
+                },
+                "MaxSize": "2",
+                "MinSize": "2",
+                "VPCZoneIdentifier": { "Ref": "EC2SubnetIds" }
+            }
+        },
+        "role": {
+           "Type": "AWS::IAM::Role",
+           "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version" : "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [ "ec2.amazonaws.com" ]
+                        },
+                        "Action": [ "sts:AssumeRole" ]
+                    }]
+                },
+                "Path": "/",
+                "Policies": [ {
+                    "PolicyName": "lw-botfarm",
+                    "PolicyDocument": {
+                        "Version" : "2012-10-17",
+                        "Statement": [ {
+                            "Effect": "Allow",
+                            "Action": [
+                                "cloudformation:*",
+                                "ec2:ModifyInstanceAttribute",
+                                "ec2:AttachNetworkInterface",
+                                "ec2:AttachNetworkInterface",
+                                "ec2:AssociateAddress",
+                                "ec2:AttachVolume",
+                                "ec2:CreateVolume",
+                                "ec2:CreateTags",
+                                "ec2:DeleteTags",
+                                "ec2:DescribeTags"
+                            ],
+                            "Resource": "*"
+                        }, {
+                            "Effect": "Allow",
+                            "Action": [
+                                "ec2:Describe*",
+                                "rds:Describe*",
+                                "route53:ListHostedZones",
+                                "s3:Get*",
+                                "s3:List*",
+                                "sdb:GetAttributes",
+                                "sdb:List*",
+                                "sdb:Select*",
+                                "sns:Get*",
+                                "sns:List*",
+                                "sqs:ListQueues",
+                                "sqs:GetQueueAttributes",
+                                "sqs:ReceiveMessage",
+                                "autoscaling:Describe*",
+                                "elasticloadbalancing:Describe*",
+                                "cloudwatch:Describe*",
+                                "cloudwatch:List*",
+                                "cloudwatch:Get*",
+                                "iam:Get*",
+                                "iam:List*"
+                            ],
+                            "Resource": "*"
+                        }, {
+                            "Effect": "Allow",
+                            "Action": [
+                                "route53:GetHostedZone",
+                                "route53:ListResourceRecordSets",
+                                "route53:ChangeResourceRecordSets"
+                            ],
+                            "Resource": "arn:aws:route53:::hostedzone/*"
+                        }, {
+                            "Effect": "Allow",
+                            "Action": [
+                                "route53:GetChange"
+                            ],
+                            "Resource":"arn:aws:route53:::change/*"
+                        }]
+                    }
+                } ]
+            }
+        },
+        "profile": {
+           "Type": "AWS::IAM::InstanceProfile",
+           "Properties": {
+              "Path": "/",
+              "Roles": [ { "Ref": "role" } ]
+           }
+        },
+        "loadBalancer": {
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+            "Condition": "NeedsLoadBalancer",
+            "Properties": {
+                "CrossZone": false,
+                "ConnectionDrainingPolicy": {
+                   "Enabled" : true,
+                   "Timeout" : 300
+                },
+                "HealthCheck": {
+                    "HealthyThreshold": "5",
+                    "Interval": "30",
+                    "Target": "TCP:80",
+                    "Timeout": "5",
+                    "UnhealthyThreshold": "3"
+                },
+                "Listeners": [{
+                    "InstancePort": "80",
+                    "LoadBalancerPort": "80",
+                    "Protocol": "HTTP"
+                }, {
+                    "InstancePort": "443",
+                    "LoadBalancerPort": "443",
+                    "Protocol": "TCP"
+                }],
+                "SecurityGroups": { "Ref": "ELBSecurityGroupIds" },
+                "Subnets": { "Ref": "ELBSubnetIds" }
+            }
+        },
+        "autoScaleGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "DependsOn": ["launchConfiguration"],
+            "Properties": {
+                "AvailabilityZones": { "Ref": "AvailabiltyZoneIds" },
+                "LaunchConfigurationName": { "Ref": "launchConfiguration" },
+                "LoadBalancerNames": {"Fn::If" : [
+                    "NeedsLoadBalancer",
+                    [{ "Ref": "loadBalancer" }],
+                    {"Ref" : "AWS::NoValue"}
+                ]},
+                "Tags" : [ {
+                     "Key" : "Name",
+                     "Value" : { "Ref" : "BaseInstanceTag" },
+                     "PropagateAtLaunch" : "true"
+                  } ],
+                "MaxSize": "1",
+                "MinSize": "1",
+                "VPCZoneIdentifier": { "Ref": "EC2SubnetIds" }
+            }
+        },
+        "launchConfiguration": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "DependsOn": ["role", "profile"],
+            "Properties": {
+                "ImageId": { "Ref": "SelectedImageId" },
+                "InstanceType": { "Ref": "InstanceType" },
+                "AssociatePublicIpAddress": {"Fn::If" : [
+                    "NeedsPublicAddress",
+                    true,
+                    false
+                ]},
+                "IamInstanceProfile": { "Fn::GetAtt": ["profile", "Arn"] },
+                "KeyName": { "Ref" : "KeyPairName" },
+                "BlockDeviceMappings": [{
+                    "DeviceName" : "/dev/sda1",
+                    "Ebs" : { "VolumeType": "gp2", "VolumeSize" : { "Ref" : "RootVolumeSize" } }
+                }, {
+                    "DeviceName" : "/dev/sdb",
+                    "VirtualName" : "ephemeral0"
+                }],
+                "SecurityGroups": { "Ref": "SecurityGroupIds" },
+                "UserData": { "Fn::Base64":
+                    { "Fn::Join": [ "\n", [
+                        "Content-Type: multipart/mixed; boundary=\"===============5031922726237328048==\"",
+                        "MIME-Version: 1.0",
+                        "",
+                        "--===============5031922726237328048==",
+                        "Content-Type: text/cloud-config; charset=\"us-ascii\"",
+                        "MIME-Version: 1.0",
+                        "Content-Transfer-Encoding: 7bit",
+                        "Content-Disposition: attachment; filename=\"mount-points.yaml\"",
+                        "",
+                        "#cloud-config",
+                        "mounts:",
+                        " - [ /dev/xvdb, /media/ephemeral0, auto, \"defaults,nobootwait\", \"0\", \"2\" ]",
+                        {"Fn::If" : [
+                            "NeedsEncryptedVolume",
+                            " - [ /dev/xvdf, /media/encrypted, auto, \"defaults,nobootwait,nofail\", \"0\", \"2\" ]\n - [ swap, null ]",
+                            " - [ swap, null ]"
+                        ]},
+                        "apt_update: true",
+                        "apt_sources:",
+                        "- source: \"deb http://apt.puppetlabs.com trusty main\"",
+                        "  keyid: 4BD6EC30",
+                        "  filename: puppetlabs.list",
+                        "- source: \"deb http://apt.puppetlabs.com trusty dependencies\"",
+                        "  keyid: 4BD6EC30",
+                        "  filename: puppetlabs.list",
+                        "packages:",
+                        " - puppet",
+                        " - bundler",
+                        " - git",
+                        " - python-pip",
+                        " - augeas-tools",
+                        " - tree",
+                        " - ccze",
+                        "",
+                        "--===============5031922726237328048==",
+                        "Content-Type: text/x-shellscript; charset=\"us-ascii\"",
+                        "MIME-Version: 1.0",
+                        "Content-Transfer-Encoding: 7bit",
+                        "Content-Disposition: attachment; filename=\"user-data.sh\"",
+                        "",
+                        "#!/bin/bash -x",
+                        { "Fn::Join": [ "", ["echo AWS_DEFAULT_REGION=", { "Ref" : "AWS::Region"}, " >> /etc/environment"]] },
+                        "pip install -U awscli",
+                        "pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz",
+                        { "Fn::Join": [ "", [
+                            "cfn-init -v -s ", { "Ref": "AWS::StackName" }, " --region ", { "Ref": "AWS::Region" }, " -r launchConfiguration"
+                        ]] },
+                        { "Fn::Join" : ["", [
+                            "curl -X PUT -H 'Content-Type:' --data-binary '{",
+                                "\"Status\": \"SUCCESS\",",
+                                "\"Reason\": \"Configuration Complete\",",
+                                "\"UniqueId\" : \"", { "Ref": "AWS::StackName" }, "\",",
+                                "\"Data\" : \"Application has completed configuration.\"",
+                            "}' \"", { "Ref" : "waitHandle" }, "\""
+                        ]] },
+                        "--===============5031922726237328048==--"
+                    ]] }
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Init" : {
+                    "config": {
+                        "sources" : {
+                            "/usr/src/ubuntu-ec2-net-utils":
+                                "https://github.com/ademaria/ubuntu-ec2net/tarball/105e574"
+                        },
+                        "files": {
+                            "/usr/local/bin/jq": {
+                                "source": "http://stedolan.github.io/jq/download/linux64/jq",
+                                "mode": "0755"
+                            },
+                            "/etc/facter/facts.d/environment.txt": {
+                                "content": { "Fn::Join" : ["=", ["environment", { "Ref" : "PuppetEnvironment" }]] }
+                            },
+                            "/etc/puppet/cfn/bootstrap.pp": {
+                                "content": { "Fn::Join" : ["\n", [
+                                    "if $ec2_instance_id =~ /^i-(\\w{3})/ {",
+                                    "  $instance_slug = $1",
+                                    "}",
+                                    "else {",
+                                    "  fail('No EC2 facts found, something is wrong.')",
+                                    "}",
+                                    { "Fn::Join" : ["", ["$instance_name = \"", { "Ref" : "BaseInstanceTag" }, "-${instance_slug}\""]]},
+                                    "exec { tag:",
+                                    "  command => join(['aws ec2 create-tags --resources ', $ec2_instance_id, ' --tags Key=Name,Value=', $instance_name], ''),",
+                                    { "Fn::Join": [ "", ["  environment => 'AWS_DEFAULT_REGION=", { "Ref" : "AWS::Region"}, "',"]] },
+                                    "  path => '/usr/local/bin'",
+                                    "}",
+                                    "exec { hostname:",
+                                    { "Fn::Join" : ["", ["  command => \"/bin/hostname -b ", { "Ref" : "BaseInstanceTag" }, "-${instance_slug}.", { "Ref" : "EndpointZone" }, "\""]]},
+                                    "}",
+                                    "file {",
+                                    "  ['/etc/hostname', '/etc/mailname']:",
+                                    "    ensure => file,",
+                                    { "Fn::Join" : ["", ["    content => join([$instance_name, '.", { "Ref" : "EndpointZone" }, "',], '')"]]},
+                                    "}",
+                                    "augeas { hosts:",
+                                    "  context   => '/files/etc/hosts',",
+                                    "  changes   => [",
+                                    { "Fn::Join" : ["", ["      join(['set 1/canonical ', $instance_name, '.", { "Ref" : "EndpointZone" }, "',], ''),"]]},
+                                    "      join(['set 1/alias[1] ', $instance_name], '')",
+                                    "    ]",
+                                    "}",
+                                    "augeas { puppet:",
+                                    "  context   => '/files/etc/puppet/puppet.conf',",
+                                    "  changes   => [",
+                                    { "Fn::Join" : ["", ["      'set main/environment ", { "Ref" : "PuppetEnvironment" }, "',"]]},
+                                    "      'rm main/templatedir',",
+                                    "      'set main/waitforcert 30s'",
+                                    "    ]",
+                                    "}",
+                                    "cron { puppet:",
+                                    { "Fn::Join" : ["", ["  command => '/usr/bin/puppet agent --test --environment=", { "Ref" : "PuppetEnvironment" }, " &> /dev/null',"]]},
+                                    "  user    => root,",
+                                    "  minute  => '*/30'",
+                                    "}"
+                                ]] }
+                            },
+                            "/usr/local/sbin/configure-nat.sh": {
+                                "content": { "Fn::Join": [ "\n", [
+                                    "#!/bin/bash -x",
+                                    "PATH=/usr/sbin:/sbin:/usr/bin:/bin",
+                                    "INTERFACE=eth1",
+                                    "ETH_MAC=$(facter macaddress_${INTERFACE})",
+                                    "VPC_CIDR_RANGE=$(facter ec2_network_interfaces_macs_${ETH_MAC}_vpc_ipv4_cidr_block)",
+                                    "sysctl -q -w net.ipv4.ip_forward=1 net.ipv4.conf.${INTERFACE}.send_redirects=0 && (",
+                                    "   iptables -t nat -C POSTROUTING -o ${INTERFACE} -s ${VPC_CIDR_RANGE} -j MASQUERADE 2> /dev/null ||",
+                                    "   iptables -t nat -A POSTROUTING -o ${INTERFACE} -s ${VPC_CIDR_RANGE} -j MASQUERADE ) || exit",
+                                    "sysctl net.ipv4.ip_forward net.ipv4.conf.${INTERFACE}.send_redirects",
+                                    "iptables -n -t nat -L POSTROUTING"
+                                ]] },
+                                "mode": "0755"
+                            }
+                        },
+                        "commands": {
+                            "0100_awscli-attach-network-interface": {
+                                "command": {"Fn::If" : [
+                                    "AttachNetworkInterface",
+                                    { "Fn::Join": [ " ", [
+                                        "aws", "ec2", "attach-network-interface",
+                                        " --region", { "Ref" : "AWS::Region" },
+                                        " --network-interface-id", { "Ref" : "ElasticNetworkInterfaceID" },
+                                        " --device-index", "1",
+                                        " --instance-id", "$(cat /var/lib/cloud/data/instance-id)"
+                                    ]] },
+                                    "true"
+                                ]}
+                            },
+                            "0200_awscli-detect-volume": {
+                                "command": {"Fn::If" : [
+                                    "NeedsEncryptedVolume",
+                                    { "Fn::Join": [ " ", [
+                                        "aws ec2 describe-volumes",
+                                        "--region", { "Ref" : "AWS::Region" },
+                                        "--filters Name=tag-key,Values=Name",
+                                        { "Fn::Join": [ "", ["Name=tag-value,Values=", { "Ref" : "BaseInstanceTag"}, "-encrypted"] ] },
+                                        "| jq -r '.Volumes|.[0]|.VolumeId'",
+                                        "> /var/lib/cloud/secondary-volume-id"
+                                    ]] },
+                                    "echo > /var/lib/cloud/secondary-volume-id"
+                                ]},
+                                "ignoreErrors": true
+                            },
+                            "0300_awscli-create-volume": {
+                                "command": {"Fn::If" : [
+                                    "NeedsEncryptedVolume",
+                                    { "Fn::Join": [ " ", [
+                                        "aws", "ec2", "create-volume",
+                                        "--region", { "Ref" : "AWS::Region" },
+                                        "--availability-zone $(facter ec2_placement_availability_zone)",
+                                        "--size", { "Ref" : "EncryptedVolumeSize" },
+                                        "--volume-type gp2 --encrypted",
+                                        "| jq -r '.VolumeId'",
+                                        "> /var/lib/cloud/created-volume-id"
+                                    ]] },
+                                    "true"
+                                ]},
+                                "test" : "bash -c 'test \"$(cat /var/lib/cloud/secondary-volume-id)\" == \"null\"'",
+                                "ignoreErrors": true
+                            },
+                            "0400_awscli-create-volume-tags": {
+                                "command": {"Fn::If" : [
+                                    "NeedsEncryptedVolume",
+                                    { "Fn::Join": [ " ", [
+                                        "aws", "ec2", "create-tags",
+                                        "--region", { "Ref" : "AWS::Region" },
+                                        "--resources $(cat /var/lib/cloud/created-volume-id)",
+                                        { "Fn::Join": [ "", ["--tags Key=Name,Value=", { "Ref" : "BaseInstanceTag"}, "-$(facter ec2_placement_availability_zone)-encrypted"] ] },
+                                        "&& cp /var/lib/cloud/created-volume-id /var/lib/cloud/secondary-volume-id"
+                                    ]] },
+                                    "true"
+                                ]},
+                                "test" : "test -e /var/lib/cloud/created-volume-id",
+                                "ignoreErrors": true
+                            },
+                            "0500_awscli-attach-volume": {
+                                "command": {"Fn::If" : [
+                                    "NeedsEncryptedVolume",
+                                    { "Fn::Join": [ " ", [
+                                        "aws", "ec2", "attach-volume",
+                                        "--region", { "Ref" : "AWS::Region" },
+                                        "--instance-id", "$(cat /var/lib/cloud/data/instance-id)",
+                                        "--volume-id", "$(cat /var/lib/cloud/secondary-volume-id)",
+                                        "--device /dev/sdf"
+                                    ]] },
+                                    "true"
+                                ]},
+                                "ignoreErrors": true
+                            },
+                            "0600_bootstrap-modules": {
+                                "command": "puppet module install puppetlabs-stdlib",
+                                "ignoreErrors": true
+                            },
+                            "0700_bootstrap-instance": {
+                                "command": "puppet apply --parser=future /etc/puppet/cfn/bootstrap.pp",
+                                "ignoreErrors": true
+                            },
+                            "0800_copy-udev-rules": {
+                                "command": "cp *.rules /etc/udev/rules.d/.",
+                                "cwd": "/usr/src/ubuntu-ec2-net-utils"
+                            },
+                            "0900_copy-dhclient-hook": {
+                                "command": "cp ec2dhcp /etc/dhcp/dhclient-exit-hooks.d/.",
+                                "cwd": "/usr/src/ubuntu-ec2-net-utils"
+                            },
+                            "1000_copy-ec2net-functions": {
+                                "command": "cp ec2net-functions ec2net.hotplug /etc/network/.",
+                                "cwd": "/usr/src/ubuntu-ec2-net-utils"
+                            },
+                            "1100_chmod-ec2net-hotplug": {
+                                "command": "chmod 744 /etc/network/ec2net.hotplug"
+                            },
+                            "1200_awscli-attach-elastic-ip": {
+                                "command": {"Fn::If" : [
+                                    "AssociateStaticIpToInstance",
+                                    { "Fn::Join": [ " ", [
+                                        "aws", "ec2", "associate-address",
+                                        "--region", { "Ref" : "AWS::Region" },
+                                        "--instance-id", "$(cat /var/lib/cloud/data/instance-id)",
+                                        "--public-ip", {"Ref" : "staticAddress"},
+                                        "--allow-reassociation"
+                                    ]] },
+                                    "true"
+                                ]}
+                            },
+                            "1300_awscli-disable-source-dest-check": {
+                                "command": {"Fn::If" : [
+                                    "DisableSourceDestCheckOnInstance",
+                                    { "Fn::Join": [ " ", [
+                                        "aws", "ec2", "modify-instance-attribute",
+                                        "--region", { "Ref" : "AWS::Region" },
+                                        "--instance-id", "$(cat /var/lib/cloud/data/instance-id)",
+                                        "--no-source-dest-check"
+                                    ]] },
+                                    "true"
+                                ]}
+                            },
+                            "1400_mount-volume": {
+                                "command": {"Fn::If" : [
+                                    "NeedsEncryptedVolume",
+                                    "mount /dev/xvdf",
+                                    "true"
+                                ]},
+                                "ignoreErrors": true
+                            },
+                            "1500_configure-nat": {
+                                "command": {"Fn::If" : [
+                                    "ConfigureNAT",
+                                    "bash -x /usr/local/sbin/configure-nat.sh",
+                                    "true"
+                                ]}
+                            },
+                            "1600_puppet-agent-first-run": {
+                                "command": "puppet agent --test",
+                                "ignoreErrors": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "wait": {
+            "Type": "AWS::CloudFormation::WaitCondition",
+            "DependsOn": "autoScaleGroup",
+            "Properties": {
+                "Handle": { "Ref": "waitHandle" },
+                "Timeout": "1800"
+            }
+        },
+        "waitHandle": {
+            "Type": "AWS::CloudFormation::WaitConditionHandle",
+            "Properties": {}
+        }
+    }
+}
