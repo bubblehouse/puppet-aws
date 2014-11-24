@@ -37,7 +37,7 @@ class bootstrap(
     mode => '0755'
   }
   
-  $instance_name = "${cfn_BaseInstanceTag}-${ec2_instance_slug}"
+  $instance_name = "${cfn_baseinstancetag}-${ec2_instance_slug}"
   
   apt::source {
     'puppetlabs-main':
@@ -98,19 +98,19 @@ class bootstrap(
   }
   
   exec { "configure-hostname":
-    command => "/bin/hostname -b ${instance_name}.${cfn_EndpointZone}"
+    command => "/bin/hostname -b ${instance_name}.${cfn_endpointzone}"
   }
   
   file {
     ['/etc/hostname', '/etc/mailname']:
       ensure => file,
-      content => "${instance_name}.${cfn_EndpointZone}"
+      content => "${instance_name}.${cfn_endpointzone}"
   }
   
   augeas { "/etc/hosts":
     context   => '/files/etc/hosts',
     changes   => [
-        "set 1/canonical ${instance_name}.${cfn_EndpointZone}",
+        "set 1/canonical ${instance_name}.${cfn_endpointzone}",
         "set 1/alias[1] ${instance_name}"
       ]
   }
