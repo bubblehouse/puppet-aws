@@ -37,14 +37,7 @@ class bootstrap(
     mode => '0755'
   }
   
-  if $ec2_instance_id =~ /^i-(\\w{3})/ {
-    $instance_slug = $1
-  }
-  else {
-    fail('No EC2 facts found, something is wrong.')
-  }
-  
-  $instance_name = "${cfn_BaseInstanceTag}-${instance_slug}"
+  $instance_name = append_instance_slug($cfn_BaseInstanceTag)
   
   apt::source {
     'puppetlabs-main':
