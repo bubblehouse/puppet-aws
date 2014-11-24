@@ -37,7 +37,7 @@ class bootstrap(
     mode => '0755'
   }
   
-  $instance_name = append_instance_slug($cfn_BaseInstanceTag)
+  $instance_name = "${cfn_BaseInstanceTag}-${ec2_instance_slug}"
   
   apt::source {
     'puppetlabs-main':

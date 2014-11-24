@@ -11,6 +11,9 @@ Facter.add('cfn_params') do
         stack_name: Facter.value(:cfn_stack_name)
       )
       Hash[resp[:stacks][0][:parameters].collect { |p|
+        Facter.add("cfn_#{p[:parameter_key]}") do
+          setcode { p[:parameter_value] }
+        end
         [p[:parameter_key], p[:parameter_value]]
       }]
     rescue Aws::EC2::Errors::ServiceError => e
