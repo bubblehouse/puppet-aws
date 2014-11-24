@@ -10,9 +10,7 @@ Facter.add('cfn_params') do
       resp = cloudformation.describe_stacks(
         stack_name: Facter.value(:cfn_stack_name)
       )
-      params = resp[:stacks][0][:parameters]
-      Hash[params.collect { |p|
-        Facter.add("cfn_#{p[:parameter_key]}", :value => p[:parameter_value])
+      Hash[resp[:stacks][0][:parameters].collect { |p|
         [p[:parameter_key], p[:parameter_value]]
       }]
     rescue Aws::EC2::Errors::ServiceError => e
@@ -20,5 +18,12 @@ Facter.add('cfn_params') do
       function_notice(e)
       nil
     end
+  end
+end
+
+if (cfn_params = Facter.value(:cfn_params))
+  cfn_facts = Facter::Util::Values.flatten_structure("cfn", cfn_params)
+  cfn_facts.each_pair do |factname, factvalue|
+    Facter.add(factname, :value => factvalue)
   end
 end
