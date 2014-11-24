@@ -4,11 +4,11 @@
 
 1. [Overview](#overview)
 2. [Module Description - What the module does and why it is useful](#module-description)
-
-<!-- 3. [Setup - The basics of getting started with bootstrap](#setup)
+3. [Setup - The basics of getting started with bootstrap](#setup)
     * [What bootstrap affects](#what-bootstrap-affects)
     * [Setup requirements](#setup-requirements)
-    * [Beginning with bootstrap](#beginning-with-bootstrap)
+
+    <!-- * [Beginning with bootstrap](#beginning-with-bootstrap)
 4. [Usage - Configuration options and additional functionality](#usage)
 5. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
 5. [Limitations - OS compatibility, etc.](#limitations)
@@ -29,20 +29,24 @@ This module seeks to standardize on Puppet and Ruby to reduce the complexity of
 the CloudFormation templates and/or userdata scripts, while using the same
 language/platform for initialization as provisioning and configuration.
 
-<!-- ### What bootstrap affects
+### What bootstrap affects
 ## Setup
 
-* A list of files, packages, services, or operations that the module will alter,
-  impact, or execute on the system it's installed on.
-* This is a great place to stick any warnings.
-* Can be in list or paragraph form.
+* Configures a wide number of different default settings for an instance
+* Runs privileged AWS API commands via custom functions executed on the Puppetmaster
 
-### Setup Requirements **OPTIONAL**
+### Setup Requirements
 
-If your module requires anything extra before setting up (pluginsync enabled,
-etc.), mention it here.
+Each instance that uses this package will need read access to various aspects
+of the AWS environment.
 
-### Beginning with bootstrap
+Use of the custom functions require that the Puppetmaster is configured with
+the appropriate level of access to create, attach, describe, etc.
+
+It's assumed an instance profile will be configured on each machine, conversely
+the AWS Ruby API provides for use of the usual environment variables.
+
+<!-- ### Beginning with bootstrap
 
 The very basic steps needed for a user to get the module up and running.
 
