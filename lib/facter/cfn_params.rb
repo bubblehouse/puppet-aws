@@ -14,7 +14,7 @@ Facter.add('cfn_params') do
         Facter.add("cfn_#{p[:parameter_key]}") do
           setcode { p[:parameter_value] }
         end
-        [p[:parameter_key], p[:parameter_value]]
+        return [p[:parameter_key], p[:parameter_value]]
       }]
     rescue Aws::EC2::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud
