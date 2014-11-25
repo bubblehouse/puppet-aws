@@ -1,8 +1,6 @@
 # Configure the installed packages
 
 class bootstrap::config inherits bootstrap {
-  include bootstrap::config::nat
-  
   $instance_name = "${cfn_baseinstancetag}-${ec2_instance_slug}"
   $instance_fqdn = "${instance_name}.${cfn_endpointzone}"
   
@@ -21,6 +19,11 @@ class bootstrap::config inherits bootstrap {
     ['/etc/hostname', '/etc/mailname']:
       ensure => file,
       content => "${instance_fqdn}"
+  }
+  
+  file_line { "/etc/environment":
+    path => "/etc/environment",
+    line => "AWS_DEFAULT_REGION=${aws_region}"
   }
   
   augeas { "/etc/hosts":

@@ -27,9 +27,13 @@
 #
 
 class bootstrap(
+  $eni_id = $bootstrap::params::eni_id,
+  $eip_allocation_id = $bootstrap::params::eip_allocation_id,
+  $static_volume_size = $bootstrap::params::static_volume_size,
+  $static_volume_encryption = $bootstrap::params::static_volume_encryption,
+  $static_volume_tag = $bootstrap::params::static_volume_tag,
   $access_key_id = $bootstrap::params::access_key_id,
   $secret_access_key = $bootstrap::params::secret_access_key,
-  $default_region = $bootstrap::params::default_region
 ) inherits bootstrap::params {
   include apt
   include staging
@@ -56,5 +60,8 @@ class bootstrap(
   anchor { 'bootstrap::begin': } ->
   class { '::bootstrap::install': } ->
   class { '::bootstrap::config': } ->
+  class { '::bootstrap::aws::resources': } ->
+  class { '::bootstrap::aws::attachments': } ->
+  class { '::bootstrap::config::nat': } ->
   anchor { 'bootstrap::end': }
 }

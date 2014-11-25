@@ -2,7 +2,11 @@ class bootstrap::config::nat {
   $iface = "eth1"
   $mac = inline_template("<%= scope.lookupvar('$macaddress_${iface}') %>")
   $range = inline_template("<%= scope.lookupvar('$ec2_network_interfaces_macs_${mac}_vpc_ipv4_cidr_block') %>")
-    
+  
+  if($bootstrap::eni_id == nil){
+    ec2_modify_instance_attribute($ec2_instance_id, 'sourceDestCheck', false)
+  }
+  
   exec { "sysctl-ip-forward":
     command => "sysctl -q -w net.ipv4.ip_forward=1",
     unless => "test $(sysctl net.ipv4.ip_forward) -eq 1"

@@ -32,13 +32,6 @@ class bootstrap::install inherits bootstrap {
     require => Package['python-pip']
   }
 
-  package { "aws-cfn-bootstrap":
-    ensure => latest,
-    source => "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz",
-    provider => pip,
-    require => Package['python-pip']
-  }
-  
   staging::file { "jq":
     source => "http://stedolan.github.io/jq/download/linux64/jq"
     target => "/usr/local/bin"
