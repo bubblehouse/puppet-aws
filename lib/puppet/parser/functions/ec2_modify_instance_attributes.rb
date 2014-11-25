@@ -8,7 +8,6 @@ module Puppet::Parser::Functions
         instance_id: instance_id,
         attribute: attribute,
         value: value
-
       )
     rescue Aws::EC2::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud

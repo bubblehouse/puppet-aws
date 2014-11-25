@@ -6,17 +6,17 @@ class bootstrap::config inherits bootstrap {
   $instance_name = "${cfn_baseinstancetag}-${ec2_instance_slug}"
   $instance_fqdn = "${instance_name}.${cfn_endpointzone}"
   
-  file { "/etc/facter/facts.d/environment.txt":
-    ensure => file,
-    content => "environment=${environment}",
-  }
-
   create_tags($ec2_instance_id, "Name", $instance_name)
   
   exec { "configure-hostname":
     command => "/bin/hostname -b ${instance_fqdn}"
   }
   
+  file { "/etc/facter/facts.d/environment.txt":
+    ensure => file,
+    content => "environment=${environment}",
+  }
+
   file {
     ['/etc/hostname', '/etc/mailname']:
       ensure => file,
@@ -41,7 +41,7 @@ class bootstrap::config inherits bootstrap {
   }
   
   cron { "puppet-agent":
-    command => "/usr/bin/puppet agent --test --environment=${environment} &> /dev/null",
+    command => "/usr/bin/puppet agent --test &> /dev/null",
     user    => root,
     minute  => '*/30'
   }
