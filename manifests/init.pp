@@ -44,18 +44,12 @@ class bootstrap(
     mode => '0755'
   }
   
-  if($ec2_iam_instance_profile){
-    validate_string($ec2_iam_instance_profile)
-    notice("Authenticating with profile ${ec2_iam_instance_profile}")
-  }
-  else {
+  if($access_key_id){
     validate_string($access_key_id)
     validate_string($secret_access_key)
     notice("Authenticating with access key ${access_key_id}")
   }
   
-  validate_string($default_region)
-
   # http://docs.puppetlabs.com/puppet/2.7/reference/lang_containment.html#known-issues
   anchor { 'bootstrap::begin': } ->
   class { '::bootstrap::install': } ->
