@@ -1,5 +1,5 @@
 class bootstrap::install::ec2netutils {
-  $path = "/usr/src/ubuntu-ec2-net-utils"
+  $path = "/usr/src/ademaria-ubuntu-ec2net-105e574/"
   
   staging::deploy { "ubuntu-ec2-net-utils.tar.gz":
     source => "https://github.com/ademaria/ubuntu-ec2net/tarball/105e574",
