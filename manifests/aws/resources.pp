@@ -9,6 +9,4 @@ class bootstrap::aws::resources {
       $volume_id = $existing_volume_id
     }
   }
-  
-  
 }

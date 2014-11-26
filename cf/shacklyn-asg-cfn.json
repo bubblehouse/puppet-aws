@@ -228,7 +228,7 @@
                 },
                 "Path": "/",
                 "Policies": [ {
-                    "PolicyName": "lw-botfarm",
+                    "PolicyName": { "Fn::Join" : ["-", [{ "Ref" : "BaseInstanceTag"}, "role"]] },
                     "PolicyDocument": {
                         "Version" : "2012-10-17",
                         "Statement": [ {

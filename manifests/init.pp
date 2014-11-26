@@ -31,23 +31,19 @@ class bootstrap(
   $eip_allocation_id = $bootstrap::params::eip_allocation_id,
   $static_volume_size = $bootstrap::params::static_volume_size,
   $static_volume_encryption = $bootstrap::params::static_volume_encryption,
-  $static_volume_tag = $bootstrap::params::static_volume_tag,
-  $access_key_id = $bootstrap::params::access_key_id,
-  $secret_access_key = $bootstrap::params::secret_access_key,
+  $static_volume_tag = $bootstrap::params::static_volume_tag
 ) inherits bootstrap::params {
   include apt
   include staging
   
+  if("${ec2_instance_id}" == "") {
+    fail("Can't find EC2 instance ID fact, something is wrong.")
+  }
+
   File {
     owner => 'root',
     group => 'root',
     mode => '0755'
-  }
-  
-  if($access_key_id){
-    validate_string($access_key_id)
-    validate_string($secret_access_key)
-    notice("Authenticating with access key ${access_key_id}")
   }
   
   # http://docs.puppetlabs.com/puppet/2.7/reference/lang_containment.html#known-issues

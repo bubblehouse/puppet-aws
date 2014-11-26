@@ -4,7 +4,7 @@ class bootstrap::config inherits bootstrap {
   $instance_name = "${cfn_baseinstancetag}-${ec2_instance_slug}"
   $instance_fqdn = "${instance_name}.${cfn_endpointzone}"
   
-  create_tags($ec2_instance_id, "Name", $instance_name)
+  # create_tags($ec2_instance_id, "Name", $instance_name)
   
   exec { "configure-hostname":
     command => "/bin/hostname -b ${instance_fqdn}"
