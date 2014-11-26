@@ -1,7 +1,7 @@
 module Puppet::Parser::Functions
   newfunction(:ec2_detect_volume, :type => :rvalue) do |args|
     tag, az = *args
-    region = Facter.value(:ec2_placement_availability_zone).chop
+    region = Facter.value(az).chop
     ec2 = Aws::EC2::Client.new(region:region)
     begin
       resp = ec2.describe_volumes(
