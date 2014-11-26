@@ -27,6 +27,7 @@
 #
 
 class bootstrap(
+  $is_nat = $bootstrap::params::is_nat,
   $eni_id = $bootstrap::params::eni_id,
   $eip_allocation_id = $bootstrap::params::eip_allocation_id,
   $static_volume_size = $bootstrap::params::static_volume_size,

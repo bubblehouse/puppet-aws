@@ -1,4 +1,5 @@
 class bootstrap::params {
+  $is_nat = false
   $eni_id = nil
   $eip_allocation_id = nil
   $static_volume_size = 8
