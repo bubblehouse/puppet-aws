@@ -1,6 +1,8 @@
+require 'json'
+
 module Puppet::Parser::Functions
   newfunction(:ec2_detect_volume, :type => :rvalue) do |args|
-    Puppet.send(:notice, args)
+    Puppet.send(:notice, args.to_json)
     tag, az = args
     region = az.chop
     ec2 = Aws::EC2::Client.new(region:region)
