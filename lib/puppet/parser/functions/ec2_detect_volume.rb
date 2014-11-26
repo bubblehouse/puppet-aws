@@ -8,7 +8,6 @@ module Puppet::Parser::Functions
     ec2 = Aws::EC2::Client.new(region:region)
     begin
       resp = ec2.describe_volumes(
-        volume_ids: ["String", '...'],
         filters: [{
           name: "availability-zone",
           values: [az],
