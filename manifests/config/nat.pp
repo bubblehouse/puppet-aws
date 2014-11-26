@@ -7,17 +7,17 @@ class bootstrap::config::nat {
   }
   
   exec { "sysctl-ip-forward":
-    command => "sysctl -q -w net.ipv4.ip_forward=1",
-    unless => "test $(sysctl net.ipv4.ip_forward) -eq 1"
+    command => "/sbin/sysctl -q -w net.ipv4.ip_forward=1",
+    unless => "/usr/bin/test $(/sbin/sysctl -n net.ipv4.ip_forward) -eq 1"
   }
   
   exec { "sysctl-send-redirects":
-    command => "sysctl -q -w net.ipv4.conf.${iface}.send_redirects=0",
-    unless => "test $(sysctl net.ipv4.conf.${iface}.send_redirects) -eq 0"
+    command => "/sbin/sysctl -q -w net.ipv4.conf.${iface}.send_redirects=0",
+    unless => "/usr/bin/test $(/sbin/sysctl -n net.ipv4.conf.${iface}.send_redirects) -eq 0"
   }
   
   exec { "iptables-nat-rule":
-    command => "iptables -t nat -A POSTROUTING -o ${iface} -s ${range} -j MASQUERADE",
-    unless => "iptables -t nat -C POSTROUTING -o ${iface} -s ${range} -j MASQUERADE"
+    command => "/sbin/iptables -t nat -A POSTROUTING -o ${iface} -s ${range} -j MASQUERADE",
+    unless => "/sbin/iptables -t nat -C POSTROUTING -o ${iface} -s ${range} -j MASQUERADE"
   }
 }
