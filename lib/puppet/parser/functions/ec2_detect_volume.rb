@@ -18,7 +18,7 @@ module Puppet::Parser::Functions
           values: [tag],
         }]
       )
-      Puppet.send(:error, resp.to_json)
+      Puppet.send(:notice, resp.to_json)
       if(resp[:volumes].count)
         resp[:volumes][0][:volume_id]
       else
@@ -26,7 +26,7 @@ module Puppet::Parser::Functions
       end
     rescue Aws::EC2::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud
-      Puppet.send(:error, e)
+      Puppet.send(:err, e)
     end
   end
 end
