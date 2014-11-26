@@ -33,7 +33,7 @@ class bootstrap::install inherits bootstrap {
   }
 
   staging::file { "jq":
-    source => "http://stedolan.github.io/jq/download/linux64/jq"
+    source => "http://stedolan.github.io/jq/download/linux64/jq",
     target => "/usr/local/bin"
   }
 }
