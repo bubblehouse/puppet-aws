@@ -10,6 +10,10 @@ class bootstrap::aws::attachments {
   if($bootstrap::static_volume_size > 0){
     ec2_attach_volume($ec2_instance_id, $bootstrap::aws::resources::volume_id, "/dev/sdf")
     
+    file { "/media/static":
+      ensure => directory
+    }
+    
     mount { "/media/static":
       ensure => mounted,
       atboot => yes,
