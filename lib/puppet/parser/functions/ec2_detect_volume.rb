@@ -18,6 +18,7 @@ module Puppet::Parser::Functions
           values: [tag],
         }]
       )
+      Puppet.send(:error, resp.to_json)
       if(resp[:volumes].count)
         resp[:volumes][0][:volume_id]
       else
