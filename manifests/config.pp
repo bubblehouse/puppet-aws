@@ -10,6 +10,10 @@ class bootstrap::config inherits bootstrap {
     command => "/bin/hostname -b ${instance_fqdn}"
   }
   
+  file { ["/etc/facter", "/etc/facter/facts.d"]:
+    ensure => directory
+  }->
+  
   file { "/etc/facter/facts.d/environment.txt":
     ensure => file,
     content => "environment=${environment}",
