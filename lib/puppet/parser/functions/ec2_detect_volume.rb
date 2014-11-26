@@ -18,7 +18,6 @@ module Puppet::Parser::Functions
           values: [tag],
         }]
       )
-      Puppet.send(:notice, resp[:volumes].count)
       if(resp[:volumes].count > 0)
         resp[:volumes][0][:volume_id]
       else
