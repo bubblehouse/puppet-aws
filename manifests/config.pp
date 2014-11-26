@@ -37,8 +37,8 @@ class bootstrap::config inherits bootstrap {
   augeas { "/etc/puppet/puppet.conf":
     context   => '/files/etc/puppet/puppet.conf',
     changes   => [
-        "set main/environment ${environment}"
-        "rm main/templatedir"
+        "set main/environment ${environment}",
+        "rm main/templatedir",
         "set main/waitforcert 30s"
       ]
   }
