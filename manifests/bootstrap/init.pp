@@ -17,8 +17,10 @@
 #
 # === Examples
 #
-#  class { "aws":
-#    
+#  class { "aws::bootstrap":
+#    static_volume_size => 8,
+#    static_volume_encryption => false,
+#    static_volume_tag => "test-bootstrap"
 #  }
 #
 # === Authors
@@ -26,8 +28,7 @@
 # Phil Christensen <phil@bubblehouse.org>
 #
 
-class aws::bootstrap
-(
+class aws::bootstrap(
   $is_nat = $aws::bootstrap::params::is_nat,
   $eni_id = $aws::bootstrap::params::eni_id,
   $eip_allocation_id = $aws::bootstrap::params::eip_allocation_id,
@@ -35,9 +36,6 @@ class aws::bootstrap
   $static_volume_encryption = $aws::bootstrap::params::static_volume_encryption,
   $static_volume_tag = $aws::bootstrap::params::static_volume_tag
 ) inherits aws::bootstrap::params {
-  include apt
-  include staging
-  
   if("${ec2_instance_id}" == "") {
     fail("Can't find EC2 instance ID fact, something is wrong.")
   }
@@ -54,6 +52,6 @@ class aws::bootstrap
   class { '::aws::bootstrap::config': } ->
   class { '::aws::bootstrap::resources': } ->
   class { '::aws::bootstrap::attachments': } ->
-  class { '::aws::bootstrap::nat': } ->
+  class { '::aws::nat': } ->
   anchor { 'aws::end': }
 }

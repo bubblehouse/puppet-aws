@@ -1,4 +1,4 @@
-class aws::aws::attachments {
+class aws::bootstrap::attachments inherits aws::bootstrap {
   if($aws::eni_id != nil){
     ec2_attach_network_interface($ec2_instance_id, $aws::eni_id, 1)
   }

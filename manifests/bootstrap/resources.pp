@@ -1,4 +1,4 @@
-class aws::aws::resources {
+class aws::bootstrap::resources {
   if($aws::static_volume_size > 0){
     $existing_volume_id = ec2_detect_volume($aws::static_volume_tag, $ec2_placement_availability_zone)
     if($existing_volume_id == nil){
