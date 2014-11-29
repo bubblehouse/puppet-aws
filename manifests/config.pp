@@ -1,6 +1,6 @@
 # Configure the installed packages
 
-class bootstrap::config inherits bootstrap {
+class aws::config inherits aws {
   $instance_name = "${cfn_baseinstancetag}-${ec2_instance_slug}"
   $instance_fqdn = "${instance_name}.${cfn_endpointzone}"
   

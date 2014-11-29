@@ -1,14 +1,14 @@
-# bootstrap
+# aws
 
 #### Table of Contents
 
 1. [Overview](#overview)
 2. [Module Description - What the module does and why it is useful](#module-description)
-3. [Setup - The basics of getting started with bootstrap](#setup)
-    * [What bootstrap affects](#what-bootstrap-affects)
+3. [Setup - The basics of getting started with aws](#setup)
+    * [What aws affects](#what-aws-affects)
     * [Setup requirements](#setup-requirements)
 
-<!-- * [Beginning with bootstrap](#beginning-with-bootstrap)
+<!-- * [Beginning with aws](#beginning-with-aws)
 4. [Usage - Configuration options and additional functionality](#usage)
 5. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
 5. [Limitations - OS compatibility, etc.](#limitations)
@@ -29,7 +29,7 @@ This module seeks to standardize on Puppet and Ruby to reduce the complexity of
 the CloudFormation templates and/or userdata scripts, while using the same
 language/platform for initialization as provisioning and configuration.
 
-### What bootstrap affects
+### What aws affects
 ## Setup
 
 * Configures a wide number of different default settings for an instance
@@ -46,7 +46,7 @@ the appropriate level of access to create, attach, describe, etc.
 It's assumed an instance profile will be configured on each machine, conversely
 the AWS Ruby API provides for use of the usual environment variables.
 
-<!-- ### Beginning with bootstrap
+<!-- ### Beginning with aws
 
 The very basic steps needed for a user to get the module up and running.
 

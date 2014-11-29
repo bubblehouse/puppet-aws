@@ -1,4 +1,4 @@
-# == Class: bootstrap
+# == Class: aws
 #
 # Bootstrap utilities for EC2 and CloudFormation. A set of helper classes,
 # functions and facts to aid in creating userdata and cfn-init scripts.
@@ -17,7 +17,7 @@
 #
 # === Examples
 #
-#  class { "bootstrap":
+#  class { "aws":
 #    
 #  }
 #
@@ -26,14 +26,14 @@
 # Phil Christensen <phil@bubblehouse.org>
 #
 
-class bootstrap(
-  $is_nat = $bootstrap::params::is_nat,
-  $eni_id = $bootstrap::params::eni_id,
-  $eip_allocation_id = $bootstrap::params::eip_allocation_id,
-  $static_volume_size = $bootstrap::params::static_volume_size,
-  $static_volume_encryption = $bootstrap::params::static_volume_encryption,
-  $static_volume_tag = $bootstrap::params::static_volume_tag
-) inherits bootstrap::params {
+class aws(
+  $is_nat = $aws::params::is_nat,
+  $eni_id = $aws::params::eni_id,
+  $eip_allocation_id = $aws::params::eip_allocation_id,
+  $static_volume_size = $aws::params::static_volume_size,
+  $static_volume_encryption = $aws::params::static_volume_encryption,
+  $static_volume_tag = $aws::params::static_volume_tag
+) inherits aws::params {
   include apt
   include staging
   
@@ -48,11 +48,11 @@ class bootstrap(
   }
   
   # http://docs.puppetlabs.com/puppet/2.7/reference/lang_containment.html#known-issues
-  anchor { 'bootstrap::begin': } ->
-  class { '::bootstrap::install': } ->
-  class { '::bootstrap::config': } ->
-  class { '::bootstrap::aws::resources': } ->
-  class { '::bootstrap::aws::attachments': } ->
-  class { '::bootstrap::config::nat': } ->
-  anchor { 'bootstrap::end': }
+  anchor { 'aws::begin': } ->
+  class { '::aws::install': } ->
+  class { '::aws::config': } ->
+  class { '::aws::aws::resources': } ->
+  class { '::aws::aws::attachments': } ->
+  class { '::aws::config::nat': } ->
+  anchor { 'aws::end': }
 }

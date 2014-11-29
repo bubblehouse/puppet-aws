@@ -1,4 +1,4 @@
-class bootstrap::params {
+class aws::params {
   $is_nat = false
   $eni_id = nil
   $eip_allocation_id = nil

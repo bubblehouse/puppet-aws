@@ -1,8 +1,8 @@
-class bootstrap::config::nat {
+class aws::config::nat {
   $iface = "eth1"
   $range = ec2_vpc_cidr($iface)
   
-  if($bootstrap::eni_id == nil and $bootstrap::is_nat == true){
+  if($aws::eni_id == nil and $aws::is_nat == true){
     ec2_modify_instance_attribute($ec2_instance_id, 'sourceDestCheck', false)
   }
   

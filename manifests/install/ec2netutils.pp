@@ -1,4 +1,4 @@
-class bootstrap::install::ec2netutils {
+class aws::install::ec2netutils {
   $path = "/usr/src/ademaria-ubuntu-ec2net-105e574/"
   
   staging::deploy { "ubuntu-ec2-net-utils.tar.gz":
