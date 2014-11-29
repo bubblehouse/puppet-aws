@@ -411,7 +411,7 @@
                         "Content-Disposition: attachment; filename=\"user-data.sh\"",
                         "",
                         "#!/bin/bash -x",
-
+                        "git clone https://github.com/bubblehouse/shacklyn-aws.git /etc/puppet/modules/aws",
                         "--===============5031922726237328048==--"
                     ]] }
                 }
