@@ -1,13 +1,10 @@
 # Configure the installed packages
 
 class aws::bootstrap::config inherits aws::bootstrap {
-  $instance_name = "${cfn_baseinstancetag}-${ec2_instance_slug}"
-  $instance_fqdn = "${instance_name}.${cfn_endpointzone}"
-  
-  # create_tags($ec2_instance_id, "Name", $instance_name)
+  ec2_create_tag($ec2_instance_id, "Name", $aws::bootstrap::instance_name)
   
   exec { "configure-hostname":
-    command => "/bin/hostname -b ${instance_fqdn}"
+    command => "/bin/hostname -b ${aws::bootstrap::instance_fqdn}"
   }
   
   file { ["/etc/facter", "/etc/facter/facts.d"]:
@@ -22,7 +19,7 @@ class aws::bootstrap::config inherits aws::bootstrap {
   file {
     ['/etc/hostname', '/etc/mailname']:
       ensure => file,
-      content => "${instance_fqdn}"
+      content => "${aws::bootstrap::instance_fqdn}"
   }
   
   file_line { "/etc/environment":
@@ -33,8 +30,8 @@ class aws::bootstrap::config inherits aws::bootstrap {
   augeas { "/etc/hosts":
     context   => '/files/etc/hosts',
     changes   => [
-        "set 1/canonical ${instance_fqdn}",
-        "set 1/alias[1] ${instance_name}"
+        "set 1/canonical ${aws::bootstrap::instance_fqdn}",
+        "set 1/alias[1] ${aws::bootstrap::instance_name}"
       ]
   }
   

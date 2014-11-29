@@ -29,6 +29,8 @@
 #
 
 class aws::bootstrap(
+  $instance_name = $aws::bootstrap::params::instance_name,
+  $instance_fqdn = $aws::bootstrap::params::instance_fqdn,
   $is_nat = $aws::bootstrap::params::is_nat,
   $eni_id = $aws::bootstrap::params::eni_id,
   $eip_allocation_id = $aws::bootstrap::params::eip_allocation_id,
