@@ -370,15 +370,6 @@
                 "SecurityGroups": { "Ref": "SecurityGroupIds" },
                 "UserData": { "Fn::Base64":
                     { "Fn::Join": [ "\n", [
-                        "Content-Type: multipart/mixed; boundary=\"===============5031922726237328048==\"",
-                        "MIME-Version: 1.0",
-                        "",
-                        "--===============5031922726237328048==",
-                        "Content-Type: text/cloud-config; charset=\"us-ascii\"",
-                        "MIME-Version: 1.0",
-                        "Content-Transfer-Encoding: 7bit",
-                        "Content-Disposition: attachment; filename=\"mount-points.yaml\"",
-                        "",
                         "#cloud-config",
                         "mounts:",
                         " - [ /dev/xvdb, /media/ephemeral0, auto, \"defaults,nobootwait\", \"0\", \"2\" ]",
@@ -403,17 +394,10 @@
                         " - augeas-tools",
                         " - tree",
                         " - ccze",
-                        "",
-                        "--===============5031922726237328048==",
-                        "Content-Type: text/x-shellscript; charset=\"us-ascii\"",
-                        "MIME-Version: 1.0",
-                        "Content-Transfer-Encoding: 7bit",
-                        "Content-Disposition: attachment; filename=\"user-data.sh\"",
-                        "",
-                        "#!/bin/bash -x",
-                        "git clone https://github.com/bubblehouse/shacklyn-aws.git /etc/puppet/modules/aws",
-                        "puppet apply -e 'include aws::bootstrap'",
-                        "--===============5031922726237328048==--"
+                        "runcmd:",
+                        " - ls -l /root",
+                        " - git clone https://github.com/bubblehouse/shacklyn-aws.git /etc/puppet/modules/aws",
+                        " - puppet apply -e 'include aws::bootstrap'",
                     ]] }
                 }
             }
