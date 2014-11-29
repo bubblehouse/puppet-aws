@@ -36,10 +36,8 @@ class aws::bootstrap(
   $static_volume_encryption = $aws::bootstrap::params::static_volume_encryption,
   $static_volume_tag = $aws::bootstrap::params::static_volume_tag
 ) inherits aws::bootstrap::params {
-  if("${ec2_instance_id}" == "") {
-    fail("Can't find EC2 instance ID fact, something is wrong.")
-  }
-
+  include aws
+  
   File {
     owner => 'root',
     group => 'root',
