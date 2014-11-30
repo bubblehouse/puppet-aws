@@ -151,6 +151,7 @@
                     "SelectedImageId": "ami-864d84ee",
                     "EC2SubnetIds": { "Ref" : "managementPublicSubnet" },
                     "ConfigureAsGateway": "true",
+                    "NatCidrRange": { "Ref" : "BaseNetwork" },
                     "NumInstances": "1",
                     "ElasticNetworkInterfaceID": { "Ref" : "natGatewayInterface" },
                     "EndpointDNSName": { "Fn::Join" : ["-", ["nat", { "Ref" : "BaseName" }] ]},

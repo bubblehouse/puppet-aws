@@ -32,6 +32,8 @@ class aws::bootstrap(
   $instance_name = $aws::bootstrap::params::instance_name,
   $instance_fqdn = $aws::bootstrap::params::instance_fqdn,
   $is_nat = $aws::bootstrap::params::is_nat,
+  $nat_interface = $aws::bootstrap::params::nat_interface,
+  $nat_cidr_range = $aws::bootstrap::params::nat_cidr_range,
   $eni_id = $aws::bootstrap::params::eni_id,
   $eip_allocation_id = $aws::bootstrap::params::eip_allocation_id,
   $static_volume_size = $aws::bootstrap::params::static_volume_size,

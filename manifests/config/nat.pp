@@ -1,10 +1,5 @@
 class aws::config::nat {
-  $iface = "eth1"
-  
-  validate_hash($ec2_metadata)
-  $range = $ec2_metadata['network']['interfaces']['macs']["${macaddress_eth1}"]['vpc-ipv4-cidr-block']
-  
-  if($aws::bootstrap::eni_id == nil and $aws::bootstrap::is_nat == true){
+  if($aws::bootstrap::eni_id == nil){
     ec2_modify_instance_attribute($ec2_instance_id, 'sourceDestCheck', false)
   }
   
@@ -15,15 +10,15 @@ class aws::config::nat {
   }->
 
   exec { "sysctl-send-redirects":
-    command => "/sbin/sysctl -q -w net.ipv4.conf.${iface}.send_redirects=0",
-    unless => "/usr/bin/test $(/sbin/sysctl -n net.ipv4.conf.${iface}.send_redirects) -eq 0",
+    command => "/sbin/sysctl -q -w net.ipv4.conf.${aws::bootstrap::nat_interface}.send_redirects=0",
+    unless => "/usr/bin/test $(/sbin/sysctl -n net.ipv4.conf.${aws::bootstrap::nat_interface}.send_redirects) -eq 0",
     notify => Exec['wait-10s']
   }->
 
   exec { "iptables-nat-rule":
-    command => "/sbin/iptables -t nat -A POSTROUTING -o ${iface} -s ${range} -j MASQUERADE",
+    command => "/sbin/iptables -t nat -A POSTROUTING -o ${aws::bootstrap::nat_interface} -s ${aws::bootstrap::nat_cidr_range} -j MASQUERADE",
     logoutput => on_failure,
-    unless => "/sbin/iptables -t nat -C POSTROUTING -o ${iface} -s ${range} -j MASQUERADE"
+    unless => "/sbin/iptables -t nat -C POSTROUTING -o ${aws::bootstrap::nat_interface} -s ${aws::bootstrap::nat_cidr_range} -j MASQUERADE"
   }
   
   exec { 'wait-10s':
