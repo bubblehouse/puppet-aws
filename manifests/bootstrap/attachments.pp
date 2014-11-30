@@ -4,8 +4,8 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
       ec2_attach_network_interface($ec2_instance_id, $aws::bootstrap::eni_id, 1)
     }
     exec { "ec2net.hotplug":
-      command => "/bin/bash /etc/network/ec2net.hotplug",
-      unless => "/sbin/ifconfig eth1",
+      command => "/bin/bash -x /etc/network/ec2net.hotplug",
+      unless => "/sbin/ifconfig eth1 | /usr/bin/grep 'inet addr'",
       environment => [
         "ACTION=add",
         "INTERFACE=eth1"
