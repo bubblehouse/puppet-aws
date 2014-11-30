@@ -14,7 +14,8 @@ class aws::config::nat {
 
   exec { "sysctl-send-redirects":
     command => "/sbin/sysctl -q -w net.ipv4.conf.${iface}.send_redirects=0",
-    unless => "/usr/bin/test $(/sbin/sysctl -n net.ipv4.conf.${iface}.send_redirects) -eq 0"
+    unless => "/usr/bin/test $(/sbin/sysctl -n net.ipv4.conf.${iface}.send_redirects) -eq 0",
+    notify => Exec['wait-5s']
   }->
 
   exec { "iptables-nat-rule":
