@@ -1,5 +1,7 @@
 class aws::config::nat {
   $iface = "eth1"
+  
+  validate_hash($ec2_metadata)
   $range = $ec2_metadata['network']['interfaces'][$macaddress_eth1]['vpc-ipv4-cidr-block']
   
   if($aws::bootstrap::eni_id == nil and $aws::bootstrap::is_nat == true){
