@@ -11,6 +11,8 @@ module Puppet::Parser::Functions
         volume_type: "gp2",
         encrypted: encrypted
       )
+      Puppet.send(:notice, "Created #{resp[:voume_id]}, waiting 15s")
+      sleep(15)
       resp[:volume_id]
     rescue Aws::EC2::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud

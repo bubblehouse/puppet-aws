@@ -154,7 +154,10 @@
                     "NumInstances": "1",
                     "ElasticNetworkInterfaceID": { "Ref" : "natGatewayInterface" },
                     "EndpointDNSName": { "Fn::Join" : ["-", ["nat", { "Ref" : "BaseName" }] ]},
-                    "EndpointZone": { "Ref" : "DhcpDomainName" }
+                    "EndpointZone": { "Ref" : "DhcpDomainName" },
+                    "StaticVolumeTag": { "Fn::Join" : ["-", ["nat-static", { "Ref": "ManagementAZ" }]]},
+                    "StaticVolumeSize": 8,
+                    "StaticVolumeEncryption": false
                 }
             }
         },

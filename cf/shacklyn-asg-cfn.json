@@ -58,6 +58,10 @@
             "Description": "For an autoscale group of 1, attach this static interface to the instance on creation.",
             "Type": "String"
         },
+        "ElasticIPAssociationID": {
+            "Description": "For an autoscale group of 1, attach this fixed elastic IP (assocation ID) to the instance.",
+            "Type": "String"
+        },
         "NumInstances" : {
             "Description": "Number of instances in this group.",
             "Type": "String"
@@ -71,19 +75,30 @@
         },
         "RootVolumeSize" : {
             "Default": "30",
-            "Description": "How big should this instance's encrypted volume be (gigabytes)?",
+            "Description": "How big should this instance's root volume be (gigabytes)?",
             "Type": "Number"
         },
-        "EncryptedVolumeSize" : {
+        "StaticVolumeSize" : {
             "Default": "0",
-            "Description": "How big should this instance's encrypted volume be (gigabytes)?",
+            "Description": "How big should this instance's static volume be (gigabytes)?",
             "Type": "Number"
+        },
+        "StaticVolumeEncryption" : {
+            "Default": "false",
+            "AllowedValues" : ["true", "false"],
+            "Description": "Use encryption on the static volume?",
+            "Type": "String"
+        },
+        "StaticVolumeTag" : {
+            "Default": "static-volume",
+            "Description": "The tag to give the static volume.",
+            "Type": "String"
         }
     },
 
     "Conditions" : {
         "NeedsPublicAddress" : { "Fn::Equals" : [{ "Fn::Join" : [",", { "Ref" : "ELBSubnetIds"}] }, ""] },
-        "NeedsEncryptedVolume" : { "Fn::Not": [{ "Fn::Equals" : [{ "Ref" : "EncryptedVolumeSize"}, "0"] }] },
+        "NeedsStaticVolume" : { "Fn::Not": [{ "Fn::Equals" : [{ "Ref" : "StaticVolumeSize"}, "0"] }] },
         "NeedsLoadBalancer" : { "Fn::Not": [{ "Fn::Equals" : [{ "Fn::Join" : [",", { "Ref" : "ELBSubnetIds"}] }, ""] }] },
         "ConfigureNAT" : { "Fn::Equals" : [{ "Ref" : "ConfigureAsGateway" }, "true"]},
         "DisableSourceDestCheckOnInstance" : { "Fn::And" : [
@@ -374,7 +389,7 @@
                         "mounts:",
                         " - [ /dev/xvdb, /media/ephemeral0, auto, \"defaults,nobootwait\", \"0\", \"2\" ]",
                         {"Fn::If" : [
-                            "NeedsEncryptedVolume",
+                            "NeedsStaticVolume",
                             " - [ /dev/xvdf, /media/encrypted, auto, \"defaults,nobootwait,nofail\", \"0\", \"2\" ]\n - [ swap, null ]",
                             " - [ swap, null ]"
                         ]},
@@ -407,12 +422,31 @@
                         "     ",
                         "     mod 'shacklyn-aws',",
                         "       :git => 'https://github.com/bubblehouse/shacklyn-aws.git'",
+                        " - path: /etc/puppet/hiera.yaml",
+                        "   content: |",
+                        "     ---",
+                        "     :backends: yaml",
+                        "     :yaml:",
+                        "       :datadir: /etc/puppet/hiera.d",
+                        "     :hierarchy: bootstrap",
+                        "     :logger: puppet",
+                        " - path: /etc/puppet/hiera.d/bootstrap.yaml",
+                        "   content: |",
+                        "     aws::bootstrap::instance_name: \"%{::cfn_baseinstancetag}-%{::ec2_instance_slug}\"",
+                        "     aws::bootstrap::instance_fqdn: \"%{::cfn_baseinstancetag}-%{::ec2_instance_slug}.%{::cfn_endpointzone}\"",
+                        "     aws::bootstrap::eip_allocation_id: nil",
+                        "     aws::bootstrap::static_volume_size: 8",
+                        { "Fn::Join" : ["", ["     aws::bootstrap::static_volume_encryption: ", { "Ref" : "StaticVolumeEncryption" }]] },
+                        { "Fn::Join" : ["", ["     aws::bootstrap::static_volume_tag: ", { "Ref" : "StaticVolumeEncryption" }]] },
+                        { "Fn::Join" : ["", ["     aws::bootstrap::is_nat: ", { "Fn::If" : ["ConfigureNAT", "true", "false"]}]] },
+                        { "Fn::Join" : ["", ["     aws::bootstrap::is_nat: ", { "Fn::If" : ["ConfigureNAT", "true", "false"]}]] },
+                        { "Fn::Join" : ["", ["     aws::bootstrap::eni_id: ", { "Fn::If" : ["AttachNetworkInterface", { "Ref" : "ElasticNetworkInterfaceID" }, "nil"]}]] },
                         "runcmd:",
                         " - cd /etc/puppet",
                         " - bundle install",
                         " - echo n | librarian-puppet init",
-                        " - USER=root HOME=/root/ librarian-puppet install",
-                        " - puppet apply -e 'include aws::bootstrap'"
+                        " - USER=root HOME=/root/ librarian-puppet install --path=/etc/puppet/bootstrap-modules",
+                        " - puppet apply --modulepath=/etc/puppet/bootstrap-modules -e 'include aws::bootstrap'"
                     ]] }
                 }
             }

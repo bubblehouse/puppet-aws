@@ -10,6 +10,8 @@ module Puppet::Parser::Functions
         instance_id: instance_id,
         device_index: index
       )
+      Puppet.send(:notice, "Created #{resp[:attachment_id]}, waiting 15s")
+      sleep(15)
     rescue Aws::EC2::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud
       Puppet.send(:err, "Error trying to attach ENI: #{e}")
