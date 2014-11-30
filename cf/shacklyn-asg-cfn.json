@@ -148,7 +148,7 @@
         },
         "staticAddress" : {
             "Type" : "AWS::EC2::EIP",
-            "Condition": "NeedsStaticIp",
+            "Condition": "NeedsPublicAddress",
             "Properties" : {
                 "Domain" : "vpc"
             }
