@@ -400,6 +400,7 @@
                         "     source 'https://rubygems.org'",
                         "     ",
                         "     gem 'librarian-puppet'",
+                        "     gem 'aws-sdk', '>=2.0.6.pre'",
                         " - path: /etc/puppet/Puppetfile",
                         "   content: |",
                         "     forge 'https://forgeapi.puppetlabs.com'",
@@ -410,7 +411,7 @@
                         " - cd /etc/puppet",
                         " - bundle install",
                         " - echo n | librarian-puppet init",
-                        " - librarian-puppet install",
+                        " - USER=root HOME=/root/ librarian-puppet install",
                         " - puppet apply -e 'include aws::bootstrap'"
                     ]] }
                 }
