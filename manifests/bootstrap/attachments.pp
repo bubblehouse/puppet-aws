@@ -3,6 +3,11 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
     if(! ec2_interface_attached($ec2_instance_id, $aws::bootstrap::eni_id, 1)){
       ec2_attach_network_interface($ec2_instance_id, $aws::bootstrap::eni_id, 1)
     }
+    exec { "ec2net.hotplug":
+      command => "/bin/bash /etc/network/ec2net.hotplug",
+      unless => "/sbin/ifconfig /dev/eth1",
+      environment => "ACTION=add"
+    }
   }
   
   if($aws::bootstrap::eip_allocation_id != nil){
