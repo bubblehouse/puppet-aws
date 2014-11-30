@@ -3,11 +3,6 @@
 class aws::bootstrap::config inherits aws::bootstrap {
   ec2_create_tag($ec2_instance_id, "Name", $aws::bootstrap::instance_name)
   
-  exec { "configure-hostname":
-    command => "/bin/hostname -b ${aws::bootstrap::instance_fqdn}",
-    unless => "/usr/bin/test \"${aws::bootstrap::instance_fqdn}\" == \"$(/bin/hostname -f)\""
-  }
-  
   file { ["/etc/facter", "/etc/facter/facts.d"]:
     ensure => directory
   }->
@@ -17,6 +12,19 @@ class aws::bootstrap::config inherits aws::bootstrap {
     content => "environment=${environment}",
   }
 
+  exec { "configure-hostname":
+    command => "/bin/hostname -b ${aws::bootstrap::instance_fqdn}",
+    unless => "/usr/bin/test \"${aws::bootstrap::instance_fqdn}\" == \"$(/bin/hostname -f)\""
+  }->
+  
+  augeas { "/etc/hosts":
+    context   => '/files/etc/hosts',
+    changes   => [
+        "set 1/canonical ${aws::bootstrap::instance_fqdn}",
+        "set 1/alias[1] ${aws::bootstrap::instance_name}"
+      ]
+  }->
+  
   file {
     ['/etc/hostname', '/etc/mailname']:
       ensure => file,
@@ -26,14 +34,6 @@ class aws::bootstrap::config inherits aws::bootstrap {
   file_line { "/etc/environment":
     path => "/etc/environment",
     line => "AWS_DEFAULT_REGION=${aws_region}"
-  }
-  
-  augeas { "/etc/hosts":
-    context   => '/files/etc/hosts',
-    changes   => [
-        "set 1/canonical ${aws::bootstrap::instance_fqdn}",
-        "set 1/alias[1] ${aws::bootstrap::instance_name}"
-      ]
   }
   
   augeas { "/etc/puppet/puppet.conf":
