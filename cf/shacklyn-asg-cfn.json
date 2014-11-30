@@ -397,7 +397,7 @@
                         "runcmd:",
                         " - ls -l /root",
                         " - git clone https://github.com/bubblehouse/shacklyn-aws.git /etc/puppet/modules/aws",
-                        " - puppet apply -e 'include aws::bootstrap'",
+                        " - puppet apply -e 'include aws::bootstrap'"
                     ]] }
                 }
             }
