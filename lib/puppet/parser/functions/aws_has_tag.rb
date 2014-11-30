@@ -4,7 +4,7 @@ module Puppet::Parser::Functions
     region = Facter.value(:ec2_placement_availability_zone).chop
     ec2 = Aws::EC2::Client.new(region:region)
     begin
-      Puppet.send(:notice, "Looking up tag #{key} on #{resource_id}")
+      Puppet.send(:debug, "Looking up tag #{key} on #{resource_id}")
       resp = ec2.describe_tags(
         filters: [{
           name: "resource-id",

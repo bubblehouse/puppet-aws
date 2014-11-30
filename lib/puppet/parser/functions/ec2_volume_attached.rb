@@ -6,7 +6,7 @@ module Puppet::Parser::Functions
     region = Facter.value(:ec2_placement_availability_zone).chop
     ec2 = Aws::EC2::Client.new(region:region)
     begin
-      Puppet.send(:notice, "Getting #{volume_id} attachment info")
+      Puppet.send(:debug, "Getting #{volume_id} attachment info")
       resp = ec2.describe_volumes(
         filters: [{
           name: "attachment.instance-id",
@@ -20,10 +20,10 @@ module Puppet::Parser::Functions
         }]
       )
       if(resp[:volumes].count > 0)
-        Puppet.send(:notice, "Volume #{resp[:volumes][0][:volume_id]} is attached to #{device} on #{instance_id}")
+        Puppet.send(:debug, "Volume #{resp[:volumes][0][:volume_id]} is attached to #{device} on #{instance_id}")
         true
       else
-        Puppet.send(:notice, "Volume #{volume_id} is not attached to #{device} on #{instance_id}")
+        Puppet.send(:debug, "Volume #{volume_id} is not attached to #{device} on #{instance_id}")
         false
       end
     rescue Aws::EC2::Errors::ServiceError => e

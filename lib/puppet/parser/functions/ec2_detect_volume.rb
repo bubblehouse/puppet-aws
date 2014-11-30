@@ -6,7 +6,7 @@ module Puppet::Parser::Functions
     region = az.chop
     ec2 = Aws::EC2::Client.new(region:region)
     begin
-      Puppet.send(:notice, "Searching #{az} for volume tagged #{tag}")
+      Puppet.send(:debug, "Searching #{az} for volume tagged #{tag}")
       resp = ec2.describe_volumes(
         filters: [{
           name: "availability-zone",
@@ -20,10 +20,10 @@ module Puppet::Parser::Functions
         }]
       )
       if(resp[:volumes].count > 0)
-        Puppet.send(:notice, "Found #{resp[:volumes][0][:volume_id]}")
+        Puppet.send(:debug, "Found #{resp[:volumes][0][:volume_id]}")
         resp[:volumes][0][:volume_id]
       else
-        Puppet.send(:notice, "No volume found for #{tag} in #{az}")
+        Puppet.send(:debug, "No volume found for #{tag} in #{az}")
         nil
       end
     rescue Aws::EC2::Errors::ServiceError => e
