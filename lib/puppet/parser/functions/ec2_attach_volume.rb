@@ -1,5 +1,5 @@
 module Puppet::Parser::Functions
-  newfunction(:ec2_attach_volume, :type => :rvalue) do |args|
+  newfunction(:ec2_attach_volume) do |args|
     instance_id, volume_id, device = *args
     region = Facter.value(:ec2_placement_availability_zone).chop
     ec2 = Aws::EC2::Client.new(region:region)
