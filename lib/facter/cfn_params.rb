@@ -15,7 +15,7 @@ Facter.add('cfn_params') do
       }]
     rescue Aws::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud
-      function_notice(e)
+      Facter::Core::Logging.warn("Failure in cfn_params fact: #{e}")
       nil
     end
   end

@@ -18,7 +18,7 @@ Facter.add('cfn_stack_name') do
       resp[:tags][0][:value]
     rescue Aws::EC2::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud
-      function_notice(e)
+      Facter::Core::Logging.warn("Failure in cfn_stack_name fact: #{e}")
       nil
     end
   end
