@@ -2,10 +2,6 @@ class aws::config::nat {
   $iface = "eth1"
   $range = ec2_vpc_cidr($iface)
   
-  if($range == ""){
-    fail("Can't determine the CIDR block for $iface")
-  }
-  
   if($aws::bootstrap::eni_id == nil and $aws::is_nat == true){
     ec2_modify_instance_attribute($ec2_instance_id, 'sourceDestCheck', false)
   }
