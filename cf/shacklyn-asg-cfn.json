@@ -395,8 +395,9 @@
                         " - tree",
                         " - ccze",
                         "runcmd:",
-                        " - ls -l /root",
                         " - git clone https://github.com/bubblehouse/shacklyn-aws.git /etc/puppet/modules/aws",
+                        " - cd /etc/puppet/modules/aws",
+                        " - bundle install",
                         " - puppet apply -e 'include aws::bootstrap'"
                     ]] }
                 }
