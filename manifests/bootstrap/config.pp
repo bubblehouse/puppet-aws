@@ -4,8 +4,8 @@ class aws::bootstrap::config inherits aws::bootstrap {
   ec2_create_tag($ec2_instance_id, "Name", $aws::bootstrap::instance_name)
   
   exec { "configure-hostname":
-    command => "/bin/hostname ${aws::bootstrap::instance_fqdn}",
-    unless => "/usr/bin/test \"${aws::bootstrap::instance_fqdn}\" == \"$(/bin/hostname)\""
+    command => "/bin/hostname -b ${aws::bootstrap::instance_fqdn}",
+    unless => "/usr/bin/test \"${aws::bootstrap::instance_fqdn}\" == \"$(/bin/hostname -f)\""
   }
   
   file { ["/etc/facter", "/etc/facter/facts.d"]:
