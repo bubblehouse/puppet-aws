@@ -9,12 +9,6 @@ module Puppet::Parser::Functions
       Puppet.send(:notice, "Getting #{volume_id} attachment info")
       resp = ec2.describe_volumes(
         filters: [{
-          name: "tag-key",
-          values: ["Name"]
-        }, {
-          name: "tag-value",
-          values: [tag]
-        }, {
           name: "attachment.instance-id",
           values: [instance_id]
         }, {
