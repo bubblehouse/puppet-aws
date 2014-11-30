@@ -58,10 +58,6 @@
             "Description": "For an autoscale group of 1, attach this static interface to the instance on creation.",
             "Type": "String"
         },
-        "ElasticIPAssociationID": {
-            "Description": "For an autoscale group of 1, attach this fixed elastic IP (assocation ID) to the instance.",
-            "Type": "String"
-        },
         "NumInstances" : {
             "Description": "Number of instances in this group.",
             "Type": "String"
@@ -105,10 +101,6 @@
             { "Fn::Equals" : [{ "Ref" : "ConfigureAsGateway" }, "false"]},
             { "Fn::Equals" : [{ "Ref" : "ElasticNetworkInterfaceID"}, ""] }
         ] },
-        "NeedsStaticIp" : { "Fn::And" : [
-            { "Fn::Equals" : [{ "Ref" : "NumInstances"}, "1"] },
-            { "Fn::Equals" : [{ "Fn::Join" : [",", { "Ref" : "ELBSubnetIds"}] }, ""] }
-        ] },
         "AssociateStaticIpToInstance" : { "Fn::And" : [
             { "Fn::Equals" : [{ "Ref" : "NumInstances"}, "1"] },
             { "Fn::Equals" : [{ "Ref" : "ElasticNetworkInterfaceID"}, ""] },
@@ -141,7 +133,6 @@
         },
         "eipRecordSetGroup" : {
             "Type" : "AWS::Route53::RecordSetGroup",
-            "Condition": "NeedsStaticIp",
             "DependsOn": ["autoScaleGroup"],
             "Properties" : {
                 "HostedZoneName" : { "Fn::Join" : ["", [{ "Ref" : "EndpointZone"}, "."]] },
@@ -434,8 +425,8 @@
                         "   content: |",
                         "     aws::bootstrap::instance_name: \"%{::cfn_baseinstancetag}-%{::ec2_instance_slug}\"",
                         "     aws::bootstrap::instance_fqdn: \"%{::cfn_baseinstancetag}-%{::ec2_instance_slug}.%{::cfn_endpointzone}\"",
-                        "     aws::bootstrap::eip_allocation_id: nil",
                         "     aws::bootstrap::static_volume_size: 8",
+                        { "Fn::Join" : ["", ["     aws::bootstrap::eip_allocation_id: ", { "Fn::If" : ["AssociateStaticIpToInstance", { "Ref" : "staticAddress" }, "nil"]}]] },
                         { "Fn::Join" : ["", ["     aws::bootstrap::static_volume_encryption: ", { "Ref" : "StaticVolumeEncryption" }]] },
                         { "Fn::Join" : ["", ["     aws::bootstrap::static_volume_tag: ", { "Ref" : "StaticVolumeEncryption" }]] },
                         { "Fn::Join" : ["", ["     aws::bootstrap::is_nat: ", { "Fn::If" : ["ConfigureNAT", "true", "false"]}]] },
