@@ -1,7 +1,9 @@
 # Configure the installed packages
 
 class aws::bootstrap::config inherits aws::bootstrap {
-  ec2_create_tag($ec2_instance_id, "Name", $aws::bootstrap::instance_name)
+  if( ! aws_has_tag($ec2_instance_id, "Name", $aws::bootstrap::instance_name)){
+    aws_create_tag($ec2_instance_id, "Name", $aws::bootstrap::instance_name)
+  }
   
   file { ["/etc/facter", "/etc/facter/facts.d"]:
     ensure => directory
