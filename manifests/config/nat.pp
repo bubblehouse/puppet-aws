@@ -1,6 +1,6 @@
 class aws::config::nat {
   $iface = "eth1"
-  $range = ec2_vpc_cidr($iface)
+  $range = $ec2_metadata['network']['interfaces'][$macaddress_eth1]['vpc-ipv4-cidr-block']
   
   if($aws::bootstrap::eni_id == nil and $aws::bootstrap::is_nat == true){
     ec2_modify_instance_attribute($ec2_instance_id, 'sourceDestCheck', false)

@@ -436,7 +436,7 @@
                         " - bundle install",
                         " - echo n | librarian-puppet init",
                         " - USER=root HOME=/root/ librarian-puppet install --path=/etc/puppet/bootstrap-modules",
-                        " - puppet apply --modulepath=/etc/puppet/bootstrap-modules -e 'include aws::bootstrap'"
+                        " - puppet apply --stringify_facts false --modulepath=/etc/puppet/bootstrap-modules --execute 'include aws::bootstrap'"
                     ]] }
                 }
             }
