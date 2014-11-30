@@ -421,6 +421,21 @@
                         "       :datadir: /etc/puppet/hiera.d",
                         "     :hierarchy: bootstrap",
                         "     :logger: puppet",
+                        " - path: /etc/puppet/puppet.conf",
+                        "   content: |",
+                        "     [main]",
+                        "     logdir=/var/log/puppet",
+                        "     vardir=/var/lib/puppet",
+                        "     ssldir=/var/lib/puppet/ssl",
+                        "     rundir=/var/run/puppet",
+                        "     factpath=$vardir/lib/facter",
+                        "     stringify_facts=false",
+                        "     ",
+                        "     [master]",
+                        "     # These are needed when the puppetmaster is run by passenger",
+                        "     # and can safely be removed if webrick is used.",
+                        "     ssl_client_header = SSL_CLIENT_S_DN",
+                        "     ssl_client_verify_header = SSL_CLIENT_VERIFY",
                         " - path: /etc/puppet/hiera.d/bootstrap.yaml",
                         "   content: |",
                         "     aws::bootstrap::instance_name: \"%{::cfn_baseinstancetag}-%{::ec2_instance_slug}\"",
@@ -436,7 +451,7 @@
                         " - bundle install",
                         " - echo n | librarian-puppet init",
                         " - USER=root HOME=/root/ librarian-puppet install --path=/etc/puppet/bootstrap-modules",
-                        " - puppet apply --stringify_facts false --modulepath=/etc/puppet/bootstrap-modules --execute 'include aws::bootstrap'"
+                        " - puppet apply --modulepath=/etc/puppet/bootstrap-modules --execute 'include aws::bootstrap'"
                     ]] }
                 }
             }
