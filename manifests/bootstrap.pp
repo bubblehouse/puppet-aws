@@ -55,7 +55,7 @@ class aws::bootstrap(
 
   if($is_nat){
     class { '::aws::config::nat':
-      require => Class['::bootstrap::attachments'],
+      require => Class['::aws::bootstrap::attachments'],
       before => Anchor['aws::bootstrap::end']
     }
   }
