@@ -4,6 +4,7 @@ module Puppet::Parser::Functions
     region = Facter.value(:ec2_placement_availability_zone).chop
     ec2 = Aws::EC2::Client.new(region:region)
     begin
+      Puppet.send(:notice, "Creating tag #{key} as #{value} on #{resource_id}")
       resp = ec2.create_tags(
         resources: [resource_id],
         tags: [{

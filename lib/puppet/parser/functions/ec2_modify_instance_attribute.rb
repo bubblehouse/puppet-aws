@@ -11,7 +11,7 @@ module Puppet::Parser::Functions
       )
     rescue Aws::EC2::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud
-      Puppet.send(:err, e)
+      Puppet.send(:err, "Error trying to modify instance attribute: #{e}")
     end
   end
 end

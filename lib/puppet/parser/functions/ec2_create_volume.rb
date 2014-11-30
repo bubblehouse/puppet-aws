@@ -4,6 +4,7 @@ module Puppet::Parser::Functions
     region = Facter.value(:ec2_placement_availability_zone).chop
     ec2 = Aws::EC2::Client.new(region:region)
     begin
+      Puppet.send(:notice, "Creating #{size} #{encrypted ? 'encrypted' : ''} volume")
       resp = ec2.create_volume(
         size: size,
         availability_zone: Facter.value(:ec2_placement_availability_zone),
@@ -13,7 +14,7 @@ module Puppet::Parser::Functions
       resp[:volume_id]
     rescue Aws::EC2::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud
-      Puppet.send(:err, e)
+      Puppet.send(:err, "Error trying to create volume: #{e}")
     end
   end
 end

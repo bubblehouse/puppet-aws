@@ -25,7 +25,7 @@ module Puppet::Parser::Functions
       end
     rescue Aws::EC2::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud
-      Puppet.send(:err, e)
+      Puppet.send(:err, "Error trying to detect volume: #{e}")
     end
   end
 end
