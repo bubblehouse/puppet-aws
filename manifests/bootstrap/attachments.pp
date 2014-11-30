@@ -1,6 +1,8 @@
 class aws::bootstrap::attachments inherits aws::bootstrap {
   if($aws::bootstrap::eni_id != nil){
-    ec2_attach_network_interface($ec2_instance_id, $aws::bootstrap::eni_id, 1)
+    if(! ec2_interface_attached($ec2_instance_id, $aws::bootstrap::eni_id, 1)){
+      ec2_attach_network_interface($ec2_instance_id, $aws::bootstrap::eni_id, 1)
+    }
   }
   
   if($aws::bootstrap::eip_allocation_id != nil){
@@ -8,7 +10,9 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
   }
 
   if($aws::bootstrap::static_volume_size > 0){
-    ec2_attach_volume($ec2_instance_id, $aws::bootstrap::resources::volume_id, "/dev/sdf")
+    if(! ec2_volume_attached($ec2_instance_id, $aws::bootstrap::resources::volume_id, "/dev/sdf")){
+      ec2_attach_volume($ec2_instance_id, $aws::bootstrap::resources::volume_id, "/dev/sdf")
+    }
     
     if($existing_volume_id == ""){
       exec { "mkfs":
