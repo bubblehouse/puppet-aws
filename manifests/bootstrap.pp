@@ -52,6 +52,15 @@ class aws::bootstrap(
   class { '::aws::bootstrap::config': } ->
   class { '::aws::bootstrap::resources': } ->
   class { '::aws::bootstrap::attachments': } ->
-  class { '::aws::nat': } ->
-  anchor { 'aws::end': }
+
+  if($is_nat){
+    class { '::aws::config::nat':
+      require => Class['::bootstrap::attachments'],
+      before => Anchor['aws::bootstrap::end']
+    }
+  }
+  
+  anchor { 'aws::bootstrap::end':
+    require => Class['::aws::bootstrap::attachments']
+  }
 }

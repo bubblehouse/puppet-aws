@@ -8,7 +8,7 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
   }
 
   if($aws::bootstrap::static_volume_size > 0){
-    ec2_attach_volume($ec2_instance_id, $aws::aws::bootstrap::resources::volume_id, "/dev/sdf")
+    ec2_attach_volume($ec2_instance_id, $aws::bootstrap::resources::volume_id, "/dev/sdf")
     
     file { "/media/static":
       ensure => directory
