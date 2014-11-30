@@ -13,7 +13,8 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
     if($existing_volume_id == ""){
       exec { "mkfs":
         command => "/sbin/mkfs.ext4 /dev/xvdf",
-        unless => "/sbin/blkid /dev/xvdf"
+        unless => "/sbin/blkid /dev/xvdf",
+        before => Mount["/media/static"]
       }
     }
     
