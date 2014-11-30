@@ -51,7 +51,7 @@ class aws::bootstrap(
   class { '::aws::bootstrap::install': } ->
   class { '::aws::bootstrap::config': } ->
   class { '::aws::bootstrap::resources': } ->
-  class { '::aws::bootstrap::attachments': } ->
+  class { '::aws::bootstrap::attachments': }
 
   if($is_nat){
     class { '::aws::config::nat':
