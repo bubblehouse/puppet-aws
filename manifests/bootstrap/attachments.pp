@@ -6,7 +6,10 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
     exec { "ec2net.hotplug":
       command => "/bin/bash /etc/network/ec2net.hotplug",
       unless => "/sbin/ifconfig eth1",
-      environment => "ACTION=add"
+      environment => [
+        "ACTION=add",
+        "INTERFACE=eth1"
+      ]
     }
   }
   
