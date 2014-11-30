@@ -1,12 +1,12 @@
 {
-  "name": "shacklyn-aws",
+  "name": "bubblehouse-aws",
   "version": "0.1.0",
-  "author": "shacklyn",
+  "author": "Phil Christensen",
   "summary": "Bootstrap utilities for EC2 and CloudFormation",
   "license": "MIT",
-  "source": "https://github.com/bubblehouse/shacklyn-aws.git",
-  "project_page": "https://github.com/bubblehouse/shacklyn-aws",
-  "issues_url": "https://github.com/bubblehouse/shacklyn-aws/issues",
+  "source": "https://github.com/bubblehouse/puppet-aws.git",
+  "project_page": "https://github.com/bubblehouse/puppet-aws",
+  "issues_url": "https://github.com/bubblehouse/puppet-aws/issues",
   "dependencies": [{
     "name": "puppetlabs-stdlib",
     "version_range": ">= 2.2.1"
