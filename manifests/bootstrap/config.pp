@@ -43,7 +43,8 @@ class aws::bootstrap::config inherits aws::bootstrap {
     changes   => [
         "set main/environment ${environment}",
         "rm main/templatedir",
-        "set main/waitforcert 30s"
+        "set main/waitforcert 30s",
+        "set main/stringify_facts false"
       ]
   }
   
