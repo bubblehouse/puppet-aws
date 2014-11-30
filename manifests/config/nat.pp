@@ -8,7 +8,8 @@ class aws::config::nat {
   
   exec { "sysctl-ip-forward":
     command => "/sbin/sysctl -q -w net.ipv4.ip_forward=1",
-    unless => "/usr/bin/test $(/sbin/sysctl -n net.ipv4.ip_forward) -eq 1"
+    unless => "/usr/bin/test $(/sbin/sysctl -n net.ipv4.ip_forward) -eq 1",
+    notify => Exec['wait-5s']
   }->
 
   exec { "sysctl-send-redirects":
@@ -19,5 +20,11 @@ class aws::config::nat {
   exec { "iptables-nat-rule":
     command => "/sbin/iptables -t nat -A POSTROUTING -o ${iface} -s ${range} -j MASQUERADE",
     unless => "/sbin/iptables -t nat -C POSTROUTING -o ${iface} -s ${range} -j MASQUERADE"
+  }
+  
+  exec { 'wait-5s':
+    command => "/bin/sleep 5",
+    refreshonly => true,
+    before => Exec['iptables-nat-rule']
   }
 }
