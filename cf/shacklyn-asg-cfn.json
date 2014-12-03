@@ -55,12 +55,19 @@
             "Type": "CommaDelimitedList"
         },
         "ElasticNetworkInterfaceID": {
+            "Default": "",
             "Description": "For an autoscale group of 1, attach this static interface to the instance on creation.",
             "Type": "String"
         },
-        "NumInstances" : {
-            "Description": "Number of instances in this group.",
+        "EniGateway": {
+            "Default": "",
+            "Description": "The gateway host for the attached interface.",
             "Type": "String"
+        },
+        "NumInstances" : {
+            "Default": 2,
+            "Description": "Number of instances in this group.",
+            "Type": "Number"
         },
         "ConfigureAsGateway" : {
             "Default": "true",
@@ -430,14 +437,15 @@
                         "   content: |",
                         "     aws::bootstrap::instance_name: \"%{::cfn_baseinstancetag}-%{::ec2_instance_slug}\"",
                         "     aws::bootstrap::instance_fqdn: \"%{::cfn_baseinstancetag}-%{::ec2_instance_slug}.%{::cfn_endpointzone}\"",
-                        { "Fn::Join" : ["", ["     aws::bootstrap::eip_allocation_id: ", { "Fn::If" : ["AssociateStaticIpToInstance", { "Ref" : "staticAddress" }, "nil"]}]] },
-                        { "Fn::Join" : ["", ["     aws::bootstrap::static_volume_encryption: ", { "Ref" : "StaticVolumeEncryption" }]] },
-                        { "Fn::Join" : ["", ["     aws::bootstrap::static_volume_size: ", { "Ref" : "StaticVolumeSize" }]] },
-                        { "Fn::Join" : ["", ["     aws::bootstrap::static_volume_tag: ", { "Ref" : "StaticVolumeTag" }]] },
-                        { "Fn::Join" : ["", ["     aws::bootstrap::is_nat: ", { "Fn::If" : ["ConfigureNAT", "true", "false"]}]] },
-                        { "Fn::Join" : ["", ["     aws::bootstrap::nat_interface: ", { "Fn::If" : ["ConfigureNAT", "eth1", "nil"]}]] },
-                        { "Fn::Join" : ["", ["     aws::bootstrap::nat_cidr_range: ", { "Fn::If" : ["ConfigureNAT", { "Ref" : "NatCidrRange" }, "nil"]}]] },
-                        { "Fn::Join" : ["", ["     aws::bootstrap::eni_id: ", { "Fn::If" : ["AttachNetworkInterface", { "Ref" : "ElasticNetworkInterfaceID" }, "nil"]}]] },
+   { "Fn::Join" : ["", ["     aws::bootstrap::eip_allocation_id: ", { "Fn::If" : ["AssociateStaticIpToInstance", { "Ref" : "staticAddress" }, "nil"]}]] },
+   { "Fn::Join" : ["", ["     aws::bootstrap::static_volume_encryption: ", { "Ref" : "StaticVolumeEncryption" }]] },
+   { "Fn::Join" : ["", ["     aws::bootstrap::static_volume_size: ", { "Ref" : "StaticVolumeSize" }]] },
+   { "Fn::Join" : ["", ["     aws::bootstrap::static_volume_tag: ", { "Ref" : "StaticVolumeTag" }]] },
+   { "Fn::Join" : ["", ["     aws::bootstrap::is_nat: ", { "Fn::If" : ["ConfigureNAT", "true", "false"]}]] },
+   { "Fn::Join" : ["", ["     aws::bootstrap::eni_interface: ", { "Fn::If" : ["ConfigureNAT", "eth1", "nil"]}]] },
+   { "Fn::Join" : ["", ["     aws::bootstrap::eni_gateway: ", { "Fn::If" : ["ConfigureNAT", { "Ref" : "EniGateway"}, "nil"]}]] },
+   { "Fn::Join" : ["", ["     aws::bootstrap::nat_cidr_range: ", { "Fn::If" : ["ConfigureNAT", { "Ref" : "NatCidrRange" }, "nil"]}]] },
+   { "Fn::Join" : ["", ["     aws::bootstrap::eni_id: ", { "Fn::If" : ["AttachNetworkInterface", { "Ref" : "ElasticNetworkInterfaceID" }, "nil"]}]] },
                         "runcmd:",
                         " - cd /etc/puppet",
                         " - bundle install",

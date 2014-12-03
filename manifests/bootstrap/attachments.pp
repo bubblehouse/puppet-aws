@@ -3,13 +3,23 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
     if(! ec2_interface_attached($ec2_instance_id, $aws::bootstrap::eni_id, 1)){
       ec2_attach_network_interface($ec2_instance_id, $aws::bootstrap::eni_id, 1)
     }
+    
     exec { "ec2net.hotplug":
-      command => "/bin/bash -x /etc/network/ec2net.hotplug ; dhclient eth1",
-      unless => "/sbin/ifconfig eth1 | /bin/grep 'inet addr'",
+      command => "/bin/bash -x /etc/network/ec2net.hotplug ; dhclient ${aws::bootstrap::eni_interface}",
+      unless => "/sbin/ifconfig ${aws::bootstrap::eni_interface} | /bin/grep 'inet addr'",
       environment => [
         "ACTION=add",
-        "INTERFACE=eth1"
+        "INTERFACE=${aws::bootstrap::eni_interface}"
+      ],
+      notify => [
+        Exec['setup-default-route'],
+        Service['ssh']
       ]
+    }
+    
+    exec { "setup-default-route":
+      command => "/sbin/route add ${aws::bootstrap::eni_gateway} gw default dev ${aws::bootstrap::eni_interface}"
+      refreshonly => true
     }
   }
   
