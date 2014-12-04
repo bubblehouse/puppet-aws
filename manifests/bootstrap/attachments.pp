@@ -11,7 +11,14 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
         "ACTION=add",
         "INTERFACE=${aws::bootstrap::eni_interface}"
       ],
-      notify => Service['ssh']
+      notify => [
+        Service['ssh'],
+        Exec['force-ifup']
+      ]
+    }
+    
+    exec { "force-ifup":
+      command => "/sbin/ifup --force ${aws::bootstrap::eni_interface}"
     }
   }
   
