@@ -3,6 +3,10 @@ class aws::config::nat {
     ec2_modify_instance_attribute($ec2_instance_id, 'sourceDestCheck', false)
   }
   
+  package { "iptables-persistent":
+    ensure => installed
+  }
+  
   exec { "sysctl-ip-forward":
     command => "/sbin/sysctl -q -w net.ipv4.ip_forward=1",
     unless => "/usr/bin/test $(/sbin/sysctl -n net.ipv4.ip_forward) -eq 1",
@@ -18,7 +22,13 @@ class aws::config::nat {
   exec { "iptables-nat-rule":
     command => "/sbin/iptables -t nat -A POSTROUTING -o ${aws::bootstrap::eni_interface} -s ${aws::bootstrap::nat_cidr_range} -j MASQUERADE",
     logoutput => on_failure,
-    unless => "/sbin/iptables -t nat -C POSTROUTING -o ${aws::bootstrap::eni_interface} -s ${aws::bootstrap::nat_cidr_range} -j MASQUERADE"
+    unless => "/sbin/iptables -t nat -C POSTROUTING -o ${aws::bootstrap::eni_interface} -s ${aws::bootstrap::nat_cidr_range} -j MASQUERADE",
+    notify => Exec['iptables-save']
+  }
+  
+  exec { "iptables-save":
+    command => "/sbin/iptables-save > /etc/iptables/rules.v4",
+    require => Package['iptable-persistent']
   }
   
   exec { 'wait-10s':
