@@ -12,8 +12,8 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
         "INTERFACE=${aws::bootstrap::eni_interface}"
       ],
       notify => [
-        Service['ssh'],
-        Exec['setup-default-route']
+        Service['ssh']#,
+        # Exec['setup-default-route']
       ]
     }
     
