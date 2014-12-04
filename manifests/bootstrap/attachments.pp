@@ -11,15 +11,7 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
         "ACTION=add",
         "INTERFACE=${aws::bootstrap::eni_interface}"
       ],
-      notify => [
-        Service['ssh']#,
-        # Exec['setup-default-route']
-      ]
-    }
-    
-    exec { "setup-default-route":
-      command => "/sbin/route add default gw ${aws::bootstrap::eni_gateway} dev ${aws::bootstrap::eni_interface}",
-      refreshonly => true
+      notify => Service['ssh']
     }
   }
   

@@ -59,11 +59,6 @@
             "Description": "For an autoscale group of 1, attach this static interface to the instance on creation.",
             "Type": "String"
         },
-        "EniGateway": {
-            "Default": "",
-            "Description": "The gateway host for the attached interface.",
-            "Type": "String"
-        },
         "NumInstances" : {
             "Default": 2,
             "Description": "Number of instances in this group.",
@@ -443,7 +438,6 @@
    { "Fn::Join" : ["", ["     aws::bootstrap::static_volume_tag: ", { "Ref" : "StaticVolumeTag" }]] },
    { "Fn::Join" : ["", ["     aws::bootstrap::is_nat: ", { "Fn::If" : ["ConfigureNAT", "true", "false"]}]] },
    { "Fn::Join" : ["", ["     aws::bootstrap::eni_interface: ", { "Fn::If" : ["ConfigureNAT", "eth1", "nil"]}]] },
-   { "Fn::Join" : ["", ["     aws::bootstrap::eni_gateway: ", { "Fn::If" : ["ConfigureNAT", { "Ref" : "EniGateway"}, "nil"]}]] },
    { "Fn::Join" : ["", ["     aws::bootstrap::nat_cidr_range: ", { "Fn::If" : ["ConfigureNAT", { "Ref" : "NatCidrRange" }, "nil"]}]] },
    { "Fn::Join" : ["", ["     aws::bootstrap::eni_id: ", { "Fn::If" : ["AttachNetworkInterface", { "Ref" : "ElasticNetworkInterfaceID" }, "nil"]}]] },
                         "runcmd:",

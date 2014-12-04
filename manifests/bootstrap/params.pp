@@ -4,7 +4,6 @@ class aws::bootstrap::params {
   $is_nat = false
   $nat_cidr_range = nil
   $eni_interface = 'eth1'
-  $eni_gateway = nil
   $eni_id = nil
   $eip_allocation_id = nil
   $static_volume_size = 0

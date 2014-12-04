@@ -60,7 +60,6 @@
                     "ManagementAZ": "a",
                     "ManagementPrivateCidr": "10.0.0.0/24",
                     "ManagementPublicCidr": "10.0.1.0/24",
-                    "ManagementPublicGateway": "10.0.1.1",
                     "PrimaryAZ": "d",
                     "PrimaryPrivateCidr": "10.0.2.0/24",
                     "PrimaryPublicCidr": "10.0.3.0/24",
