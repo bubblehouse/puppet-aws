@@ -1,15 +1,13 @@
 {
-    "Description" : "Shacklyn stack", 
+    "Description" : "puppet-aws stack", 
     "AWSTemplateFormatVersion" : "2010-09-09",
     
     "Parameters": {
         "DefaultKeyPair": {
-            "Default": "bubblehouse-master_20140323",
             "Description": "The default keypair to use for EC2 instances.",
             "Type": "String"
         },
         "DhcpDomainName": {
-            "Default": "shacklyn.net",
             "Description": "The domain to configure for this network.",
             "Type": "String"
         },
@@ -46,7 +44,7 @@
         "hub" : {
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
-                "TemplateURL" : "https://s3.amazonaws.com/cf.shacklyn.net/shacklyn-net-cfn.json",
+                "TemplateURL" : "puppet_aws-net-cfn.json",
                 "Parameters" : {
                     "BaseName": "hub",
                     "BaseNetwork": "10.0.0.0/16",

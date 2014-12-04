@@ -1,7 +1,7 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
 
-    "Description": "Shacklyn network stack",
+    "Description": "puppet-aws network stack",
 
     "Parameters": {
         "BaseName": {
@@ -140,7 +140,7 @@
         "nat" : {
             "Type" : "AWS::CloudFormation::Stack",
             "Properties" : {
-                "TemplateURL" : "https://s3.amazonaws.com/cf.shacklyn.net/shacklyn-asg-cfn.json",
+                "TemplateURL" : "puppet_aws-asg-cfn.json",
                 "Parameters" : {
                     "AvailabiltyZoneIds": { "Fn::Join" : ["", [{ "Ref" : "AWS::Region" }, { "Ref" : "ManagementAZ" }] ]},
                     "BaseInstanceTag": { "Fn::Join" : ["-", ["nat", { "Ref" : "BaseName" }] ]},
