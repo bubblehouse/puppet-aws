@@ -11,6 +11,9 @@ Facter.add('cfn_stack_name') do
           name: "resource-type",
           values: ["instance"],
         }, {
+          name: "resource-id",
+          values: [Facter.value(:ec2_instance_id)],
+        }, {
           name: "key",
           values: ["aws:cloudformation:stack-name"],
         }]
