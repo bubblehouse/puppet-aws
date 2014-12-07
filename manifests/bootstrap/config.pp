@@ -25,13 +25,13 @@ class aws::bootstrap::config inherits aws::bootstrap {
       "file = /var/log/syslog",
       "log_group_name = /var/log/syslog",
       "log_stream_name = {instance_id}",
-      "datetime_format = %b %d %H:%M:%S\n"
+      "datetime_format = %b %d %H:%M:%S",
       "",
       "[/var/log/auth.log]",
       "file = /var/log/auth.log",
       "log_group_name = /var/log/auth.log",
       "log_stream_name = {instance_id}",
-      "datetime_format = %b %d %H:%M:%S\n"
+      "datetime_format = %b %d %H:%M:%S",
       "",
       "[/var/log/cloud-init-output.log]",
       "file = /var/log/cloud-init-output.log",
