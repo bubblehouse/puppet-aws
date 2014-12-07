@@ -49,7 +49,7 @@ class aws::bootstrap::config inherits aws::bootstrap {
   }
   
   service { 'awslogs':
-    ensure => running
+    ensure => running,
     enable => true
   }  
   
