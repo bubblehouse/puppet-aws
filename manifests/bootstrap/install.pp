@@ -18,8 +18,9 @@ class aws::bootstrap::install inherits aws::bootstrap {
       key_server => 'pgp.mit.edu';
   }
 
-  ensure_packages(["puppet", "python-pip", "update-notifier-common"], {
-    ensure => latest,
+  ensure_packages(["puppet", "python-pip", "update-notifier-common",
+      "unzip", "libwww-perl", "libcrypt-ssleay-perl"], {
+    ensure => installed,
     require => [
       Apt::Source['puppetlabs-main'],
       Apt::Source['puppetlabs-deps']
@@ -35,5 +36,20 @@ class aws::bootstrap::install inherits aws::bootstrap {
   staging::file { "jq":
     source => "http://stedolan.github.io/jq/download/linux64/jq",
     target => "/usr/local/bin"
+  }
+  
+  staging::deploy { "CloudWatchMonitoringScripts-v1.1.0.zip":
+    source => "http://ec2-downloads.s3.amazonaws.com/cloudwatch-samples/CloudWatchMonitoringScripts-v1.1.0.zip",
+    target => "/usr/local",
+    creates => "/usr/local/aws-scripts-mon"
+  }
+  
+  cron { "cloudwatch":
+    command => $aws::bootstrap::static_volume_size > 0 ? {
+      true => '/usr/bin/perl /usr/local/aws-scripts-mon/mon-put-instance-data.pl --mem-util --disk-space-util --disk-path=/ --disk-path=/media/static --from-cron &>> /var/log/cloudwatch-cron.log',
+      false => '/usr/bin/perl /usr/local/aws-scripts-mon/mon-put-instance-data.pl --mem-util --disk-space-util --disk-path=/ --from-cron &>> /var/log/cloudwatch-cron.log'
+    },
+    user    => root,
+    minute  => '*/5'
   }
 }
