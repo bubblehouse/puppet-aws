@@ -10,13 +10,13 @@ class aws::config::nat {
   exec { "sysctl-ip-forward":
     command => "/sbin/sysctl -q -w net.ipv4.ip_forward=1",
     unless => "/usr/bin/test $(/sbin/sysctl -n net.ipv4.ip_forward) -eq 1",
-    notify => Exec['wait-10s']
+    notify => Exec['wait-10s-for-ip-forwarding']
   }->
 
   exec { "sysctl-send-redirects":
     command => "/sbin/sysctl -q -w net.ipv4.conf.${aws::bootstrap::eni_interface}.send_redirects=0",
     unless => "/usr/bin/test $(/sbin/sysctl -n net.ipv4.conf.${aws::bootstrap::eni_interface}.send_redirects) -eq 0",
-    notify => Exec['wait-10s']
+    notify => Exec['wait-10s-for-ip-forwarding']
   }->
 
   exec { "iptables-nat-rule":
