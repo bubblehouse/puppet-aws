@@ -28,7 +28,7 @@ class aws::config::nat {
   
   exec { "iptables-save":
     command => "/sbin/iptables-save > /etc/iptables/rules.v4",
-    require => Package['iptable-persistent']
+    require => Package['iptables-persistent']
   }
   
   exec { 'wait-10s':
