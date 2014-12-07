@@ -247,9 +247,9 @@
                         "Statement": [ {
                             "Effect": "Allow",
                             "Action": [
-                                "cloudformation:*",
+                                "cloudwatch:*",
+                                "logs:*",
                                 "ec2:ModifyInstanceAttribute",
-                                "ec2:AttachNetworkInterface",
                                 "ec2:AttachNetworkInterface",
                                 "ec2:AssociateAddress",
                                 "ec2:AttachVolume",
@@ -264,6 +264,7 @@
                             "Action": [
                                 "ec2:Describe*",
                                 "rds:Describe*",
+                                "cloudformation:Describe*",
                                 "route53:ListHostedZones",
                                 "s3:Get*",
                                 "s3:List*",
@@ -277,9 +278,6 @@
                                 "sqs:ReceiveMessage",
                                 "autoscaling:Describe*",
                                 "elasticloadbalancing:Describe*",
-                                "cloudwatch:Describe*",
-                                "cloudwatch:List*",
-                                "cloudwatch:Get*",
                                 "iam:Get*",
                                 "iam:List*"
                             ],

@@ -53,4 +53,17 @@ class aws::bootstrap::config inherits aws::bootstrap {
     user    => root,
     minute  => '*/30'
   }
+  
+  if($aws::bootstrap::static_volume_size > 0) {
+    $cloudwatch_cmd = '/usr/bin/perl /usr/local/aws-scripts-mon/mon-put-instance-data.pl --mem-util --disk-space-util --disk-path=/ --disk-path=/media/static --from-cron'
+  }
+  else {
+    $cloudwatch_cmd = '/usr/bin/perl /usr/local/aws-scripts-mon/mon-put-instance-data.pl --mem-util --disk-space-util --disk-path=/ --from-cron'
+  }
+  
+  cron { "cloudwatch":
+    command => $cloudwatch_cmd,
+    user    => root,
+    minute  => '*/5'
+  }
 }
