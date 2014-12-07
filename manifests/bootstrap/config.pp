@@ -17,7 +17,7 @@ class aws::bootstrap::config inherits aws::bootstrap {
   file { "/etc/awslogs-agent.conf":
     ensure => present,
     replace => false,
-    content => join("\n", [
+    content => join([
       "[general]",
       "state_file = /var/awslogs/state/agent-state",
       "",
@@ -38,7 +38,7 @@ class aws::bootstrap::config inherits aws::bootstrap {
       "log_group_name = /var/log/cloud-init-output.log",
       "log_stream_name = {instance_id}",
       "datetime_format = %b %d %H:%M:%S\n"
-    ])
+    ], "\n")
   }->
   
   exec { "awslogs-agent-setup":
