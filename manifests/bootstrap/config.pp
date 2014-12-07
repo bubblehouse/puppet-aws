@@ -13,7 +13,38 @@ class aws::bootstrap::config inherits aws::bootstrap {
     ensure => file,
     content => "environment=${environment}",
   }
-
+  
+  file { "/etc/awslogs-agent.conf":
+    ensure => present,
+    replace => false,
+    content => join("\n", [
+      "[general]",
+      "state_file = /var/awslogs/state/agent-state",
+      "",
+      "[/var/log/syslog]",
+      "file = /var/log/syslog",
+      "log_group_name = /var/log/syslog",
+      "log_stream_name = {instance_id}",
+      "datetime_format = %b %d %H:%M:%S\n"
+      "",
+      "[/var/log/auth.log]",
+      "file = /var/log/auth.log",
+      "log_group_name = /var/log/auth.log",
+      "log_stream_name = {instance_id}",
+      "datetime_format = %b %d %H:%M:%S\n"
+      "",
+      "[/var/log/cloud-init-output.log]",
+      "file = /var/log/cloud-init-output.log",
+      "log_group_name = /var/log/cloud-init-output.log",
+      "log_stream_name = {instance_id}",
+      "datetime_format = %b %d %H:%M:%S\n"
+    ])
+  }->
+  
+  exec { "awslogs-agent-setup":
+    command => "/usr/bin/python /opt/staging/aws/awslogs-agent-setup.py -n -r $aws_region -c /etc/awslogs-agent.conf"
+  }
+  
   exec { "configure-hostname":
     command => "/bin/hostname -b ${aws::bootstrap::instance_fqdn}",
     unless => "/usr/bin/test \"${aws::bootstrap::instance_fqdn}\" == \"$(/bin/hostname -f)\""

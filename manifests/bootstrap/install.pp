@@ -38,6 +38,10 @@ class aws::bootstrap::install inherits aws::bootstrap {
     target => "/usr/local/bin"
   }
   
+  staging::file { "awslogs-agent-setup.py":
+    source => "https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py"
+  }
+  
   staging::deploy { "CloudWatchMonitoringScripts-v1.1.0.zip":
     source => "http://ec2-downloads.s3.amazonaws.com/cloudwatch-samples/CloudWatchMonitoringScripts-v1.1.0.zip",
     target => "/usr/local",
