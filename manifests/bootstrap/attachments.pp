@@ -13,12 +13,26 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
       ],
       notify => [
         Service['ssh'],
-        Exec['force-ifup']
+        Exec['force-ifup'],
+        Exec['del-default-gw-eth0']
       ]
     }
     
     exec { "force-ifup":
-      command => "/sbin/ifup --force ${aws::bootstrap::eni_interface}"
+      command => "/sbin/ifup --force ${aws::bootstrap::eni_interface}",
+      refreshonly => true,
+      notify => Exec['wait-5s-for-interface']
+    }
+    
+    exec { 'wait-5s-for-interface':
+      command => "/bin/sleep 5",
+      refreshonly => true,
+      before => Exec['del-default-gw-eth0']
+    }
+
+    exec { "del-default-gw-eth0":
+      command => "/sbin/ip route del default dev eth0",
+      refreshonly => true
     }
   }
   

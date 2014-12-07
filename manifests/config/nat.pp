@@ -31,7 +31,7 @@ class aws::config::nat {
     require => Package['iptables-persistent']
   }
   
-  exec { 'wait-10s':
+  exec { 'wait-10s-for-ip-forwarding':
     command => "/bin/sleep 10",
     refreshonly => true,
     before => Exec['iptables-nat-rule']
