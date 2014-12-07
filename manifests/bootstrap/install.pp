@@ -19,7 +19,7 @@ class aws::bootstrap::install inherits aws::bootstrap {
   }
 
   ensure_packages(["puppet", "python-pip", "update-notifier-common",
-      "unzip", "libwww-perl", "libcrypt-ssleay-perl"], {
+      "unzip", "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
     ensure => installed,
     require => [
       Apt::Source['puppetlabs-main'],
