@@ -38,12 +38,20 @@ class aws::bootstrap::config inherits aws::bootstrap {
       "log_group_name = /var/log/cloud-init-output.log",
       "log_stream_name = {instance_id}",
       "datetime_format = %b %d %H:%M:%S\n"
-    ], "\n")
+    ], "\n"),
+    notify => Service['awslogs']
   }->
   
   exec { "awslogs-agent-setup":
-    command => "/usr/bin/python /opt/staging/aws/awslogs-agent-setup.py -n -r $aws_region -c /etc/awslogs-agent.conf"
+    command => "/usr/bin/python /opt/staging/aws/awslogs-agent-setup.py -n -r $aws_region -c /etc/awslogs-agent.conf",
+    creates => "/etc/init.d/awslogs",
+    notify => Service['awslogs']
   }
+  
+  service { 'awslogs':
+    ensure => running
+    enable => true
+  }  
   
   exec { "configure-hostname":
     command => "/bin/hostname -b ${aws::bootstrap::instance_fqdn}",
