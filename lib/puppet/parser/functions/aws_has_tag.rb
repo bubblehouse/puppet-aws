@@ -18,7 +18,7 @@ module Puppet::Parser::Functions
         if value != nil
           tag[:value] == value
         else
-          true
+          false
         end
       }
     rescue Aws::EC2::Errors::ServiceError => e
