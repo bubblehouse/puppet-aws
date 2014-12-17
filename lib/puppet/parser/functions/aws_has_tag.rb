@@ -17,10 +17,9 @@ module Puppet::Parser::Functions
       resp[:tags].all? { |tag|
         if value != nil
           tag[:value] == value
-        else
-          false
         end
       }
+      false
     rescue Aws::EC2::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud
       Puppet.send(:err, e)
