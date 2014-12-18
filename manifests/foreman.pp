@@ -17,10 +17,8 @@
 #
 # === Examples
 #
-#  class { "aws::bootstrap":
-#    static_volume_size => 8,
-#    static_volume_encryption => false,
-#    static_volume_tag => "test-bootstrap"
+#  class { "aws::foreman":
+#  
 #  }
 #
 # === Authors
