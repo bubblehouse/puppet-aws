@@ -6,9 +6,10 @@ class aws::foreman::config inherits aws::foreman {
   augeas { "foreman-puppet.conf":
     context   => '/files/etc/puppet/puppet.conf',
     changes   => [
-        "set agent/environment ${aws::foreman::foreman_environment}",
-        "set master/external_nodes \"/etc/puppet/node.rb --no-environment\"",
-      ]
+      "set agent/environment ${aws::foreman::foreman_environment}",
+      "set master/external_nodes \"/etc/puppet/node.rb --no-environment\"",
+    ],
+    notify => Service['apache2']
   }
   
   file { "/etc/puppet/autosign.conf":
@@ -16,6 +17,7 @@ class aws::foreman::config inherits aws::foreman {
     content => "*",
     owner => 'root',
     group => 'root',
-    mode => '0644'
+    mode => '0644',
+    notify => Service['apache2']
   }
 }
