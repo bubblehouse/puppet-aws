@@ -16,7 +16,7 @@ class aws::foreman::install inherits aws::foreman {
       key_server => 'pgp.mit.edu';
   }->
   
-  class { 'foreman':
+  class { '::foreman':
     environment => $aws::foreman::foreman_environment,
     admin_password => $aws::foreman::admin_password
   }
