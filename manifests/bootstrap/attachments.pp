@@ -31,7 +31,7 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
     if($aws::bootstrap::is_nat){
       exec { "del-default-gw-eth0":
         command => "/sbin/ip route del default dev eth0",
-        refreshonly => true
+        refreshonly => true,
         require => Exec['wait-5s-for-interface'],
         subscribe => Exec["ec2net.hotplug"]
       }
