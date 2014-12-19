@@ -77,7 +77,7 @@ class aws::bootstrap::config inherits aws::bootstrap {
     line => "AWS_DEFAULT_REGION=${aws_region}"
   }
   
-  augeas { "/etc/puppet/puppet.conf":
+  augeas { "base-puppet.conf":
     context   => '/files/etc/puppet/puppet.conf',
     changes   => [
         "set main/environment ${environment}",

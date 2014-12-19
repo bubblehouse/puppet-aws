@@ -3,7 +3,7 @@
 class aws::foreman::config inherits aws::foreman {
   include foreman::plugin::default_hostgroup
   
-  augeas { "/etc/puppet/puppet.conf":
+  augeas { "foreman-puppet.conf":
     context   => '/files/etc/puppet/puppet.conf',
     changes   => [
         "set agent/environment ${aws::foreman::foreman_environment}",
