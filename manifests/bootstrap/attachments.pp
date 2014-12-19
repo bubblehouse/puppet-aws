@@ -13,8 +13,7 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
       ],
       notify => [
         Service['ssh'],
-        Exec['force-ifup'],
-        Exec['del-default-gw-eth0']
+        Exec['force-ifup']
       ]
     }
     
@@ -26,14 +25,15 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
     
     exec { 'wait-5s-for-interface':
       command => "/bin/sleep 5",
-      refreshonly => true,
-      before => Exec['del-default-gw-eth0']
+      refreshonly => true
     }
 
     if($aws::bootstrap::is_nat){
       exec { "del-default-gw-eth0":
         command => "/sbin/ip route del default dev eth0",
         refreshonly => true
+        require => Exec['wait-5s-for-interface'],
+        subscribe => Exec["ec2net.hotplug"]
       }
     }
   }
