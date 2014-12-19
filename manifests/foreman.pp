@@ -33,12 +33,25 @@ class aws::foreman(
   $base_module_repo = $aws::foreman::params::base_module_repo,
   $foreman_environment = $aws::foreman::params::foreman_environment
 ) inherits aws::foreman::params {
-  class { '::aws::bootstrap': }
+  apt::source {
+    'foreman-trusty':
+      location   => 'http://deb.theforeman.org/',
+      release => 'trusty',
+      repos => '1.7',
+      key => 'B3484CB71AA043B8',
+      key_server => 'pgp.mit.edu';
+    'foreman-plugins':
+      location   => 'http://deb.theforeman.org/',
+      release => 'plugins',
+      repos => '1.7',
+      key => 'B3484CB71AA043B8',
+      key_server => 'pgp.mit.edu';
+  }
+  
   
   anchor { 'aws::foreman::begin': } ->
-  class { '::aws::foreman::install':
-    require => Class['::aws::bootstrap']
-  } ->
+  class { '::aws::bootstrap': } ->
+  class { '::aws::foreman::install': } ->
   class { '::aws::foreman::config': } ->
   anchor { 'aws::foreman::end': }
 }
