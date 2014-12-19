@@ -14,7 +14,7 @@ class aws::foreman::install inherits aws::foreman {
       repos => '1.7',
       key => 'B3484CB71AA043B8',
       key_server => 'pgp.mit.edu';
-  }->
+  }
   
   class { '::foreman':
     environment => $aws::foreman::foreman_environment,
