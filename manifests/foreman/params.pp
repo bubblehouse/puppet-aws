@@ -3,5 +3,5 @@ class aws::foreman::params {
   $base_module_vendor = nil
   $base_module_name = nil
   $base_module_repo = nil
-  $foreman_environment = 'production'
+  $foreman_environment = 'hub'
 }
