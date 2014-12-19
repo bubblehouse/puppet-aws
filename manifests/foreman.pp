@@ -38,8 +38,8 @@ class aws::foreman(
     before => Stage['main']
   }
   
-  class { 'aws::bootstrap':
-    stage => 'bootstrap'
+  class { '::aws::bootstrap':
+    stage => bootstrap
   }
   
   anchor { 'aws::foreman::begin': } ->
