@@ -30,9 +30,11 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
       before => Exec['del-default-gw-eth0']
     }
 
-    exec { "del-default-gw-eth0":
-      command => "/sbin/ip route del default dev eth0",
-      refreshonly => true
+    if($aws::bootstrap::is_nat):
+      exec { "del-default-gw-eth0":
+        command => "/sbin/ip route del default dev eth0",
+        refreshonly => true
+      }
     }
   }
   
