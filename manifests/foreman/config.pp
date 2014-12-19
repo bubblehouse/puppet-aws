@@ -1,6 +1,8 @@
 # Configure the installed packages
 
 class aws::foreman::config inherits aws::foreman {
+  include foreman::plugin::default_hostgroup
+  
   augeas { "/etc/puppet/puppet.conf":
     context   => '/files/etc/puppet/puppet.conf',
     changes   => [

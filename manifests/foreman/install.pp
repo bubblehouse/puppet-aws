@@ -15,18 +15,9 @@ class aws::foreman::install inherits aws::foreman {
       key => 'B3484CB71AA043B8',
       key_server => 'pgp.mit.edu';
   }->
-
-  package { "foreman-installer":
-    ensure => installed
-  }->
   
-  exec { "foreman-installer":
-    command => join([
-      "/usr/sbin/foreman-installer",
-      " --foreman-environment=${aws::foreman::foreman_environment}",
-      " --foreman-admin-password=${aws::foreman::admin_password}",
-      " --enable-foreman-plugin-default-hostgroup"
-    ], ""),
-    creates => "/etc/foreman"
+  class { 'foreman':
+    environment => $aws::foreman::foreman_environment,
+    admin_password => $aws::foreman::admin_password
   }
 }
