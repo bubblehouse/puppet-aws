@@ -1,13 +1,9 @@
-class aws(
-  $bootstrap = false
-){
+class aws {
   if("${ec2_instance_id}" == "") {
     fail("Can't find EC2 instance ID fact, something is wrong.")
   }
   
-  class { 'apt':
-    apt_update_frequency => weekly
-  }
+  include apt
   include staging
   
   ensure_resource(service, 'ssh', {})
@@ -16,15 +12,5 @@ class aws(
   anchor { 'aws::begin': } ->
   class { '::aws::install': } ->
   class { '::aws::config': }
-  
-  if($bootstrap){
-    class { '::aws::bootstrap':
-      require => Class['::aws::config'],
-      before => Anchor['aws::end']
-    }
-  }
-  
-  anchor { 'aws::end':
-    require => Class['::aws::config']
-  }
+  anchor { 'aws::end': }
 }

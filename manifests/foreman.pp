@@ -33,8 +33,9 @@ class aws::foreman(
   $base_module_repo = $aws::foreman::params::base_module_repo,
   $foreman_environment = $aws::foreman::params::foreman_environment
 ) inherits aws::foreman::params {
+  include aws::bootstrap
+  
   anchor { 'aws::foreman::begin': } ->
-  class { '::aws::bootstrap': } ->
   class { '::aws::foreman::install': } ->
   class { '::aws::foreman::config': } ->
   anchor { 'aws::foreman::end': }
