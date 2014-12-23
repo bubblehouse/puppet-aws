@@ -9,4 +9,5 @@ class aws::bootstrap::params {
   $static_volume_size = 0
   $static_volume_encryption = false
   $static_volume_tag = nil
+  $puppetmaster = false
 }

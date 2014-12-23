@@ -38,7 +38,8 @@ class aws::bootstrap(
   $eip_allocation_id = $aws::bootstrap::params::eip_allocation_id,
   $static_volume_size = $aws::bootstrap::params::static_volume_size,
   $static_volume_encryption = $aws::bootstrap::params::static_volume_encryption,
-  $static_volume_tag = $aws::bootstrap::params::static_volume_tag
+  $static_volume_tag = $aws::bootstrap::params::static_volume_tag,
+  $puppetmaster = $aws::bootstrap::params::puppetmaster
 ) inherits aws::bootstrap::params {
   include aws
   
@@ -50,7 +51,7 @@ class aws::bootstrap(
   
   # http://docs.puppetlabs.com/puppet/2.7/reference/lang_containment.html#known-issues
   anchor { 'aws::bootstrap::begin': } ->
-  class { '::aws::bootstrap::install': } ->
+  class { '::aws::bootstrap::install': puppetmaster => $puppetmaster } ->
   class { '::aws::bootstrap::config': } ->
   class { '::aws::bootstrap::resources': } ->
   class { '::aws::bootstrap::attachments': }
