@@ -64,7 +64,7 @@ class aws::foreman::config inherits aws::foreman {
   }
   
   exec { "librarian-init":
-    command => "echo n | /usr/local/bin/librarian-puppet init",
+    command => "/bin/echo n | /usr/local/bin/librarian-puppet init",
     cwd => "/etc/puppet",
     environment => [
       "USER=root",
