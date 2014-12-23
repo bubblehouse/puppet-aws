@@ -24,7 +24,7 @@ class aws::foreman::config inherits aws::foreman {
   file { "/etc/puppet/Puppetfile":
     ensure => file,
     content => join([
-      "# Install ${aws::foreman::base_module_vendor}-${aws::foreman::base_module_name}"
+      "# Install ${aws::foreman::base_module_vendor}-${aws::foreman::base_module_name}",
       "forge 'https://forgeapi.puppetlabs.com'",
       "",
       "mod '${aws::foreman::base_module_vendor}-${aws::foreman::base_module_name}',",
@@ -38,7 +38,7 @@ class aws::foreman::config inherits aws::foreman {
   file { "/etc/puppet/Gemfile":
     ensure => file,
     content => join([
-      "# Dependencies for ${aws::foreman::base_module_vendor}-${aws::foreman::base_module_name}"
+      "# Dependencies for ${aws::foreman::base_module_vendor}-${aws::foreman::base_module_name}",
       "source 'https://rubygems.org'",
       "",
       "gem 'librarian-puppet'",
