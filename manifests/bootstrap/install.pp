@@ -1,8 +1,8 @@
 # Install all the dependencies needed for this module to function
 
-class aws::bootstrap::install inherits aws::bootstrap(
+class aws::bootstrap::install(
   $puppetmaster = false
-) {
+) inherits aws::bootstrap {
   include aws::install::ec2netutils
   
   apt::source {
@@ -21,7 +21,7 @@ class aws::bootstrap::install inherits aws::bootstrap(
   }
 
   class { '::puppet':
-    server => $puppetmaster
+    server => $puppetmaster,
     require => [
       Apt::Source['puppetlabs-main'],
       Apt::Source['puppetlabs-deps']
