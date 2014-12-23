@@ -1,10 +1,6 @@
 # Install all the dependencies needed for this module to function
 
 class aws::foreman::install inherits aws::foreman {
-  class { '::puppet':
-    server => true
-  }->
-
   class { '::foreman':
     custom_repo => true,
     environment => $aws::foreman::foreman_environment,

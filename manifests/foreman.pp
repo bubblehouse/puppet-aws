@@ -34,7 +34,7 @@ class aws::foreman(
   $foreman_environment = $aws::foreman::params::foreman_environment
 ) inherits aws::foreman::params {
   anchor { 'aws::foreman::begin': } ->
-  class { '::aws::bootstrap': } ->
+  class { '::aws::bootstrap': puppetmaster => true } ->
   class { '::aws::foreman::install': } ->
   class { '::aws::foreman::config': } ->
   anchor { 'aws::foreman::end': }

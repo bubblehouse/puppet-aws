@@ -1,6 +1,8 @@
 # Install all the dependencies needed for this module to function
 
-class aws::bootstrap::install inherits aws::bootstrap {
+class aws::bootstrap::install inherits aws::bootstrap(
+  $puppetmaster = false
+) {
   include aws::install::ec2netutils
   
   apt::source {
@@ -18,13 +20,17 @@ class aws::bootstrap::install inherits aws::bootstrap {
       key_server => 'pgp.mit.edu';
   }
 
-  ensure_packages(["puppet", "python-pip", "update-notifier-common",
-      "unzip", "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
-    ensure => installed,
+  class { '::puppet':
+    server => $puppetmaster
     require => [
       Apt::Source['puppetlabs-main'],
       Apt::Source['puppetlabs-deps']
     ]
+  }
+
+  ensure_packages(["python-pip", "update-notifier-common",
+      "unzip", "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
+    ensure => installed
   })
   
   package { "awscli":
