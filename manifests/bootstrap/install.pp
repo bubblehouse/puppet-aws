@@ -41,7 +41,7 @@ class aws::bootstrap::install(
     }
   }
 
-  ensure_packages(["python-pip", "update-notifier-common",
+  ensure_packages(["python-pip", "update-notifier-common", "ntp",
       "unzip", "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
     ensure => installed
   })
@@ -73,5 +73,11 @@ class aws::bootstrap::install(
     source => "http://ec2-downloads.s3.amazonaws.com/cloudwatch-samples/CloudWatchMonitoringScripts-v1.1.0.zip",
     target => "/usr/local",
     creates => "/usr/local/aws-scripts-mon"
+  }
+  
+  service { "ntp":
+    ensure => running,
+    enable => true,
+    require => Package['ntp']
   }
 }
