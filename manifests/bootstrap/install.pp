@@ -25,7 +25,7 @@ class aws::bootstrap::install(
       server => true,
       puppetmaster => $aws::bootstrap::instance_fqdn,
       server_certname => $aws::bootstrap::instance_fqdn,
-      agent_template => "bootstrap/puppet.erb.conf",
+      agent_template => "aws/bootstrap/puppet.erb.conf",
       require => [
         Apt::Source['puppetlabs-main'],
         Apt::Source['puppetlabs-deps']
@@ -37,7 +37,7 @@ class aws::bootstrap::install(
       server => false,
       puppetmaster => "puppet",
       server_certname => $aws::bootstrap::instance_fqdn,
-      agent_template => "bootstrap/puppet.erb.conf",
+      agent_template => "aws/bootstrap/puppet.erb.conf",
       require => [
         Apt::Source['puppetlabs-main'],
         Apt::Source['puppetlabs-deps']
