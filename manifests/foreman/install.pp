@@ -5,7 +5,6 @@ class aws::foreman::install inherits aws::foreman {
     admin_password => $aws::foreman::admin_password,
     servername => $aws::bootstrap::instance_fqdn,
     environment => $aws::foreman::foreman_environment,
-    server_certname => $aws::bootstrap::instance_fqdn,
     server_ssl_key => "/var/lib/puppet/ssl/private_keys/${aws::bootstrap::instance_fqdn}.pem",
     server_ssl_cert => "/var/lib/puppet/ssl/certs/${aws::bootstrap::instance_fqdn}.pem"
   }

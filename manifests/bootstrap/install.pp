@@ -24,6 +24,7 @@ class aws::bootstrap::install(
     class { '::puppet':
       server => true,
       puppetmaster => $aws::bootstrap::instance_fqdn,
+      server_certname => $aws::bootstrap::instance_fqdn,
       require => [
         Apt::Source['puppetlabs-main'],
         Apt::Source['puppetlabs-deps']
