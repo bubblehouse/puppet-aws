@@ -20,12 +20,25 @@ class aws::bootstrap::install(
       key_server => 'pgp.mit.edu';
   }
 
-  class { '::puppet':
-    server => $puppetmaster,
-    require => [
-      Apt::Source['puppetlabs-main'],
-      Apt::Source['puppetlabs-deps']
-    ]
+  if($puppetmaster){
+    class { '::puppet':
+      server => true,
+      puppetmaster => $aws::bootstrap::instance_fqdn,
+      require => [
+        Apt::Source['puppetlabs-main'],
+        Apt::Source['puppetlabs-deps']
+      ]
+    }
+  }
+  else {
+    class { '::puppet':
+      server => false,
+      puppetmaster => "puppet",
+      require => [
+        Apt::Source['puppetlabs-main'],
+        Apt::Source['puppetlabs-deps']
+      ]
+    }
   }
 
   ensure_packages(["python-pip", "update-notifier-common",
