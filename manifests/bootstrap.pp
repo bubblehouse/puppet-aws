@@ -36,6 +36,7 @@ class aws::bootstrap(
   $nat_cidr_range = $aws::bootstrap::params::nat_cidr_range,
   $eni_id = $aws::bootstrap::params::eni_id,
   $eip_allocation_id = $aws::bootstrap::params::eip_allocation_id,
+  $deploy_key_s3_url = $aws::bootstrap::params::deploy_key_s3_url,
   $static_volume_size = $aws::bootstrap::params::static_volume_size,
   $static_volume_encryption = $aws::bootstrap::params::static_volume_encryption,
   $static_volume_tag = $aws::bootstrap::params::static_volume_tag,

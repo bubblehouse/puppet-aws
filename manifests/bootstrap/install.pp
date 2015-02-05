@@ -39,6 +39,14 @@ class aws::bootstrap::install(
     require => Package['python-pip']
   }
 
+  if($aws::bootstrap::deploy_key_s3_url != nil){
+    exec { "deploy-key":
+      command => "/usr/local/bin/aws s3 cp $aws::bootstrap::deploy_key_s3_url /root/.ssh/id_rsa",
+      creates => "/root/.ssh/id_rsa",
+      require => Package['awscli']
+    }
+  }
+
   staging::file { "jq":
     source => "http://stedolan.github.io/jq/download/linux64/jq",
     target => "/usr/local/bin"
