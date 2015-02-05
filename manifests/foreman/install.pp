@@ -3,7 +3,7 @@
 class aws::foreman::install inherits aws::foreman {
   class { '::foreman':
     servername => $aws::bootstrap::instance_fqdn,
-    lower_fqdn => downcase($aws::bootstrap::instance_fqdn)
+    lower_fqdn => downcase($aws::bootstrap::instance_fqdn),
     environment => $aws::foreman::foreman_environment,
     admin_password => $aws::foreman::admin_password
   }
