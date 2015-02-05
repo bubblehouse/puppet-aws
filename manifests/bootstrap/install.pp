@@ -57,6 +57,14 @@ class aws::bootstrap::install(
       command => "/usr/local/bin/aws s3 cp $aws::bootstrap::deploy_key_s3_url /root/.ssh/id_rsa",
       creates => "/root/.ssh/id_rsa",
       require => Package['awscli']
+    }->
+    
+    file { "/root/.ssh/id_rsa":
+      ensure => present,
+      replace => false,
+      owner => root,
+      group => root,
+      mode => '0600'
     }
   }
 
