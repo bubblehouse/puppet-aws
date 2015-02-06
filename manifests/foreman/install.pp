@@ -13,6 +13,7 @@ class aws::foreman::install inherits aws::foreman {
 
   class { '::foreman_proxy':
     registered_name => $aws::bootstrap::instance_fqdn,
+    trusted_hosts => [$aws::bootstrap::instance_fqdn],
     puppet_url => "https://localhost:8140",
     foreman_base_url => "https://localhost",
     registered_proxy_url => "https://localhost:8443",
