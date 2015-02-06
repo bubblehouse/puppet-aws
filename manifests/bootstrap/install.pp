@@ -22,7 +22,7 @@ class aws::bootstrap::install(
 
   if($puppetmaster){
     exec { "puppetmaster-cert":
-      command => "/usr/bin/puppet cert --generate ${aws::bootstrap::instance_fqdn}",
+      command => "/usr/bin/puppet cert --generate --dns_alt_names puppet ${aws::bootstrap::instance_fqdn}",
       creates => "/var/lib/puppet/ssl/certs/${aws::bootstrap::instance_fqdn}.pem"
     }
     
