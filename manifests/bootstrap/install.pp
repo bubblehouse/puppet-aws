@@ -21,12 +21,18 @@ class aws::bootstrap::install(
   }
 
   if($puppetmaster){
+    exec { "puppetmaster-cert":
+      command => "puppet cert --generate ${aws::bootstrap::instance_fqdn}",
+      creates => "/var/lib/puppet/ssl/certs/${aws::bootstrap::instance_fqdn}.pem"
+    }
+    
     class { '::puppet':
       server => true,
       puppetmaster => $aws::bootstrap::instance_fqdn,
       server_certname => $aws::bootstrap::instance_fqdn,
       agent_template => "aws/bootstrap/puppet.erb.conf",
       require => [
+        Exec['puppetmaster-cert'],
         Apt::Source['puppetlabs-main'],
         Apt::Source['puppetlabs-deps']
       ]
@@ -36,7 +42,6 @@ class aws::bootstrap::install(
     class { '::puppet':
       server => false,
       puppetmaster => "puppet",
-      server_certname => $aws::bootstrap::instance_fqdn,
       agent_template => "aws/bootstrap/puppet.erb.conf",
       require => [
         Apt::Source['puppetlabs-main'],
