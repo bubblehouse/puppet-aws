@@ -120,6 +120,7 @@ class aws::bootstrap::install(
                     "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzd",
                     "HAyNTYAAABBBKJJwvabinwYXs8U3fqYhHwaRynoLgm7czEKcz2UdQc59H7MO7",
                     "xRGLZAjSfaOYxVEzPpseJz9tiE/U7fTogeCVI="], "")
+    }
   }
 
   staging::file { "jq":
