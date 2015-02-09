@@ -78,6 +78,25 @@ class aws::bootstrap::install(
       group => root,
       mode => '0600'
     }
+    
+    # Some very arbitrary combinations of SSH can fail because of strange MTUs
+    # which may be exacerbated by running Git behind a load balancer or proxy.
+    #  *  http://serverfault.com/questions/481966/why-is-sshd-hanging-at-server-accepts-key
+    #  *  http://superuser.com/questions/568891/ssh-works-in-putty-but-not-terminal
+    #  *  http://www.held.org.il/blog/2011/05/the-myterious-case-of-broken-ssh-client-connection-reset-by-peer/
+    file { "/root/.ssh/config":
+      ensure => file,
+      replace => false,
+      content => join([
+        "Host *",
+        "  Cipher aes128-ctr",
+        "  MACs hmac-md5",
+        ""
+      ], "\n"),
+      owner => 'root',
+      group => 'root',
+      mode => '0600'
+    }
   }
 
   staging::file { "jq":
