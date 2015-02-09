@@ -29,8 +29,11 @@ class aws::bootstrap::install(
     class { '::puppet':
       server => true,
       puppetmaster => $aws::bootstrap::instance_fqdn,
-      server_certname => $aws::bootstrap::instance_fqdn,
       agent_template => "aws/bootstrap/puppet.erb.conf",
+      server_certname => $aws::bootstrap::instance_fqdn,
+      server_foreman_url => "https://${aws::bootstrap::instance_fqdn}",
+      server_foreman_ssl_cert => "/var/lib/puppet/ssl/certs/${aws::bootstrap::instance_fqdn}.pem",
+      server_foreman_ssl_key => "/var/lib/puppet/ssl/private_keys/${aws::bootstrap::instance_fqdn}.pem",
       require => [
         Exec['puppetmaster-cert'],
         Apt::Source['puppetlabs-main'],

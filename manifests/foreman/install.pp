@@ -10,7 +10,7 @@ class aws::foreman::install inherits aws::foreman {
     websockets_ssl_key => "/var/lib/puppet/ssl/private_keys/${aws::bootstrap::instance_fqdn}.pem",
     websockets_ssl_cert => "/var/lib/puppet/ssl/certs/${aws::bootstrap::instance_fqdn}.pem"
   }
-
+  
   class { '::foreman_proxy':
     trusted_hosts => [$aws::bootstrap::instance_fqdn],
     registered_name => $aws::bootstrap::instance_fqdn,
