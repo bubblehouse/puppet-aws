@@ -29,8 +29,11 @@ class aws::bootstrap::install(
     class { '::puppet':
       server => true,
       puppetmaster => $aws::bootstrap::instance_fqdn,
-      server_certname => $aws::bootstrap::instance_fqdn,
       agent_template => "aws/bootstrap/puppet.erb.conf",
+      server_certname => $aws::bootstrap::instance_fqdn,
+      server_foreman_url => "https://${aws::bootstrap::instance_fqdn}",
+      server_foreman_ssl_cert => "/var/lib/puppet/ssl/certs/${aws::bootstrap::instance_fqdn}.pem",
+      server_foreman_ssl_key => "/var/lib/puppet/ssl/private_keys/${aws::bootstrap::instance_fqdn}.pem",
       require => [
         Exec['puppetmaster-cert'],
         Apt::Source['puppetlabs-main'],
@@ -74,6 +77,49 @@ class aws::bootstrap::install(
       owner => root,
       group => root,
       mode => '0600'
+    }
+    
+    # Some very arbitrary combinations of SSH can fail because of strange MTUs
+    # which may be exacerbated by running Git behind a load balancer or proxy.
+    #  *  http://serverfault.com/questions/481966/why-is-sshd-hanging-at-server-accepts-key
+    #  *  http://superuser.com/questions/568891/ssh-works-in-putty-but-not-terminal
+    #  *  http://www.held.org.il/blog/2011/05/the-myterious-case-of-broken-ssh-client-connection-reset-by-peer/
+    file { "/root/.ssh/config":
+      ensure => file,
+      replace => false,
+      content => join([
+        "Host *",
+        "  Cipher aes128-ctr",
+        "  MACs hmac-md5",
+        ""
+      ], "\n"),
+      owner => 'root',
+      group => 'root',
+      mode => '0600'
+    }
+
+    # It would be better if this wasn't hard-coded, as it's Logicworks-specific
+    file { "/root/.ssh/known_hosts":
+      ensure => present,
+      owner => "root",
+      group => "root",
+      mode => "0600",
+    }->
+
+    file_line { "gitlab-host-key-1":
+      path => "/root/.ssh/known_hosts",
+      line => join(["|1|ogj/x504dwser2whRpQH9gcImww=|bWwftmXEuPZRMhuiIPMsBBwzfy0= ",
+                    "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzd",
+                    "HAyNTYAAABBBKJJwvabinwYXs8U3fqYhHwaRynoLgm7czEKcz2UdQc59H7MO7",
+                    "xRGLZAjSfaOYxVEzPpseJz9tiE/U7fTogeCVI="], "")
+    }->
+
+    file_line { "gitlab-host-key-2":
+      path => "/root/.ssh/known_hosts",
+      line => join(["|1|6NrhkkWAapcvxg5rBsopVwfP+ZE=|V1Y6u6l9JZu8NzTTjv7/jT2A1JQ= ",
+                    "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzd",
+                    "HAyNTYAAABBBKJJwvabinwYXs8U3fqYhHwaRynoLgm7czEKcz2UdQc59H7MO7",
+                    "xRGLZAjSfaOYxVEzPpseJz9tiE/U7fTogeCVI="], "")
     }
   }
 

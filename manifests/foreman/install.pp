@@ -10,13 +10,13 @@ class aws::foreman::install inherits aws::foreman {
     websockets_ssl_key => "/var/lib/puppet/ssl/private_keys/${aws::bootstrap::instance_fqdn}.pem",
     websockets_ssl_cert => "/var/lib/puppet/ssl/certs/${aws::bootstrap::instance_fqdn}.pem"
   }
-
+  
   class { '::foreman_proxy':
-    registered_name => $aws::bootstrap::instance_fqdn,
     trusted_hosts => [$aws::bootstrap::instance_fqdn],
-    puppet_url => "https://localhost:8140",
-    foreman_base_url => "https://localhost",
-    registered_proxy_url => "https://localhost:8443",
+    registered_name => $aws::bootstrap::instance_fqdn,
+    puppet_url => "https://${aws::bootstrap::instance_fqdn}:8140",
+    foreman_base_url => "https://${aws::bootstrap::instance_fqdn}",
+    registered_proxy_url => "https://${aws::bootstrap::instance_fqdn}:8443",
     ssl_key => "/var/lib/puppet/ssl/private_keys/${aws::bootstrap::instance_fqdn}.pem",
     ssl_cert => "/var/lib/puppet/ssl/certs/${aws::bootstrap::instance_fqdn}.pem"
   }
