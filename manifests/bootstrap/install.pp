@@ -101,8 +101,8 @@ class aws::bootstrap::install(
     # It would be better if this wasn't hard-coded, as it's Logicworks-specific
     file { "/root/.ssh/known_hosts":
       ensure => present,
-      owner => "insite",
-      group => "insite",
+      owner => "root",
+      group => "root",
       mode => "0600",
     }->
 
