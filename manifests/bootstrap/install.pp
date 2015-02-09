@@ -97,6 +97,29 @@ class aws::bootstrap::install(
       group => 'root',
       mode => '0600'
     }
+
+    # It would be better if this wasn't hard-coded, as it's Logicworks-specific
+    file { "/root/.ssh/known_hosts":
+      ensure => present,
+      owner => "insite",
+      group => "insite",
+      mode => "0600",
+    }->
+
+    file_line { "gitlab-host-key-1":
+      path => "/root/.ssh/known_hosts",
+      line => join(["|1|ogj/x504dwser2whRpQH9gcImww=|bWwftmXEuPZRMhuiIPMsBBwzfy0= ",
+                    "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzd",
+                    "HAyNTYAAABBBKJJwvabinwYXs8U3fqYhHwaRynoLgm7czEKcz2UdQc59H7MO7",
+                    "xRGLZAjSfaOYxVEzPpseJz9tiE/U7fTogeCVI="], "")
+    }->
+
+    file_line { "gitlab-host-key-2":
+      path => "/root/.ssh/known_hosts",
+      line => join(["|1|6NrhkkWAapcvxg5rBsopVwfP+ZE=|V1Y6u6l9JZu8NzTTjv7/jT2A1JQ= ",
+                    "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzd",
+                    "HAyNTYAAABBBKJJwvabinwYXs8U3fqYhHwaRynoLgm7czEKcz2UdQc59H7MO7",
+                    "xRGLZAjSfaOYxVEzPpseJz9tiE/U7fTogeCVI="], "")
   }
 
   staging::file { "jq":
