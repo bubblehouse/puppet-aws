@@ -7,18 +7,21 @@ class aws::config::nat {
     ensure => installed
   }
   
-  exec { "sysctl-ip-forward":
-    command => "/sbin/sysctl -q -w net.ipv4.ip_forward=1",
-    unless => "/usr/bin/test $(/sbin/sysctl -n net.ipv4.ip_forward) -eq 1",
+  
+  sysctl { "net.ipv4.ip_forward":
+    ensure => present,
+    permanent => "yes",
+    value => '1',
     notify => Exec['wait-10s-for-ip-forwarding']
   }->
-
-  exec { "sysctl-send-redirects":
-    command => "/sbin/sysctl -q -w net.ipv4.conf.${aws::bootstrap::eni_interface}.send_redirects=0",
-    unless => "/usr/bin/test $(/sbin/sysctl -n net.ipv4.conf.${aws::bootstrap::eni_interface}.send_redirects) -eq 0",
+  
+  sysctl { "net.ipv4.conf.${aws::bootstrap::eni_interface}.send_redirects":
+    ensure => present,
+    permanent => "yes",
+    value => '0',
     notify => Exec['wait-10s-for-ip-forwarding']
   }->
-
+  
   exec { "iptables-nat-rule":
     command => "/sbin/iptables -t nat -A POSTROUTING -o ${aws::bootstrap::eni_interface} -s ${aws::bootstrap::nat_cidr_range} -j MASQUERADE",
     logoutput => on_failure,
