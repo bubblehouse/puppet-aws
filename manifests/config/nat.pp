@@ -7,6 +7,15 @@ class aws::config::nat {
     ensure => installed
   }
   
+  file_line { "net.ipv4.ip_forward":
+    path => "/etc/sysctl.conf",
+    line => "net.ipv4.ip_forward=1"
+  }
+
+  file_line { "net.ipv4.conf.${aws::bootstrap::eni_interface}.send_redirects":
+    path => "/etc/sysctl.conf",
+    line => "net.ipv4.conf.${aws::bootstrap::eni_interface}.send_redirects=0"
+  }
   
   sysctl { "net.ipv4.ip_forward":
     ensure => present,
