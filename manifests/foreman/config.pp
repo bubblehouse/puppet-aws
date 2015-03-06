@@ -11,7 +11,15 @@ class aws::foreman::config inherits aws::foreman {
     ],
     notify => Service['apache2']
   }
-  
+
+  file { "/etc/puppet/autosign.conf":
+    ensure => file,
+    content => '*',
+    owner => 'foreman-proxy', 
+    group => 'puppet', 
+    mode => '0644'
+  }
+
   file { "/etc/puppet/Puppetfile":
     ensure => file,
     content => join([
