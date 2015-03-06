@@ -24,25 +24,25 @@ write_files:
    content: |
      StrictHostKeyChecking no
    owner: root:root
-################################################
-#                                              #
-#  This will setup a private key in the root   #
-#  user's home folder. If it's needed,         #
-#  uncomment the lines below and then follow   #
-#  the steps below.                            #
-#                                              #
-#  1) Create a key if you don't have one       #
-#      already.                                #
-#  2) cat id_rsa | base64 -w0                  #
-#  3) copy the output of that command after    #
-#      the "content: " in the next block.      #
-#                                              #
-################################################
-# - path: /root/.ssh/id_rsa
-#   permissions: '0600'
-#   encoding: b64
-#   content:  
-#   owner: root:root
+   ################################################
+   #                                              #
+   #  This will setup a private key in the root   #
+   #  user's home folder. If it's needed,         #
+   #  uncomment the lines below and then follow   #
+   #  the steps below.                            #
+   #                                              #
+   #  1) Create a key if you don't have one       #
+   #      already.                                #
+   #  2) cat id_rsa | base64 -w0                  #
+   #  3) copy the output of that command after    #
+   #      the "content: " in the next block.      #
+   #                                              #
+   ################################################
+   # - path: /root/.ssh/id_rsa
+   #   permissions: '0600'
+   #   encoding: b64
+   #   content:  
+   #   owner: root:root
  - path: /etc/puppet/Gemfile
    content: |
      source 'https://rubygems.org'
@@ -63,12 +63,12 @@ write_files:
      :logger: puppet
  - path: /etc/puppet/hiera.d/bootstrap.yaml
    content: |
-################################################
-#                                              #
-#  Be sure to set the instance name and FQDN   #
-#  in the puppet variables below.              #
-#                                              #
-################################################
+     ################################################
+     #                                              #
+     #  Be sure to set the instance name and FQDN   #
+     #  in the puppet variables below.              #
+     #                                              #
+     ################################################
      aws::bootstrap::instance_name: "generic"
      aws::bootstrap::instance_fqdn: "generic.demo.local"
      aws::bootstrap::eip_allocation_id: nil

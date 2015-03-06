@@ -27,16 +27,16 @@ write_files:
  - path: /root/.ssh/id_rsa
    permissions: '0600'
    encoding: b64
-################################################
-#                                              #
-#  This key is your deploy key for gitlab.     #
-#  1) Create a key                             #
-#  2) Add it to gitlab                         #
-#  3) cat id_rsa | base64 -w0                  #
-#  4) copy the content of that command         #
-#     after the "content:" in the next line.   #
-#                                              #
-################################################
+   ################################################
+   #                                              #
+   #  This key is your deploy key for gitlab.     #
+   #  1) Create a key                             #
+   #  2) Add it to gitlab                         #
+   #  3) cat id_rsa | base64 -w0                  #
+   #  4) copy the content of that command         #
+   #     after the "content:" in the next line.   #
+   #                                              #
+   ################################################
    content:  
    owner: root:root
  - path: /etc/puppet/Gemfile
@@ -59,12 +59,12 @@ write_files:
      :logger: puppet
  - path: /etc/puppet/hiera.d/bootstrap.yaml
    content: |
-################################################
-#                                              #
-#  Be sure to set the instance name and FQDN   #
-#  in the puppet variables below.              #
-#                                              #
-################################################
+     ################################################
+     #                                              #
+     #  Be sure to set the instance name and FQDN   #
+     #  in the puppet variables below.              #
+     #                                              #
+     ################################################
      aws::bootstrap::instance_name: "puppet"
      aws::bootstrap::instance_fqdn: "puppet.demo.local"
      aws::bootstrap::eip_allocation_id: nil
@@ -75,27 +75,27 @@ write_files:
      aws::bootstrap::eni_interface: nil
      aws::bootstrap::nat_cidr_range: nil
      aws::bootstrap::eni_id: nil
-################################################
-#                                              #
-#  Be sure to set the instance name and FQDN   #
-#  again in the variables here which are used  #
-#  to setup the SSL certificate used by the    #
-#  puppetmaster during it's setup.             #
-#                                              #
-################################################
+     ################################################
+     #                                              #
+     #  Be sure to set the instance name and FQDN   #
+     #  again in the variables here which are used  #
+     #  to setup the SSL certificate used by the    #
+     #  puppetmaster during it's setup.             #
+     #                                              #
+     ################################################
      puppet::server::passenger::ssl_cert: "/var/lib/puppet/ssl/certs/puppet.demo.local.pem"
      puppet::server::passenger::ssl_cert_key: "/var/lib/puppet/ssl/private_keys/puppet.demo.local.pem"
      aws::foreman::base_module_vendor: Logicworks
-################################################
-#                                              #
-#  Set the puppet repository, the root class   #
-#  name for the client module, and the         #
-#  puppet environment you want the             #
-#  puppetmaster to exist within.               #
-#                                              #
-#  demo is used in the example here.           #
-#                                              #
-################################################
+     ################################################
+     #                                              #
+     #  Set the puppet repository, the root class   #
+     #  name for the client module, and the         #
+     #  puppet environment you want the             #
+     #  puppetmaster to exist within.               #
+     #                                              #
+     #  demo is used in the example here.           #
+     #                                              #
+     ################################################
      aws::foreman::base_module_name: demo
      aws::foreman::base_module_repo: ssh://git@gitlab.auto.aws.logicworks.net:44322/client-puppet/demo.git
      aws::foreman::foreman_environment: mgmt-hub
