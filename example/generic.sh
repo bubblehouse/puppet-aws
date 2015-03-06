@@ -70,7 +70,7 @@ write_files:
 #                                              #
 ################################################
      aws::bootstrap::instance_name: "generic"
-     aws::bootstrap::instance_fqdn: "generic.demo.local.pem"
+     aws::bootstrap::instance_fqdn: "generic.demo.local"
      aws::bootstrap::eip_allocation_id: nil
      aws::bootstrap::static_volume_encryption: false
      aws::bootstrap::static_volume_size: 0

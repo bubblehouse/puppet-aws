@@ -66,7 +66,7 @@ write_files:
 #                                              #
 ################################################
      aws::bootstrap::instance_name: "puppet"
-     aws::bootstrap::instance_fqdn: "puppet.demo.local.pem"
+     aws::bootstrap::instance_fqdn: "puppet.demo.local"
      aws::bootstrap::eip_allocation_id: nil
      aws::bootstrap::static_volume_encryption: false
      aws::bootstrap::static_volume_size: 0
