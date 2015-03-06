@@ -1,0 +1,61 @@
+{
+  "Statement": [
+    {
+      "Resource": "*",
+      "Action": [
+        "logs:*",
+        "cloudwatch:*",
+        "ec2:ModifyInstanceAttribute",
+        "ec2:AttachNetworkInterface",
+        "ec2:AssociateAddress",
+        "ec2:AttachVolume",
+        "ec2:CreateVolume",
+        "ec2:CreateTags",
+        "ec2:DeleteTags",
+        "ec2:DescribeTags"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Resource": "*",
+      "Action": [
+        "ec2:Describe*",
+        "rds:Describe*",
+        "cloudformation:Describe*",
+        "route53:ListHostedZones",
+        "s3:Get*",
+        "s3:List*",
+        "sdb:GetAttributes",
+        "sdb:List*",
+        "sdb:Select*",
+        "sns:Get*",
+        "sns:List*",
+        "sqs:ListQueues",
+        "sqs:GetQueueAttributes",
+        "sqs:ReceiveMessage",
+        "autoscaling:Describe*",
+        "elasticloadbalancing:Describe*",
+        "iam:Get*",
+        "iam:List*"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Resource": "arn:aws:route53:::hostedzone/*",
+      "Action": [
+        "route53:GetHostedZone",
+        "route53:ListResourceRecordSets",
+        "route53:ChangeResourceRecordSets"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Resource": "arn:aws:route53:::change/*",
+      "Action": [
+        "route53:GetChange"
+      ],
+      "Effect": "Allow"
+    }
+  ],
+  "Version": "2012-10-17"
+}
