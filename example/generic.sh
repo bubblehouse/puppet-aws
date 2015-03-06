@@ -24,21 +24,25 @@ write_files:
    content: |
      StrictHostKeyChecking no
    owner: root:root
- - path: /root/.ssh/id_rsa
-   permissions: '0600'
-   encoding: b64
 ################################################
 #                                              #
-#  This key is your deploy key for gitlab.     #
-#  1) Create a key                             #
-#  2) Add it to gitlab                         #
-#  3) cat id_rsa | base64 -w0                  #
-#  4) copy the content of that command         #
-#     after the "content:" in the next line.   #
+#  This will setup a private key in the root   #
+#  user's home folder. If it's needed,         #
+#  uncomment the lines below and then follow   #
+#  the steps below.                            #
+#                                              #
+#  1) Create a key if you don't have one       #
+#      already.                                #
+#  2) cat id_rsa | base64 -w0                  #
+#  3) copy the output of that command after    #
+#      the "content: " in the next block.      #
 #                                              #
 ################################################
-   content:  
-   owner: root:root
+# - path: /root/.ssh/id_rsa
+#   permissions: '0600'
+#   encoding: b64
+#   content:  
+#   owner: root:root
  - path: /etc/puppet/Gemfile
    content: |
      source 'https://rubygems.org'
