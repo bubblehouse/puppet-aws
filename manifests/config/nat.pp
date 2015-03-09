@@ -1,9 +1,11 @@
 class aws::config::nat {
   $ec2gatewayeth0 = $aws::bootstrap::ec2_gateway['eth0']
-  $ec2gatewayeth1 = $aws::bootstrap::ec2_gateway['eth1']
 
-  if $ec2gatewayeth1 == "" {
-      $ec2gatewayeth1 = $ec2gatewayeth0
+  if ($aws::bootstrap::ec2_gateway['eth1'] == nil) {
+      $ec2gatewayeth1 = $aws::bootstrap::ec2_gateway['eth0']
+  }
+  else {
+      $ec2gatewayeth1 = $aws::bootstrap::ec2_gateway['eth1']
   }
 
 
