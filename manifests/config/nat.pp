@@ -1,4 +1,7 @@
 class aws::config::nat {
+  $ec2gatewayeth0 = $aws::bootstrap::ec2_gateway['eth0']
+  $ec2gatewayeth1 = $aws::bootstrap::ec2_gateway['eth1']
+
   if($aws::bootstrap::eni_id == nil){
     ec2_modify_instance_attribute($ec2_instance_id, 'sourceDestCheck', false)
   }
@@ -36,13 +39,9 @@ class aws::config::nat {
   exec { 'wait-10s-for-ip-forwarding':
     command => "/bin/sleep 10",
     refreshonly => true,
-    before => Exec['iptables-nat-rule'],
-    notify => File['/etc/network/interfaces.d/eth0.conf']
-  }
+    before => Exec['iptables-nat-rule']
+  }->
  
-  $ec2gatewayeth0 = $aws::bootstrap::ec2_gateway['eth0']
-  $ec2gatewayeth1 = $aws::bootstrap::ec2_gateway['eth1']
-
   file { '/etc/network/interfaces.d/eth0.cfg':
     ensure  => file,
     content => join([
@@ -53,9 +52,8 @@ class aws::config::nat {
     ], "\n"),
     owner   => 'root',
     group   => 'root',
-    mode    => '0644',
-    notify  => File['/etc/network/interfaces.d/eth1.cfg'] 
-  }
+    mode    => '0644'
+  }->
   
   file { '/etc/network/interfaces.d/eth1.cfg':
     ensure  => file,
