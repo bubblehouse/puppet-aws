@@ -27,7 +27,7 @@ class aws::config::nat {
     unless => "/sbin/iptables -t nat -C POSTROUTING -o ${aws::bootstrap::eni_interface} -s ${aws::bootstrap::nat_cidr_range} -j MASQUERADE",
     notify => Exec['iptables-save']
   }
-  
+
   exec { "iptables-save":
     command => "/sbin/iptables-save > /etc/iptables/rules.v4",
     require => Package['iptables-persistent']
@@ -37,5 +37,11 @@ class aws::config::nat {
     command => "/bin/sleep 10",
     refreshonly => true,
     before => Exec['iptables-nat-rule']
+  }
+
+  file_line { "routes-persistent": 
+    ensure => present,
+    path => '/etc/rc.local',
+    line => '/sbin/ip route del default dev eth0'
   }
 }
