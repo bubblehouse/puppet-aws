@@ -1,6 +1,6 @@
 class aws::bootstrap::params {
-  $instance_name = "${cfn_baseinstancetag}-${ec2_instance_slug}"
-  $instance_fqdn = "${instance_name}.${cfn_endpointzone}"
+  $instance_name = "${::cfn_baseinstancetag}-${::ec2_instance_slug}"
+  $instance_fqdn = "${instance_name}.${::cfn_endpointzone}"
   $is_nat = false
   $nat_cidr_range = nil
   $eni_interface = 'eth1'
