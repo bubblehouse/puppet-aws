@@ -39,14 +39,17 @@ class aws::config::nat {
     before => Exec['iptables-nat-rule'],
     notify => File['/etc/network/interfaces.d/eth0.conf']
   }
-  
+ 
+  $ec2gatewayeth0 = $aws::bootstrap::ec2_gateway['eth0']
+  $ec2gatewayeth1 = $aws::bootstrap::ec2_gateway['eth1']
+
   file { '/etc/network/interfaces.d/eth0.cfg':
     ensure  => file,
     content => join([
       'auto eth0',
       'iface eth0 inet dhcp',
-      "post-up ip route add default via ${aws::bootstrap::ec2_gateway["eth0"]} dev eth0 table 10001",
-      "post-up ip route add default via ${aws::bootstrap::ec2_gateway["eth0"]} dev eth0 metric 10001",
+      "post-up ip route add default via ${ec2gatewayeth0} dev eth0 table 10001",
+      "post-up ip route add default via ${ec2gatewayeth0} dev eth0 metric 10001",
     ], "\n"),
     owner   => 'root',
     group   => 'root',
@@ -59,8 +62,8 @@ class aws::config::nat {
     content => join([
       'auto eth1',
       'iface eth1 inet dhcp',
-      "post-up ip route add default via ${aws::bootstrap::ec2_gateway["eth1"]} dev eth1 table 0",
-      "post-up ip route add default via ${aws::bootstrap::ec2_gateway["eth1"]} dev eth1 metric 0",
+      "post-up ip route add default via ${ec2gatewayeth1} dev eth1 table 0",
+      "post-up ip route add default via ${ec2gatewayeth1} dev eth1 metric 0",
     ], "\n"),
     owner   => 'root',
     group   => 'root',
