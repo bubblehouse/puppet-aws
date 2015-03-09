@@ -1,7 +1,7 @@
 class aws::config::nat {
   $ec2gatewayeth0 = $aws::bootstrap::ec2_gateway['eth0']
 
-  if ($aws::bootstrap::ec2_gateway['eth1'] == nil) {
+  if ($aws::bootstrap::ec2_gateway['eth1'] == "") {
       $ec2gatewayeth1 = $aws::bootstrap::ec2_gateway['eth0']
   }
   else {
@@ -50,16 +50,7 @@ class aws::config::nat {
   }->
 
   file { '/etc/network/interfaces.d/eth0.cfg':
-    ensure  => file,
-    content => join([
-      'auto eth0',
-      'iface eth0 inet dhcp',
-      "post-up ip route add default via ${ec2gatewayeth0} dev eth0 table 10001",
-      "post-up ip route add default via ${ec2gatewayeth0} dev eth0 metric 10001",
-    ], "\n"),
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644'
+    ensure  => absent
   }->
   
   file { '/etc/network/interfaces.d/eth1.cfg':
@@ -68,7 +59,7 @@ class aws::config::nat {
       'auto eth1',
       'iface eth1 inet dhcp',
       "post-up ip route add default via ${ec2gatewayeth1} dev eth1 table 0",
-      "post-up ip route add default via ${ec2gatewayeth1} dev eth1 metric 0",
+      "post-up ip route add default via ${ec2gatewayeth0} dev eth1 metric 0",
     ], "\n"),
     owner   => 'root',
     group   => 'root',
