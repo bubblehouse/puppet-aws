@@ -8,7 +8,7 @@ class aws::config::nat {
 
 
   if($aws::bootstrap::eni_id == nil){
-    ec2_modify_instance_attribute($ec2_instance_id, 'sourceDestCheck', false)
+    ec2_modify_instance_attribute($::ec2_instance_id, 'sourceDestCheck', false)
   }
   
   package { "iptables-persistent":
@@ -46,7 +46,7 @@ class aws::config::nat {
     refreshonly => true,
     before => Exec['iptables-nat-rule']
   }->
- 
+
   file { '/etc/network/interfaces.d/eth0.cfg':
     ensure  => file,
     content => join([
