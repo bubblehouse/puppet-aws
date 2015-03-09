@@ -2,6 +2,11 @@ class aws::config::nat {
   $ec2gatewayeth0 = $aws::bootstrap::ec2_gateway['eth0']
   $ec2gatewayeth1 = $aws::bootstrap::ec2_gateway['eth1']
 
+  if $ec2gatewayeth1 == "" {
+      $ec2gatewayeth1 = $ec2gatewayeth0
+  }
+
+
   if($aws::bootstrap::eni_id == nil){
     ec2_modify_instance_attribute($ec2_instance_id, 'sourceDestCheck', false)
   }
