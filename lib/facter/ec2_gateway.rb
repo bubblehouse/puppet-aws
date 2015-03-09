@@ -13,6 +13,7 @@ Facter.add('ec2_gateway') do
       gateways
     rescue e
       Facter::Core::Logging.warn("Failure in ec2_gateway fact: #{e}")
+    end
   end
 end
 
