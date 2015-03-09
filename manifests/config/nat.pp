@@ -36,12 +36,34 @@ class aws::config::nat {
   exec { 'wait-10s-for-ip-forwarding':
     command => "/bin/sleep 10",
     refreshonly => true,
-    before => Exec['iptables-nat-rule']
+    before => Exec['iptables-nat-rule'],
+    notify => File['/etc/network/interfaces.d/eth0.conf']
   }
-
-  file_line { "routes-persistent": 
-    ensure => present,
-    path => '/etc/rc.local',
-    line => '/sbin/ip route del default dev eth0'
+  
+  file { '/etc/network/interfaces.d/eth0.cfg':
+    ensure  => file,
+    content => join([
+      'auto eth0',
+      'iface eth0 inet dhcp',
+      "post-up ip route add default via ${aws::bootstrap::ec2_gateway["eth0"]} dev eth0 table 10001",
+      "post-up ip route add default via ${aws::bootstrap::ec2_gateway["eth0"]} dev eth0 metric 10001",
+    ], "\n"),
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    notify  => File['/etc/network/interfaces.d/eth1.cfg'] 
+  }
+  
+  file { '/etc/network/interfaces.d/eth1.cfg':
+    ensure  => file,
+    content => join([
+      'auto eth1',
+      'iface eth1 inet dhcp',
+      "post-up ip route add default via ${aws::bootstrap::ec2_gateway["eth1"]} dev eth1 table 0",
+      "post-up ip route add default via ${aws::bootstrap::ec2_gateway["eth1"]} dev eth1 metric 0",
+    ], "\n"),
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644'
   }
 }
