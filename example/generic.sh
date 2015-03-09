@@ -52,7 +52,7 @@ write_files:
    content: |
      forge 'https://forgeapi.puppetlabs.com'     
      mod 'bootstrap-aws',
-       :git => 'https://gitlab.auto.aws.logicworks.net/common-libs/puppet-aws.git'
+       :git => 'ssh://git@gitlab.auto.aws.logicworks.net:44322/common-libs/puppet-aws.git'
  - path: /etc/puppet/hiera.yaml
    content: |
      ---
