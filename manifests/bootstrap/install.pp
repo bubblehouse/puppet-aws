@@ -44,7 +44,7 @@ class aws::bootstrap::install(
   else {
     class { '::puppet':
       server => false,
-      puppetmaster => "puppet",
+      puppetmaster => $aws::bootstrap::puppetmaster_hostname,
       agent_template => "aws/bootstrap/puppet.erb.conf",
       require => [
         Apt::Source['puppetlabs-main'],

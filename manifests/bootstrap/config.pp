@@ -81,7 +81,6 @@ class aws::bootstrap::config inherits aws::bootstrap {
     context   => '/files/etc/puppet/puppet.conf',
     changes   => [
         "set main/environment ${environment}",
-        "set agent/server ${aws::bootstrap::puppetmaster_hostname}",
         "rm main/templatedir",
         "set main/waitforcert 30s",
         "set main/stringify_facts false"
