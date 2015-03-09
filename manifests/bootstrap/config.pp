@@ -43,7 +43,7 @@ class aws::bootstrap::config inherits aws::bootstrap {
   }->
   
   exec { "awslogs-agent-setup":
-    command => "/usr/bin/python /opt/staging/aws/awslogs-agent-setup.py -n -r $aws_region -c /etc/awslogs-agent.conf",
+    command => "/usr/bin/python /opt/staging/aws/awslogs-agent-setup.py -n -r ${::aws_region} -c /etc/awslogs-agent.conf",
     creates => "/etc/init.d/awslogs",
     notify => Service['awslogs']
   }

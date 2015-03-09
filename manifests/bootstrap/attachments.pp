@@ -47,7 +47,7 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
       ec2_attach_volume($::ec2_instance_id, $aws::bootstrap::resources::volume_id, "/dev/sdf")
     }
     
-    if($existing_volume_id == ""){
+    if($aws::bootstrap::resources::existing_volume_id == ""){
       exec { "mkfs":
         command => "/sbin/mkfs.ext4 /dev/xvdf",
         unless => "/sbin/blkid /dev/xvdf",

@@ -1,5 +1,5 @@
 class aws {
-  if("${ec2_instance_id}" == "") {
+  if("${::ec2_instance_id}" == "") {
     fail("Can't find EC2 instance ID fact, something is wrong.")
   }
   
