@@ -26,7 +26,6 @@ class aws::foreman::install inherits aws::foreman {
     registered_proxy_url => "https://${aws::bootstrap::instance_fqdn}:8443",
     puppet_url => "https://${aws::bootstrap::instance_fqdn}:8140",
     foreman_base_url => "https://${aws::bootstrap::instance_fqdn}",
-    registered_proxy_url => "https://${aws::bootstrap::instance_fqdn}:8443",
     ssl_key => "/var/lib/puppet/ssl/private_keys/${aws::bootstrap::instance_fqdn}.pem",
     ssl_cert => "/var/lib/puppet/ssl/certs/${aws::bootstrap::instance_fqdn}.pem",
     require => File["/etc/puppet/environments/${aws::foreman::foreman_environment}/modules"]
