@@ -31,7 +31,8 @@ class aws::foreman(
   $base_module_vendor = $aws::foreman::params::base_module_vendor,
   $base_module_name = $aws::foreman::params::base_module_name,
   $base_module_repo = $aws::foreman::params::base_module_repo,
-  $foreman_environment = $aws::foreman::params::foreman_environment
+  $foreman_environment = $aws::foreman::params::foreman_environment,
+  $autosign_glob = $aws::foreman::params::autosign_glob
 ) inherits aws::foreman::params {
   anchor { 'aws::foreman::begin': } ->
   class { '::aws::bootstrap': puppetmaster => true } ->

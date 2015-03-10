@@ -12,12 +12,9 @@ class aws::foreman::config inherits aws::foreman {
     notify => Service['apache2']
   }
 
-  file { "/etc/puppet/autosign.conf":
-    ensure => file,
-    content => '*',
-    owner => 'foreman-proxy', 
-    group => 'puppet', 
-    mode => '0644'
+  exec { "update-autosign":
+    command => "/bin/echo '${aws::foreman::autosign_glob}' > /etc/puppet/autosign.conf",
+    onlyif => '/usr/bin/test "$(cat /etc/puppet/autosign.conf)" == ""'
   }
 
   file { "/etc/puppet/Puppetfile":
