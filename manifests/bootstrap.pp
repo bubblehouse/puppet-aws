@@ -29,6 +29,7 @@
 #
 
 class aws::bootstrap(
+  $route53_internal_zone = $aws::bootstrap::params::route53_internal_zone,
   $instance_name = $aws::bootstrap::params::instance_name,
   $instance_fqdn = $aws::bootstrap::params::instance_fqdn,
   $is_nat = $aws::bootstrap::params::is_nat,

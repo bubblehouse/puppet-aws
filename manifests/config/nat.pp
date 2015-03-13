@@ -9,7 +9,7 @@ class aws::config::nat {
   }
 
   if ($aws::bootstrap::route53_internal_zone != nil) {
-      vpc_attach_r53_zone($::ec2_vpc, $aws::bootstrap::route53_internal_zone)
+      vpc_attach_r53_zone($aws::bootstrap::ec2_vpc_id, $aws::bootstrap::route53_internal_zone)
   }
 
 
