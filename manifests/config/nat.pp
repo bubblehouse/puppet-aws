@@ -53,22 +53,6 @@ class aws::config::nat {
     command => "/bin/sleep 10",
     refreshonly => true,
     before => Exec['iptables-nat-rule']
-  }->
-
-  file { '/etc/network/interfaces.d/eth0.cfg':
-    ensure  => absent
-  }->
-  
-  file { '/etc/network/interfaces.d/eth1.cfg':
-    ensure  => file,
-    content => join([
-      'auto eth1',
-      'iface eth1 inet dhcp',
-      "post-up ip route add default via ${ec2gatewayeth1} dev eth1 table 0",
-      "post-up ip route add default via ${ec2gatewayeth0} dev eth1 metric 0",
-    ], "\n"),
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644'
   }
+
 }
