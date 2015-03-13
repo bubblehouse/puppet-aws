@@ -13,7 +13,7 @@ module Puppet::Parser::Functions
         zone[:name] = r53_zone
         zone[:vpc] = {vpc_region: region, vpc_id: vpc_id}
         zone[:caller_reference] = SecureRandom.uuid
-        zone[:hosted_zone_config] = {comment: "created by Logicworks on #{Time.now}.", private_zone: true}
+        zone[:hosted_zone_config] = {comment: "created by puppet-aws on #{Time.now}.", private_zone: true}
         resp = e53.create_hosted_zone(zone)
         Puppet.send(:debug, resp[:change_info].to_s)
         sleep(10)
@@ -22,7 +22,8 @@ module Puppet::Parser::Functions
           Puppet.send(:warn, "Zone still not created, moving on.")
         else
           zone_id = zones[:hosted_zones][0][:id]
-      elsif (zones[:hosted_zones].count == 1)
+        end
+      elsif zones[:hosted_zones].count == 1
         zone_id = zones[:hosted_zones][0][:id]
         Puppet.send(:debug, "Located Route53 Zone with DNS name of #{r53_zone} and id #{zone_id}.")
       else
@@ -34,11 +35,12 @@ module Puppet::Parser::Functions
           zone = r53.get_hosted_zone(id: zone_id)[:hosted_zones]
           if zone[:vp_cs].select{|vpc| vpc[:vpc_id] == vpc_id}.count == 0
             Puppet.send(:debug, "Route53 zone #{r53_zone} not currently associated with vpc #{vpc_id}, associating.")
-            r53.associate_vpc_with_hosted_zone(hosted_zone_id: zone_id, vpc: {vpc_region: region, vpc_id: vpc_id}, comment: "Associated by logicworks on #{Time.now}"})
+            r53.associate_vpc_with_hosted_zone(hosted_zone_id: zone_id, vpc: {vpc_region: region, vpc_id: vpc_id}, comment: "Associated by puppet-aws on #{Time.now}")
           end
         rescue Aws::Route53::Errors::ServiceError
           Puppet.send(:warn, e)
         end
+      end
     end
   end
 end
