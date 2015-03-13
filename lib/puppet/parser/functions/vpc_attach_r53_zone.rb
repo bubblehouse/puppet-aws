@@ -6,7 +6,7 @@ module Puppet::Parser::Functions
     region = Facter.value(:ec2_placement_availability_zone).chop
     r53 = Aws::Route53::Client.new(region:region)
     begin
-      zones = r53.list_hosted_zones_by_name(dns_name: r53_zone).to_hash.select{|zone|
+      zones = r53.list_hosted_zones_by_name(dns_name: r53_zone).to_hash[:hosted_zones].select{|zone|
           zone[:config][:private_zone] and (
               (zone[:name] == r53_zone) or
               (zone[:name] == "#{r53_zone}."))
