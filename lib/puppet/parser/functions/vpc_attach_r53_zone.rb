@@ -18,10 +18,10 @@ module Puppet::Parser::Functions
         zone[:name] = r53_zone
         zone[:vpc] = {vpc_region: region, vpc_id: vpc_id}
         zone[:caller_reference] = SecureRandom.uuid
-        zone[:hosted_zone_config] = {comment: "created by puppet-aws on #{Time.now}.", private_zone: true}
+        zone[:hosted_zone_config] = {comment: "created by puppet-aws on #{Time.now}."}
         resp = r53.create_hosted_zone(zone)
         Puppet.send(:debug, resp[:change_info].to_s)
-        sleep(10)
+        sleep(5)
         zones = r53.list_hosted_zones_by_name(dns_name: r53_zone)
         if zones.count != 1
           Puppet.send(:warn, "Zone still not created, moving on.")
