@@ -5,7 +5,7 @@ Facter.add('ec2_vpc_id') do
     begin
       gateways = {}
       metadata = Facter.value(:ec2_metadata)
-      metadata["network"]["interfaces"]["macs"].first["vpc-id"]
+      metadata["network"]["interfaces"]["macs"].first[1]["vpc-id"]
     rescue e
       Facter::Core::Logging.warn("Failure in ec2_vpc fact: #{e}")
     end
