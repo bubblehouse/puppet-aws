@@ -19,7 +19,7 @@ module Puppet::Parser::Functions
         zone[:vpc] = {vpc_region: region, vpc_id: vpc_id}
         zone[:caller_reference] = SecureRandom.uuid
         zone[:hosted_zone_config] = {comment: "created by puppet-aws on #{Time.now}.", private_zone: true}
-        resp = e53.create_hosted_zone(zone)
+        resp = r53.create_hosted_zone(zone)
         Puppet.send(:debug, resp[:change_info].to_s)
         sleep(10)
         zones = r53.list_hosted_zones_by_name(dns_name: r53_zone)
