@@ -8,6 +8,12 @@ class aws::config::nat {
       $ec2gatewayeth1 = $aws::bootstrap::ec2_gateway['eth1']
   }
 
+  if ($aws::bootstrap::route53_internal_zone != nil) {
+      vpc_attach_r53_zone($::ec2_vpc, $aws::bootstrap::route53_internal_zone)
+  }
+
+
+
 
   if($aws::bootstrap::eni_id == nil){
     ec2_modify_instance_attribute($::ec2_instance_id, 'sourceDestCheck', false)
