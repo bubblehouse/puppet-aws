@@ -8,6 +8,12 @@ class aws::config::nat {
       $ec2gatewayeth1 = $aws::bootstrap::ec2_gateway['eth1']
   }
 
+  if ($aws::bootstrap::route53_internal_zone != nil) {
+      vpc_attach_r53_zone($aws::bootstrap::ec2_vpc_id, $aws::bootstrap::route53_internal_zone)
+  }
+
+
+
 
   if($aws::bootstrap::eni_id == nil){
     ec2_modify_instance_attribute($::ec2_instance_id, 'sourceDestCheck', false)
@@ -47,22 +53,6 @@ class aws::config::nat {
     command => "/bin/sleep 10",
     refreshonly => true,
     before => Exec['iptables-nat-rule']
-  }->
-
-  file { '/etc/network/interfaces.d/eth0.cfg':
-    ensure  => absent
-  }->
-  
-  file { '/etc/network/interfaces.d/eth1.cfg':
-    ensure  => file,
-    content => join([
-      'auto eth1',
-      'iface eth1 inet dhcp',
-      "post-up ip route add default via ${ec2gatewayeth1} dev eth1 table 0",
-      "post-up ip route add default via ${ec2gatewayeth0} dev eth1 metric 0",
-    ], "\n"),
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644'
   }
+
 }
