@@ -37,7 +37,7 @@ module Puppet::Parser::Functions
 
       if zone_id
         begin
-          zone = r53.get_hosted_zone(id: zone_id).to_hash[:hosted_zones]
+          zone = r53.get_hosted_zone(id: zone_id).to_hash
           if zone[:vp_cs].select{|vpc| vpc[:vpc_id] == vpc_id}.count == 0
             Puppet.send(:notice, "Route53 zone #{r53_zone} not currently associated with vpc #{vpc_id}, associating.")
             r53.associate_vpc_with_hosted_zone(hosted_zone_id: zone_id, vpc: {vpc_region: region, vpc_id: vpc_id}, comment: "Associated by puppet-aws on #{Time.now}")
