@@ -31,14 +31,14 @@ module Puppet::Parser::Functions
           changes[:change_batch][:changes] = []
 
           record = r53.list_resource_record_sets(hosted_zone_id: zone_id, start_record_name: base, start_record_type: "CNAME")[:resource_record_sets].select{|rec| 
-              (rec[:name] =~ /#{base}\.#{r53_zone}/) and 
+              (rec[:name] =~ /^#{base}\.#{r53_zone}/) and 
               (rec[:type] == "CNAME" ) 
           }
 
           if record.count == 0
               Puppet.send(:notice, "No cname exists for #{base}.#{r53_zone}, creating it.")
               change = changes 
-              change[:change_batch][:changes][0][:action] = "CREATE"
+              change[:change_batch][:changes][0][:action] = "UPSERT"
               change[:change_batch][:changes][0][:resource_record_set] = {}
               change[:change_batch][:changes][0][:resource_record_set][:name] = "#{base}.#{r53_zone}"
               change[:change_batch][:changes][0][:resource_record_set][:type] = "CNAME"
@@ -48,26 +48,47 @@ module Puppet::Parser::Functions
               Puppet.send(:debug, "Response: #{resp[:change_info].to_hash.to_s}")
               sleep(5)
               record = r53.list_resource_record_sets(hosted_zone_id: zone_id, start_record_name: base, start_record_type: "CNAME")[:resource_record_sets].select{|rec| 
-                  (rec[:name] =~ /#{base}\.#{r53_zone}/) and 
+                  (rec[:name] =~ /^#{base}\.#{r53_zone}/) and 
                   (rec[:type] == "CNAME" ) 
               }
           end
 
           ec2_conns = {}
+          ip_map = []
+
           record[:resource_records].each{|hostname|
-              # get r53 A and TXT records for that hostname
+              records = r53.list_resource_record_sets(hosted_zone_id: zone_id, start_record_name: hostname[:value])[:resource_record_sets].select{|rec| 
+                  (rec[:name] == hostname[:value]) and 
+                  (rec[:type] == "TXT")
+              }
 
-              records = r53.list_resource_record_sets(hosted_zone_id: zone_id, start_record_name: hostname[:value])[:resource_record_sets].select{|rec| rec[:name] == hostname[:value]}
-              txt_rec = records.select{|rec| rec[:type] == "TXT"}[:resource_records]
-              a_rec   = records.select{|rec| rec[:type] == "A"}[:resource_records]
+              records.each{|entry|
+                  entry = {}
+                  entry[:hostname] = hostname[:value]
+                  entry[:vpc_id] = entry.split(',')[0]
+                  entry[:instance_id] = entry.split(',')[1]
+                  entry[:interface_id] = entry.split(',')[2]
+                  entry[:ipaddr] = entry.split(',')[3]
+                  entry[:region] = entry.split(',')[4]
+                  ip_map.push entry
+              }
+          } 
 
-              # split TXT record, check vpc and verify that that instance id is still running.
+          ip_map.each{|entry|
+            if not ec2_conns[entry[:region]]
+              ec2_conns[entry[:region]] = Aws::EC2::Client.new(region: entry[:region])
+            end
 
-              if txt_rec.count == 1
-                vpc_id      = txt_rec.split(',')[0]
-                instance_id = txt_rec.split(',')[1]
-                interface_id = txt_rec.split(',')[2]
-              else
+            instance = Aws::EC2::Instance.new(id: entry[:instance_id], client: ec2_conns[entry[:region]])
+            begin 
+              # This will trigger an error if the instance doesn't exist anymore.  
+              if instance.state[:name] == "running"
+                change[ 
+
+
+
+
+
                 Puppet.send(:warn, "TXT record for #{hostname[:value]} isn't correct.")
               end
 
