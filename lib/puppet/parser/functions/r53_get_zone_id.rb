@@ -1,4 +1,3 @@
-require 'securerandom'
 #
 # Get the route 53 zone id
 # Returns 0 if zone doesn't exist.
