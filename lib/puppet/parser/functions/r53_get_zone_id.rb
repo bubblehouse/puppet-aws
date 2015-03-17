@@ -6,7 +6,7 @@
 #
 
 module Puppet::Parser::Functions
-  newfunction(:vpc_attach_r53_zone, :type => :rvalue) do |args|
+  newfunction(:r53_get_zone_id, :type => :rvalue) do |args|
     r53_zone = *args
     region = Facter.value(:ec2_placement_availability_zone).chop
     r53 = Aws::Route53::Client.new(region:region)
