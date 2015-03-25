@@ -6,15 +6,11 @@ module Puppet::Parser::Functions
     region = Facter.value(:ec2_placement_availability_zone).chop
     r53 = Aws::Route53::Client.new(region:region)
     begin
-      zones = r53.list_hosted_zones_by_name(dns_name: r53_zone).to_hash[:hosted_zones].select{|zone|
-          zone[:config][:private_zone] and (
-              (zone[:name] == r53_zone) or
-              (zone[:name] == "#{r53_zone}."))
-      }
+      zone_id = function_r53_get_zone_id([r53_zone])
 
-      if (zones.count == 0)
+      if (zone_id == 0)
         Puppet.send(:notice, "No zones with the DNS name of #{r53_zone}, taking no action.")
-      elsif zones.count == 1
+      elsif zone_id == 1
         zone_id = zones[0][:id]
         Puppet.send(:notice, "Located Route53 Zone with DNS name of #{r53_zone} and id #{zone_id}.")
       else
@@ -30,7 +26,9 @@ module Puppet::Parser::Functions
           changes[:change_batch][:comment] = "Updated by puppet-aws on #{Facter.value(aws::bootstrap::fqdn)} at #{Time.now()}."
           changes[:change_batch][:changes] = []
 
-          record = r53.list_resource_record_sets(hosted_zone_id: zone_id, start_record_name: base, start_record_type: "CNAME")[:resource_record_sets].select{|rec| 
+          base_record = function_r53_get_record([zone_id, ])
+
+          base_record = r53.list_resource_record_sets(hosted_zone_id: zone_id, start_record_name: base, start_record_type: "CNAME")[:resource_record_sets].select{|rec| 
               (rec[:name] =~ /^#{base}\.#{r53_zone}/) and 
               (rec[:type] == "CNAME" ) 
           }
@@ -47,7 +45,7 @@ module Puppet::Parser::Functions
               resp = r53.change_resource_record_sets(change)
               Puppet.send(:debug, "Response: #{resp[:change_info].to_hash.to_s}")
               sleep(5)
-              record = r53.list_resource_record_sets(hosted_zone_id: zone_id, start_record_name: base, start_record_type: "CNAME")[:resource_record_sets].select{|rec| 
+              base_record = r53.list_resource_record_sets(hosted_zone_id: zone_id, start_record_name: base, start_record_type: "CNAME")[:resource_record_sets].select{|rec| 
                   (rec[:name] =~ /^#{base}\.#{r53_zone}/) and 
                   (rec[:type] == "CNAME" ) 
               }
@@ -56,20 +54,23 @@ module Puppet::Parser::Functions
           ec2_conns = {}
           ip_map = []
 
-          record[:resource_records].each{|hostname|
-              records = r53.list_resource_record_sets(hosted_zone_id: zone_id, start_record_name: hostname[:value])[:resource_record_sets].select{|rec| 
+          base_record[:resource_records].each{|hostname|
+              instance_record = r53.list_resource_record_sets(hosted_zone_id: zone_id, start_record_name: hostname[:value])[:resource_record_sets].select{|rec| 
                   (rec[:name] == hostname[:value]) and 
                   (rec[:type] == "TXT")
               }
 
-              records.each{|entry|
-                  entry = {}
-                  entry[:hostname] = hostname[:value]
-                  entry[:vpc_id] = entry.split(',')[0]
-                  entry[:instance_id] = entry.split(',')[1]
-                  entry[:interface_id] = entry.split(',')[2]
-                  entry[:ipaddr] = entry.split(',')[3]
-                  entry[:region] = entry.split(',')[4]
+
+              change[:action] = "UPSERT"
+              change[:resource_record_set] = instance_record
+
+              instance_record[:resource_records].select!{|entry|
+                  hostname = hostname[:value]
+                  vpc_id = entry.split(',')[0]
+                  instance_id = entry.split(',')[1]
+                  interface_id = entry.split(',')[2]
+                  ipaddr = entry.split(',')[3]
+                  region = entry.split(',')[4]
                   ip_map.push entry
               }
           } 
