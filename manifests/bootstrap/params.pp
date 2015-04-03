@@ -1,5 +1,7 @@
 class aws::bootstrap::params {
   $route53_internal_zone = nil
+  $role = "${::cfn_puppetrole}"
+  $environment = "${::cfn_puppetenvironment}"
   $instance_name = "${::cfn_baseinstancetag}-${::ec2_instance_slug}"
   $instance_fqdn = "${instance_name}.${::cfn_endpointzone}"
   $is_nat = false
