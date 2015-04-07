@@ -9,7 +9,7 @@ class aws::bootstrap::config inherits aws::bootstrap {
     ensure => directory
   }
   
-  if ( ${aws::bootstrap::role} != nil) {
+  if ( $aws::bootstrap::role != nil) {
     file { "/etc/facter/facts.d/role.txt":
       ensure => file,
       content => "role=${aws::bootstrap::role}",
