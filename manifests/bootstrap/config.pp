@@ -7,16 +7,20 @@ class aws::bootstrap::config inherits aws::bootstrap {
   
   file { ["/etc/facter", "/etc/facter/facts.d"]:
     ensure => directory
-  }->
+  }
   
-  file { "/etc/facter/facts.d/role.txt":
-    ensure => file,
-    content => "role=${aws::bootstrap::role}",
+  if ( ${aws::bootstrap::role} != nil) {
+    file { "/etc/facter/facts.d/role.txt":
+      ensure => file,
+      content => "role=${aws::bootstrap::role}",
+      require => File['/etc/facter/facts.d']
+    }
   }
 
   file { "/etc/facter/facts.d/environment.txt":
     ensure => file,
     content => "environment=${aws::bootstrap::environment}",
+    require => File['/etc/facter/facts.d']
   }
   
   file { "/etc/awslogs-agent.conf":
