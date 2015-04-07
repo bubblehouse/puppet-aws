@@ -34,7 +34,7 @@ module Puppet::Parser::Functions
           else
             Puppet.send(:notice, "Route53 zone #{r53_zone} is already associated with vpc #{vpc_id}.")
           end
-        rescue Aws::Route53::Errors::ServiceError
+        rescue Aws::Route53::Errors::ServiceError => e
           Puppet.send(:warn, e)
         end
       end
