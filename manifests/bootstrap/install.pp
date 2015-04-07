@@ -126,6 +126,13 @@ class aws::bootstrap::install(
   staging::file { "jq":
     source => "http://stedolan.github.io/jq/download/linux64/jq",
     target => "/usr/local/bin/jq"
+  }->
+  
+  file { "/usr/local/bin/jq":
+    ensure => present,
+    owner => 'root',
+    group => 'root',
+    mode => '0755'
   }
   
   staging::file { "awslogs-agent-setup.py":
