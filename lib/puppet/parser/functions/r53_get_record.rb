@@ -1,8 +1,9 @@
 #
-# Get the route 53 zone id
-# Returns 0 if zone doesn't exist.
-# Returns 2 if more than one zone of that name exists.
-# Returns the zone_id (/hostedzone/1234567890ABCD) if a single zone exists.
+# Get a route53 record.
+# Returns 0 if record doesn't exist.
+# Returns 2 if more than one record of that name exists.
+# Returns 3 if it's unable to retrieve the record.
+# Returns the record_id hash otherwise.
 #
 
 module Puppet::Parser::Functions
