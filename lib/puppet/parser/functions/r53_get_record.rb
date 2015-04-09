@@ -18,7 +18,7 @@ module Puppet::Parser::Functions
       }
 
       if (r53_record.count == 0)
-        Puppet.send(:debug, "Unable to locate record #{name} of type #{type} in zone #{zone_id}."
+        Puppet.send(:debug, "Unable to locate record #{name} of type #{type} in zone #{zone_id}.")
         r53_record = 0
       elsif r53_record.count == 1
         Puppet.send(:debug, "Located record #{name} of type #{type} in zone #{zone_id}.")
