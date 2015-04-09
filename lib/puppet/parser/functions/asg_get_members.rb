@@ -12,7 +12,7 @@ module Puppet::Parser::Functions
 
     as = Aws::AutoScaling::Client.new(region:region)
     begin
-      resp = as.describe_auto_scaling_groups(auto_scaling_group_names: group_name)
+      resp = as.describe_auto_scaling_groups(auto_scaling_group_names: [group_name])
 
       instances = resp[:auto_scaling_groups][:instances]
 
