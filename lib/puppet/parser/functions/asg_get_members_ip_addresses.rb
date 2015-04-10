@@ -6,7 +6,7 @@
 #
 
 module Puppet::Parser::Functions
-  newfunction(:asg_get_members, :type => :rvalue) do |args|
+  newfunction(:asg_get_members_ip_addresses, :type => :rvalue) do |args|
     group_name = *args
     region = Facter.value(:aws_region)
 
