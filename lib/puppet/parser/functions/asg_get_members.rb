@@ -11,13 +11,14 @@ module Puppet::Parser::Functions
     region = Facter.value(:aws_region)
 
     as = Aws::AutoScaling::Client.new(region:region)
+    ec2 = Aws::EC2::Client.new(region:region)
     begin
       resp = as.describe_auto_scaling_groups(auto_scaling_group_names: group_name)
       instances = resp.auto_scaling_groups[0].instances
       instances.select!{|i| i.health_status == "Healthy"}
-      
-      
-      {healthy: instances.count, instances: instances.map{|i| i.instance_id}}
+      instances.map!{|i| Aws::EC2::Instance.new(i.instance_id, client: ec2) }
+
+      instances
     rescue => e
       Puppet.send(:err, "unable to retrieve asg members due to #{e}")
     end
