@@ -7,7 +7,7 @@
 
 module Puppet::Parser::Functions
   newfunction(:asg_get_members, :type => :rvalue) do |args|
-    group_name = args[0]
+    group_name = *args
     region = Facter.value(:aws_region)
 
     as = Aws::AutoScaling::Client.new(region:region)
