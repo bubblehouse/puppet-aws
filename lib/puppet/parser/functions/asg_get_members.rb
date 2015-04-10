@@ -10,6 +10,8 @@ module Puppet::Parser::Functions
     group_name = args[0]
     region = Facter.value(:aws_region)
 
+    Puppet.send(:notice, "asg_get_members received ${group_name}")
+
     as = Aws::AutoScaling::Client.new(region:region)
     begin
       resp = as.describe_auto_scaling_groups(auto_scaling_group_names: [group_name])
