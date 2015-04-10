@@ -10,18 +10,14 @@ module Puppet::Parser::Functions
     group_name = args[0]
     region = Facter.value(:aws_region)
 
-    Puppet.send(:notice, "asg_get_members received ${group_name}")
-
     as = Aws::AutoScaling::Client.new(region:region)
     begin
       resp = as.describe_auto_scaling_groups(auto_scaling_group_names: [group_name])
-
-      instances = resp[:auto_scaling_groups][:instances]
-
-      instances.select!{|i| i[:health_status] == "Healthy"}
+      instances = resp.auto_scaling_groups[0].instances
+      instances.select!{|i| i.health_status == "Healthy"}
       
       
-      {healthy: instances.count, instances: instances.map{|i| i[:instance_id]}}
+      {healthy: instances.count, instances: instances.map{|i| i.instance_id}}
     rescue => e
       Puppet.send(:err, "unable to retrieve asg members due to #{e}")
     end
