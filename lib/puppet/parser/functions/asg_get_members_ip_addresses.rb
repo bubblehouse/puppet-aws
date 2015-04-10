@@ -16,7 +16,7 @@ module Puppet::Parser::Functions
       resp = as.describe_auto_scaling_groups(auto_scaling_group_names: group_name)
       instances = resp.auto_scaling_groups[0].instances
       instances.select!{|i| i.health_status == "Healthy"}
-      instances.map!{|i| Aws::EC2::Instance.new(i.instance_id, client: ec2) }
+      instances.map!{|i| Aws::EC2::Instance.new(i.instance_id, client: ec2) }.private_ip_address
 
       instances
     rescue => e
