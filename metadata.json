@@ -9,22 +9,21 @@
   "issues_url": "https://github.com/bubblehouse/puppet-aws/issues",
   "dependencies": [{
     "name": "puppetlabs/stdlib",
-    "version_requirement": ">=2.2.1"
+    "version_requirement": "4.6.0"
   }, {
     "name": "nanliu/staging",
-    "version_requirement": ">=1.0.2"
+    "version_requirement": "1.0.3"
   }, {
     "name": "theforeman/foreman",
-    "version_requirement": ">=2.3.1"
+    "version_requirement": "3.0.2"
   }, {
     "name": "theforeman/foreman_proxy",
-    "version_requirement": ">=2.1.0"
+    "version_requirement": "2.2.1"
   }, {
     "name": "theforeman/puppet",
-    "version_requirement": ">=2.3.1"
+    "version_requirement": "3.0.0"
   }, {
     "name": "fiddyspence/sysctl",
-    "version_requirement": ">=1.1.0"
+    "version_requirement": "1.1.0"
   }]
 }
-
