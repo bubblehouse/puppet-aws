@@ -1,6 +1,6 @@
 {
   "name": "bubblehouse-aws",
-  "version": "0.1.1",
+  "version": "0.1.",
   "author": "Phil Christensen",
   "summary": "Bootstrap utilities for EC2 and CloudFormation",
   "license": "MIT",
@@ -10,6 +10,9 @@
   "dependencies": [{
     "name": "puppetlabs-stdlib",
     "version_range": ">= 2.2.1"
+  }, {
+    "name": "puppetlabs-apt",
+    "version_range": ">= 2.0.0"
   }, {
     "name": "nanliu-staging",
     "version_range": ">= 1.0.2"
