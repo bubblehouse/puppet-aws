@@ -39,6 +39,7 @@ class aws::bootstrap(
   $eip_allocation_id = $aws::bootstrap::params::eip_allocation_id,
   $deploy_key_s3_url = $aws::bootstrap::params::deploy_key_s3_url,
   $static_volume_size = $aws::bootstrap::params::static_volume_size,
+  $static_volume_mountpoint = $aws::bootstrap::params::static_volume_mountpoint,
   $static_volume_encryption = $aws::bootstrap::params::static_volume_encryption,
   $static_volume_tag = $aws::bootstrap::params::static_volume_tag,
   $puppetmaster = $aws::bootstrap::params::puppetmaster,

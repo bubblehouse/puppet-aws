@@ -51,15 +51,15 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
       exec { "mkfs":
         command => "/sbin/mkfs.ext4 /dev/xvdf",
         unless => "/sbin/blkid /dev/xvdf",
-        before => Mount["/media/static"]
+        before => Mount[$aws::bootstrap::static_volume_mountpoint]
       }
     }
     
-    file { "/media/static":
+    file { $aws::bootstrap::static_volume_mountpoint:
       ensure => directory
     }
     
-    mount { "/media/static":
+    mount { $aws::bootstrap::static_volume_mountpoint:
       ensure => mounted,
       atboot => yes,
       device => "/dev/xvdf",

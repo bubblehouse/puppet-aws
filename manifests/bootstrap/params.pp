@@ -11,6 +11,7 @@ class aws::bootstrap::params {
   $eip_allocation_id        = nil
   $deploy_key_s3_url        = nil
   $static_volume_size       = 0
+  $static_volume_mountpoint = "/media/static"
   $static_volume_encryption = false
   $static_volume_tag        = nil
   $puppetmaster             = false
