@@ -15,7 +15,7 @@
     "version_range": ">= 2.0.0"
   }, {
     "name": "nanliu-staging",
-    "version_range": ">= 1.0.2"
+    "version_range": ">= 1.0.3"
   }, {
     "name": "theforeman-foreman",
     "version_range": ">= 2.3.1"
