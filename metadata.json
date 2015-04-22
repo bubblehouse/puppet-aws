@@ -1,6 +1,6 @@
 {
   "name": "bubblehouse-aws",
-  "version": "0.1.",
+  "version": "0.1.1",
   "author": "Phil Christensen",
   "summary": "Bootstrap utilities for EC2 and CloudFormation",
   "license": "MIT",
