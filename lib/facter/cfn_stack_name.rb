@@ -18,7 +18,17 @@ Facter.add('cfn_stack_name') do
           values: ["aws:cloudformation:stack-name"],
         }]
       )
-      resp[:tags][0][:value]
+      if resp.tags.length == 0
+        if File.exist?('/var/lib/cloud/data/cloudformation-stack-name')
+          File.open('/var/lib/cloud/data/cloudformation-stack-name', 'r').read
+        else
+          raise "No tag found, no file at '/var/lib/cloud/data/cloudformation-stack-name'"
+        end
+      elsif resp.tags.length == 1
+        resp[:tags][0][:value]
+      else
+        raise "More than 2 tags matched the filter. Strictly speaking, this shouldn't happen"
+      end
     rescue Aws::EC2::Errors::ServiceError => e
       # rescues all errors returned by Amazon Elastic Compute Cloud
       Facter::Core::Logging.warn("Failure in cfn_stack_name fact: #{e}")
