@@ -139,8 +139,8 @@ class aws::bootstrap::install(
     source => "https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py"
   }
   
-  staging::deploy { "CloudWatchMonitoringScripts-v1.1.0.zip":
-    source => "http://ec2-downloads.s3.amazonaws.com/cloudwatch-samples/CloudWatchMonitoringScripts-v1.1.0.zip",
+  staging::deploy { "CloudWatchMonitoringScripts-1.2.1.zip":
+    source => "http://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.1.zip",
     target => "/usr/local",
     creates => "/usr/local/aws-scripts-mon"
   }
