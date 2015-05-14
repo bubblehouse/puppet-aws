@@ -12,6 +12,7 @@ class aws::foreman::install inherits aws::foreman {
   $certname = downcase($aws::bootstrap::instance_fqdn)
   
   class { '::foreman':
+    repo => '1.7',
     admin_password => $aws::foreman::admin_password,
     servername => $aws::bootstrap::instance_fqdn,
     environment => $aws::foreman::foreman_environment,
@@ -23,6 +24,7 @@ class aws::foreman::install inherits aws::foreman {
   }
   
   class { '::foreman_proxy':
+    repo => '1.7',
     trusted_hosts => [$aws::bootstrap::instance_fqdn],
     registered_name => $aws::bootstrap::instance_fqdn,
     registered_proxy_url => "https://${aws::bootstrap::instance_fqdn}:8443",
