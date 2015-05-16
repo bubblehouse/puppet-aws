@@ -47,10 +47,19 @@ class aws::bootstrap::install(
     }
   }
 
-  ensure_packages(["python-pip", "update-notifier-common", "ntp",
-      "unzip", "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
-    ensure => installed
-  })
+  case $osfamily {
+    'Debian': {
+      ensure_packages(["python-pip", "update-notifier-common", "ntp",
+          "unzip", "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
+        ensure => installed
+      })
+    }
+    'RedHat': {
+      ensure_packages(["perl-DateTime", "perl-Sys-Syslog", "perl-libwww-perl"], {
+        ensure => installed
+      })
+    }
+  }
   
   package { "awscli":
     ensure => latest,
