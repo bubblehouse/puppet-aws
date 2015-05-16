@@ -684,7 +684,7 @@
                         " - while [[ -f /var/lib/puppet/state/agent_catalog_run.lock ]]; do",
                         " -   sleep 10",
                         " - done",
-                        " - puppet agent --test"
+                        " - echo 'puppet agent --test'"
                     ]] }
                 }
             }

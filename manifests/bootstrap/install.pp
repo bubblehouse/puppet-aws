@@ -63,8 +63,7 @@ class aws::bootstrap::install(
   
   package { "awscli":
     ensure => latest,
-    provider => pip,
-    require => Package['python-pip']
+    provider => pip
   }
 
   if($aws::bootstrap::deploy_key_s3_url != nil){
