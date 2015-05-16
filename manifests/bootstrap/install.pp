@@ -9,6 +9,11 @@ class aws::bootstrap::install(
   
   ensure_packages(["unzip", "ntp"])
   
+  $ntp_service = $osfamily ? {
+    'Debian' => 'ntp',
+    'RedHat' => 'ntpd'
+  }
+  
   if($puppetmaster){
     exec { "puppetmaster-cert":
       command => "/usr/bin/puppet cert --generate --dns_alt_names localhost,${aws::bootstrap::puppetmaster_hostname},${aws::bootstrap::instance_fqdn} ${aws::bootstrap::instance_fqdn}",
@@ -140,7 +145,7 @@ class aws::bootstrap::install(
     creates => "/usr/local/aws-scripts-mon"
   }
   
-  service { "ntp":
+  service { $ntp_service:
     ensure => running,
     enable => true,
     require => Package['ntp']
