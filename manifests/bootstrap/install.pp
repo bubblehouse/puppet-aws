@@ -5,23 +5,8 @@ class aws::bootstrap::install(
 ) inherits aws::bootstrap {
   include aws::install::ec2netutils
   
-  if($osfamily == 'Debian'){
-    apt::source {
-      'puppetlabs-main':
-        location   => 'http://apt.puppetlabs.com/',
-        release => 'trusty',
-        repos => 'main',
-        key => '1054B7A24BD6EC30',
-        key_server => 'pgp.mit.edu';
-      'puppetlabs-deps':
-        location   => 'http://apt.puppetlabs.com/',
-        release => 'trusty',
-        repos => 'dependencies',
-        key => '1054B7A24BD6EC30',
-        key_server => 'pgp.mit.edu';
-    }
-  }
-
+  ensure_packages(["ntp"])
+  
   if($puppetmaster){
     exec { "puppetmaster-cert":
       command => "/usr/bin/puppet cert --generate --dns_alt_names localhost,${aws::bootstrap::puppetmaster_hostname},${aws::bootstrap::instance_fqdn} ${aws::bootstrap::instance_fqdn}",
@@ -46,10 +31,10 @@ class aws::bootstrap::install(
       agent_template => "aws/bootstrap/puppet.erb.conf",
     }
   }
-
+  
   case $osfamily {
     'Debian': {
-      ensure_packages(["python-pip", "update-notifier-common", "ntp",
+      ensure_packages(["python-pip", "update-notifier-common",
           "unzip", "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
         ensure => installed
       })
