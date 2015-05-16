@@ -5,19 +5,21 @@ class aws::bootstrap::install(
 ) inherits aws::bootstrap {
   include aws::install::ec2netutils
   
-  apt::source {
-    'puppetlabs-main':
-      location   => 'http://apt.puppetlabs.com/',
-      release => 'trusty',
-      repos => 'main',
-      key => '1054B7A24BD6EC30',
-      key_server => 'pgp.mit.edu';
-    'puppetlabs-deps':
-      location   => 'http://apt.puppetlabs.com/',
-      release => 'trusty',
-      repos => 'dependencies',
-      key => '1054B7A24BD6EC30',
-      key_server => 'pgp.mit.edu';
+  if($osfamily == 'Debian'){
+    apt::source {
+      'puppetlabs-main':
+        location   => 'http://apt.puppetlabs.com/',
+        release => 'trusty',
+        repos => 'main',
+        key => '1054B7A24BD6EC30',
+        key_server => 'pgp.mit.edu';
+      'puppetlabs-deps':
+        location   => 'http://apt.puppetlabs.com/',
+        release => 'trusty',
+        repos => 'dependencies',
+        key => '1054B7A24BD6EC30',
+        key_server => 'pgp.mit.edu';
+    }
   }
 
   if($puppetmaster){
