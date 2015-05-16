@@ -585,6 +585,7 @@
                         "    enabled: true",
                         "packages:",
                         " - puppet",
+                        " - ruby-devel",
                         " - rubygem-bundler",
                         " - make",
                         " - automake",
