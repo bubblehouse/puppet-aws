@@ -7,7 +7,7 @@ class aws::bootstrap::install(
     include aws::install::ec2netutils
   }
   
-  ensure_packages(["ntp"])
+  ensure_packages(["unzip", "ntp"])
   
   if($puppetmaster){
     exec { "puppetmaster-cert":
@@ -37,7 +37,7 @@ class aws::bootstrap::install(
   case $osfamily {
     'Debian': {
       ensure_packages(["python-pip", "update-notifier-common",
-          "unzip", "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
+          "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
         ensure => installed
       })
       
