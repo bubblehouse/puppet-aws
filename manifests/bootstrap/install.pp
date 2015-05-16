@@ -3,7 +3,9 @@
 class aws::bootstrap::install(
   $puppetmaster = false
 ) inherits aws::bootstrap {
-  include aws::install::ec2netutils
+  if($operatingsystem == 'Ubuntu'){
+    include aws::install::ec2netutils
+  }
   
   ensure_packages(["ntp"])
   
