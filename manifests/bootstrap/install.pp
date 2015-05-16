@@ -57,6 +57,11 @@ class aws::bootstrap::install(
         ensure => installed
       })
       
+      file { "/usr/bin/pip-python":
+        ensure => link,
+        target => "/usr/bin/pip"
+      }->
+      
       package { "awscli":
         ensure => latest,
         provider => pip
