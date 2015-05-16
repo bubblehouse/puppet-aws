@@ -53,19 +53,25 @@ class aws::bootstrap::install(
           "unzip", "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
         ensure => installed
       })
+      
+      package { "awscli":
+        ensure => latest,
+        provider => pip,
+        require => Package['python-pip']
+      }
     }
     'RedHat': {
       ensure_packages(["perl-DateTime", "perl-Sys-Syslog", "perl-libwww-perl"], {
         ensure => installed
       })
+      
+      package { "awscli":
+        ensure => latest,
+        provider => pip
+      }
     }
   }
   
-  package { "awscli":
-    ensure => latest,
-    provider => pip
-  }
-
   if($aws::bootstrap::deploy_key_s3_url != nil){
     exec { "deploy-key":
       command => "/usr/local/bin/aws s3 cp ${aws::bootstrap::deploy_key_s3_url} /root/.ssh/id_rsa",
