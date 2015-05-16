@@ -62,25 +62,33 @@ class aws::bootstrap::config inherits aws::bootstrap {
     enable => true
   }  
   
-  if($osfamily == 'Debian'){
-    exec { "configure-hostname":
-      command => "/bin/hostname -b ${aws::bootstrap::instance_fqdn}",
-      unless => "/usr/bin/test \"${aws::bootstrap::instance_fqdn}\" == \"$(/bin/hostname -f)\""
-    }->
-  
-    augeas { "/etc/hosts":
-      context   => '/files/etc/hosts',
-      changes   => [
-          "set 1/canonical ${aws::bootstrap::instance_fqdn}",
-          "set 1/alias[1] ${aws::bootstrap::instance_name}"
-        ]
-    }->
-  
-    file {
-      ['/etc/hostname', '/etc/mailname']:
-        ensure => file,
-        content => "${aws::bootstrap::instance_fqdn}"
+  exec { "configure-hostname":
+    command => "/bin/hostname -b ${aws::bootstrap::instance_fqdn}",
+    unless => "/usr/bin/test \"${aws::bootstrap::instance_fqdn}\" == \"$(/bin/hostname -f)\""
+  }
+
+  case $osfamily {
+    'Debian' : {
+      augeas { "/etc/hosts":
+        context   => '/files/etc/hosts',
+        changes   => [
+            "set 1/canonical ${aws::bootstrap::instance_fqdn}",
+            "set 1/alias[1] ${aws::bootstrap::instance_name}"
+          ]
+      }
     }
+    'RedHat': {
+      file_line { "/etc/hosts":
+        path => "/etc/hosts",
+        line => "127.0.1.1 ${aws::bootstrap::instance_fqdn} ${aws::bootstrap::instance_name}"
+      }
+    }
+  }
+
+  file {
+    ['/etc/hostname', '/etc/mailname']:
+      ensure => file,
+      content => "${aws::bootstrap::instance_fqdn}"
   }
   
   file_line { "/etc/environment":
