@@ -77,7 +77,7 @@ module Puppet::Parser::Functions
 
           # Loop through original TXT record and check if they all still exist.
           txt_record.first.resource_records.each{|record|
-            region, instance_id, hostname = *record.value.split(',')
+            region, instance_id, hostname = *record.value.split(',').slice(2..-2)
 
             # If it still exists, keep it in the new TXT record.
             if Aws::EC2::Instance.new(id: instance_id, region: region).exists?
