@@ -26,7 +26,7 @@ module Puppet::Parser::Functions
         change_batch_template[:change_batch][:changes] = []
 
         txt_record = function_r53_get_record([zone.id, base, "TXT"])
-        euppet.send(:debug, "r53_get_record returned #{txt_record}")
+        Puppet.send(:debug, "r53_get_record returned #{txt_record}")
 
         if txt_record.class == Integer
           if txt_record == 0
