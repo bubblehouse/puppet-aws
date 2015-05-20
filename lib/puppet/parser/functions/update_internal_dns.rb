@@ -47,6 +47,7 @@ module Puppet::Parser::Functions
           end
 
           if txt_record.class == Hash
+              Puppet.send(:debug, "Retrieved TXT record: #{txt_record.to_s}")
           end
 
 #         ec2_conns = {}
