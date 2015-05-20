@@ -46,7 +46,12 @@ module Puppet::Parser::Functions
         if txt_record.class == Hash
             Puppet.send(:debug, "Retrieved TXT record: #{txt_record.to_s}")
         end
-
+      end
+    rescue => e 
+      Puppet.send(:warn, e)
+    end
+  end
+end
 #         ec2_conns = {}
 #         ip_map = []
 
@@ -120,10 +125,3 @@ module Puppet::Parser::Functions
 #           r53.associate_vpc_with_hosted_zone(hosted_zone_id: zone_id, vpc: {vpc_region: region, vpc_id: vpc_id}, comment: "Associated by puppet-aws on #{Time.now}")
 #         else
 #           Puppet.send(:notice, "Route53 zone #{r53_zone} is already associated with vpc #{vpc_id}.")
-#         end
-      rescue => e 
-        Puppet.send(:warn, e)
-      end
-    end
-  end
-end
