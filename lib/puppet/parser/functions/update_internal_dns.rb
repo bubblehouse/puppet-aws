@@ -76,7 +76,7 @@ module Puppet::Parser::Functions
           new_txt[:resource_record_set][:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')}\""})
 
           # Loop through original TXT record and check if they all still exist.
-          txt_record.resource_records.each{|record|
+          txt_record.first.resource_records.each{|record|
             region, instance_id, hostname = *record.split(',')
 
             # If it still exists, keep it in the new TXT record.
