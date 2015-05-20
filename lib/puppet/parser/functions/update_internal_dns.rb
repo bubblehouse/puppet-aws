@@ -19,11 +19,21 @@ module Puppet::Parser::Functions
         zone = r53.get_hosted_zone(id: zone_id).hosted_zone
         Puppet.send(:debug, "r53_get_hosted_zone returned #{zone}")
 
-        change_batch_template = {}
-        change_batch_template[:hosted_zone_id] = zone.id
-        change_batch_template[:change_batch] = {}
-        change_batch_template[:change_batch][:comment] = "Updated by puppet-aws on #{hostname} at #{Time.now()}."
-        change_batch_template[:change_batch][:changes] = []
+        change_batch = {
+          :hosted_zone_id => zone.id,
+          :change_batch => {
+            :comment => "Updated by puppet-aws on #{hostname} at #{Time.now()}.",
+            :changes => []
+          }
+        }
+
+        change_template = {
+          :action => "CREATE",
+          :resource_record_set => {
+            :ttl => 600,
+            :resource_records => []
+          }
+        }
 
         txt_record = function_r53_get_record([zone.id, base, "TXT"])
         Puppet.send(:debug, "r53_get_record returned #{txt_record}")
@@ -32,25 +42,63 @@ module Puppet::Parser::Functions
         if txt_record.class == Fixnum
           if txt_record == 0
             Puppet.send(:notice, "No TXT exists for #{base}.#{r53_zone}, creating it.")
-            create_txt_record = change_batch_template.dup
-            create_txt_record[:change_batch][:changes][0] = {}
-            create_txt_record[:change_batch][:changes][0][:action] = "UPSERT"
-            create_txt_record[:change_batch][:changes][0][:resource_record_set] = {}
-            create_txt_record[:change_batch][:changes][0][:resource_record_set][:name] = "#{base}.#{zone.name}"
-            create_txt_record[:change_batch][:changes][0][:resource_record_set][:type] = "TXT"
-            create_txt_record[:change_batch][:changes][0][:resource_record_set][:ttl] = "600"
-            create_txt_record[:change_batch][:changes][0][:resource_record_set][:resource_records] = []
-            create_txt_record[:change_batch][:changes][0][:resource_record_set][:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')}\""})
-            Puppet.send(:debug, "Update: #{create_txt_record}")
-            resp = r53.change_resource_record_sets(create_txt_record)
-            Puppet.send(:debug, "Response: #{resp[:change_info].to_hash.to_s}")
-            sleep(5)
-            txt_record = function_r53_get_record([zone_id, base, "TXT"])
-          end
-        end
+            change = change_template.dup
+            change[:name] = "#{base}.#{zone.name}"
+            change[:type] = "TXT"
+            change[:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')},#{Facter.value('hostname')}\""})
+            change_batch[:changes].push(change)
 
-        if txt_record.class == Hash
-            Puppet.send(:debug, "Retrieved TXT record: #{txt_record.to_s}")
+            change = change_template.dup
+            change[:name] = "#{base}.#{zone.name}"
+            change[:type] = "A"
+            change[:resource_records].push({value: "#{Facter.Value('ip_address')}" })
+            change_batch[:changes].push(change)
+          end
+        elsif txt_record.class == Array
+          Puppet.send(:debug, "Retrieved TXT record: #{txt_record.first.to_s}")
+
+          # Delete the old TXT record
+          delete_original_txt = txt_record.to_hash
+          delete_original_txt[:action] = "DELETE"
+          change_batch[:changes].push(delete_original_txt)
+
+          # Create the A record
+          change = change_template.dup
+          change[:name] = "#{base}.#{zone.name}"
+          change[:type] = "A"
+          change[:resource_records].push({value: "#{Facter.Value('ip_address')}" })
+          change_batch[:changes].push(change)
+
+          # Start compiling the new TXT record
+          new_txt = change_template.dup
+          new_txt[:name] = "#{base}.#{zone.name}"
+          new_txt[:type] = "TXT"
+          new_txt[:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')}\""})
+
+          # Loop through original TXT record and check if they all still exist.
+          txt_record.resource_records.each{|record|
+            region, instance_id, hostname = *record.split(',')
+
+            # If it still exists, keep it in the new TXT record.
+            if Aws::EC2::Instance.new(id: instance_id, region: region).exists?
+              change[:resource_records].push({value: "\"#{region},#{instance_id}')}\""})
+
+            # If it doesn't, delete the associated A record and leave it out of the new TXT
+            else
+              check_for_a_record = function_r53_get_record([zone.id, hostname, "A"])
+              if check_for_a_record.class == Array
+                terminated_instance = check_for_a_record.first
+                terminated_instance[:action] = "DELETE"
+                change_batch[:changes].push(terminated_instance)
+              end
+            end
+          }
+
+          change_batch[:changes].push(change)
+
+          Puppet.send(:debug, "Compiled change request: #{change_batch}")
+          r53.change_resource_record_sets(change_batch)
+
         end
       end
     rescue => e 
