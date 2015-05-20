@@ -100,8 +100,8 @@ module Puppet::Parser::Functions
         Puppet.send(:debug, "Compiled change request: #{change_batch}")
         r53.change_resource_record_sets(change_batch)
       end
-    rescue => e 
-      Puppet.send(:warn, e)
+#    rescue => e 
+#      Puppet.send(:warn, e)
     end
   end
 end
