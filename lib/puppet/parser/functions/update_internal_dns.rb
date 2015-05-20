@@ -16,37 +16,36 @@ module Puppet::Parser::Functions
         zone_id = nil
       else
         Puppet.send(:notice, "Located Route53 Zone with DNS name of #{r53_zone} and id #{zone_id}.")
-        begin
-          zone = r53.get_hosted_zone(id: zone_id).to_hash
+        zone = r53.get_hosted_zone(id: zone_id).to_hash
 
-          change_batch_template = {}
-          change_batch_template[:hosted_zone_id] = zone_id
-          change_batch_template[:change_batch] = {}
-          change_batch_template[:change_batch][:comment] = "Updated by puppet-aws on #{hostname} at #{Time.now()}."
-          change_batch_template[:change_batch][:changes] = []
+        change_batch_template = {}
+        change_batch_template[:hosted_zone_id] = zone_id
+        change_batch_template[:change_batch] = {}
+        change_batch_template[:change_batch][:comment] = "Updated by puppet-aws on #{hostname} at #{Time.now()}."
+        change_batch_template[:change_batch][:changes] = []
 
-          txt_record = function_r53_get_record([zone_id, base, "TXT"])
+        txt_record = function_r53_get_record([zone_id, base, "TXT"])
 
-          if txt_record.class == Integer
-            if txt_record == 0
-              Puppet.send(:notice, "No TXT exists for #{base}.#{r53_zone}, creating it.")
-              create_txt_record = change_batch_template.dup
-              create_txt_record[:change_batch][:changes][0][:action] = "UPSERT"
-              create_txt_record[:change_batch][:changes][0][:resource_record_set] = {}
-              create_txt_record[:change_batch][:changes][0][:resource_record_set][:name] = "#{base}.#{r53_zone}"
-              create_txt_record[:change_batch][:changes][0][:resource_record_set][:type] = "TXT"
-              create_txt_record[:change_batch][:changes][0][:resource_record_set][:resource_records] = []
-              create_txt_record[:change_batch][:changes][0][:resource_record_set][:resource_records].push({value: "#{region},#{Facter.value('ec2_instanceid')}"})
-              resp = r53.change_resource_record_sets(create_txt_record)
-              Puppet.send(:debug, "Response: #{resp[:change_info].to_hash.to_s}")
-              sleep(5)
-              txt_record = function_r53_get_record([zone_id, base, "TXT"])
-            end
+        if txt_record.class == Integer
+          if txt_record == 0
+            Puppet.send(:notice, "No TXT exists for #{base}.#{r53_zone}, creating it.")
+            create_txt_record = change_batch_template.dup
+            create_txt_record[:change_batch][:changes][0][:action] = "UPSERT"
+            create_txt_record[:change_batch][:changes][0][:resource_record_set] = {}
+            create_txt_record[:change_batch][:changes][0][:resource_record_set][:name] = "#{base}.#{r53_zone}"
+            create_txt_record[:change_batch][:changes][0][:resource_record_set][:type] = "TXT"
+            create_txt_record[:change_batch][:changes][0][:resource_record_set][:resource_records] = []
+            create_txt_record[:change_batch][:changes][0][:resource_record_set][:resource_records].push({value: "#{region},#{Facter.value('ec2_instanceid')}"})
+            resp = r53.change_resource_record_sets(create_txt_record)
+            Puppet.send(:debug, "Response: #{resp[:change_info].to_hash.to_s}")
+            sleep(5)
+            txt_record = function_r53_get_record([zone_id, base, "TXT"])
           end
+        end
 
-          if txt_record.class == Hash
-              Puppet.send(:debug, "Retrieved TXT record: #{txt_record.to_s}")
-          end
+        if txt_record.class == Hash
+            Puppet.send(:debug, "Retrieved TXT record: #{txt_record.to_s}")
+        end
 
 #         ec2_conns = {}
 #         ip_map = []
@@ -122,9 +121,8 @@ module Puppet::Parser::Functions
 #         else
 #           Puppet.send(:notice, "Route53 zone #{r53_zone} is already associated with vpc #{vpc_id}.")
 #         end
-        rescue => e 
-          Puppet.send(:warn, e)
-        end
+      rescue => e 
+        Puppet.send(:warn, e)
       end
     end
   end
