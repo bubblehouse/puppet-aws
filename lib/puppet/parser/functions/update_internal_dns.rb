@@ -36,7 +36,7 @@ module Puppet::Parser::Functions
             create_txt_record[:change_batch][:changes][0] = {}
             create_txt_record[:change_batch][:changes][0][:action] = "UPSERT"
             create_txt_record[:change_batch][:changes][0][:resource_record_set] = {}
-            create_txt_record[:change_batch][:changes][0][:resource_record_set][:name] = "#{base}.#{r53_zone}"
+            create_txt_record[:change_batch][:changes][0][:resource_record_set][:name] = "#{base}"
             create_txt_record[:change_batch][:changes][0][:resource_record_set][:type] = "TXT"
             create_txt_record[:change_batch][:changes][0][:resource_record_set][:resource_records] = []
             create_txt_record[:change_batch][:changes][0][:resource_record_set][:resource_records].push({value: "#{region},#{Facter.value('ec2_instanceid')}"})
