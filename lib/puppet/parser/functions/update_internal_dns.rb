@@ -16,11 +16,11 @@ module Puppet::Parser::Functions
         zone_id = nil
       else
         Puppet.send(:notice, "Located Route53 Zone with DNS name of #{r53_zone} and id #{zone_id}.")
-        zone = r53.get_hosted_zone(id: zone_id).to_hash
+        zone = r53.get_hosted_zone(id: zone_id)
         Puppet.send(:debug, "r53_get_hosted_zone returned #{zone}")
 
         change_batch_template = {}
-        change_batch_template[:hosted_zone_id] = zone_id
+        change_batch_template[:hosted_zone_id] = zone.id
         change_batch_template[:change_batch] = {}
         change_batch_template[:change_batch][:comment] = "Updated by puppet-aws on #{hostname} at #{Time.now()}."
         change_batch_template[:change_batch][:changes] = []
