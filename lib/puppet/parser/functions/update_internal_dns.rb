@@ -51,7 +51,7 @@ module Puppet::Parser::Functions
             change = change_template.dup
             change[:resource_record_set][:name] = "#{base}.#{zone.name}"
             change[:resource_record_set][:type] = "A"
-            change[:resource_record_set][:resource_records].push({value: "#{Facter.value('ip_address')}" })
+            change[:resource_record_set][:resource_records].push({value: "#{Facter.value('ipaddress')}" })
             change_batch[:change_batch][:changes].push(change)
           end
         elsif txt_record.class == Array
