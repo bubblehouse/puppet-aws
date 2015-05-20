@@ -58,7 +58,7 @@ module Puppet::Parser::Functions
           Puppet.send(:debug, "Retrieved TXT record: #{txt_record.first.to_s}")
 
           # Delete the old TXT record
-          delete_original_txt = txt_record.to_hash
+          delete_original_txt = txt_record.first.to_hash
           delete_original_txt[:action] = "DELETE"
           change_batch[:changes].push(delete_original_txt)
 
