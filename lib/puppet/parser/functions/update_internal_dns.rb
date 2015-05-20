@@ -16,9 +16,6 @@ module Puppet::Parser::Functions
         zone_id = nil
       else
         Puppet.send(:notice, "Located Route53 Zone with DNS name of #{r53_zone} and id #{zone_id}.")
-      end
-
-      if zone_id
         begin
           zone = r53.get_hosted_zone(id: zone_id).to_hash
 
