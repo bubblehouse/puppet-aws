@@ -42,13 +42,13 @@ module Puppet::Parser::Functions
         if txt_record.class == Fixnum
           if txt_record == 0
             Puppet.send(:notice, "No TXT exists for #{base}.#{r53_zone}, creating it.")
-            change = change_template.clone
+            change = change_template
             change[:resource_record_set][:name] = "#{base}.#{zone.name}"
             change[:resource_record_set][:type] = "TXT"
             change[:resource_record_set][:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')},#{Facter.value('hostname')}\""})
             change_batch[:change_batch][:changes].push(change)
 
-            change = change_template.clone
+            change = change_template
             change[:resource_record_set][:name] = "#{base}.#{zone.name}"
             change[:resource_record_set][:type] = "A"
             change[:resource_record_set][:resource_records].push({value: "#{Facter.value('ipaddress')}" })
@@ -63,14 +63,14 @@ module Puppet::Parser::Functions
           change_batch[:change_batch][:changes].push(delete_original_txt)
 
           # Create the A record
-          change = change_template.clone
+          change = change_template
           change[:resource_record_set][:name] = "#{base}.#{zone.name}"
           change[:resource_record_set][:type] = "A"
           change[:resource_record_set][:resource_records].push({value: "#{Facter.value('ipaddress')}" })
           change_batch[:change_batch][:changes].push(change)
 
           # Start compiling the new TXT record
-          new_txt = change_template.clone
+          new_txt = change_template
           new_txt[:name] = "#{base}.#{zone.name}"
           new_txt[:type] = "TXT"
           new_txt[:resource_record_set][:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')}\""})
