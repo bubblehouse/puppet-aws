@@ -10,13 +10,12 @@ module Puppet::Parser::Functions
 
       if (zone_id == 0)
         Puppet.send(:notice, "No zones with the DNS name of #{r53_zone}, taking no action.")
-      elsif zone_id == 1
-        zone_id = zones[0][:id]
-        Puppet.send(:notice, "Located Route53 Zone with DNS name of #{r53_zone} and id #{zone_id}.")
-      else
+      elsif zone_id == 2
         Puppet.send(:notice, "More than one zone with the DNS name of #{r53_zone}, taking no action.")
         Puppet.send(:debug, "r53_get_zone_id returned #{zone_id}")
         zone_id = nil
+      else
+        Puppet.send(:notice, "Located Route53 Zone with DNS name of #{r53_zone} and id #{zone_id}.")
       end
 
       if zone_id
