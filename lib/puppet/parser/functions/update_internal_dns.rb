@@ -40,6 +40,7 @@ module Puppet::Parser::Functions
             create_txt_record[:change_batch][:changes][0][:resource_record_set][:type] = "TXT"
             create_txt_record[:change_batch][:changes][0][:resource_record_set][:resource_records] = []
             create_txt_record[:change_batch][:changes][0][:resource_record_set][:resource_records].push({value: "#{region},#{Facter.value('ec2_instanceid')}"})
+            Puppet.send(:debug, "Update: #{create_txt_record}")
             resp = r53.change_resource_record_sets(create_txt_record)
             Puppet.send(:debug, "Response: #{resp[:change_info].to_hash.to_s}")
             sleep(5)
