@@ -27,6 +27,7 @@ module Puppet::Parser::Functions
 
         txt_record = function_r53_get_record([zone.id, base, "TXT"])
         Puppet.send(:debug, "r53_get_record returned #{txt_record}")
+        Puppet.send(:debug, "r53_get_record returned #{txt_record.class}")
 
         if txt_record.class == Integer
           if txt_record == 0
