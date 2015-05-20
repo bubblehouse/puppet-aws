@@ -17,6 +17,7 @@ module Puppet::Parser::Functions
       else
         Puppet.send(:notice, "Located Route53 Zone with DNS name of #{r53_zone} and id #{zone_id}.")
         zone = r53.get_hosted_zone(id: zone_id).to_hash
+        Puppet.send(:debug, "r53_get_hosted_zone returned #{zone}")
 
         change_batch_template = {}
         change_batch_template[:hosted_zone_id] = zone_id
