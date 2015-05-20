@@ -43,14 +43,14 @@ module Puppet::Parser::Functions
           if txt_record == 0
             Puppet.send(:notice, "No TXT exists for #{base}.#{r53_zone}, creating it.")
             change = change_template.dup
-            change[:name] = "#{base}.#{zone.name}"
-            change[:type] = "TXT"
+            change[:resource_record_set][:name] = "#{base}.#{zone.name}"
+            change[:resource_record_set][:type] = "TXT"
             change[:resource_record_set][:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')},#{Facter.value('hostname')}\""})
             change_batch[:change_batch][:changes].push(change)
 
             change = change_template.dup
-            change[:name] = "#{base}.#{zone.name}"
-            change[:type] = "A"
+            change[:resource_record_set][:name] = "#{base}.#{zone.name}"
+            change[:resource_record_set][:type] = "A"
             change[:resource_record_set][:resource_records].push({value: "#{Facter.value('ip_address')}" })
             change_batch[:change_batch][:changes].push(change)
           end
@@ -64,8 +64,8 @@ module Puppet::Parser::Functions
 
           # Create the A record
           change = change_template.dup
-          change[:name] = "#{base}.#{zone.name}"
-          change[:type] = "A"
+          change[:resource_record_set][:name] = "#{base}.#{zone.name}"
+          change[:resource_record_set][:type] = "A"
           change[:resource_record_set][:resource_records].push({value: "#{Facter.value('ip_address')}" })
           change_batch[:change_batch][:changes].push(change)
 
