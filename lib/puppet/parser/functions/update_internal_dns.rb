@@ -33,6 +33,7 @@ module Puppet::Parser::Functions
           if txt_record == 0
             Puppet.send(:notice, "No TXT exists for #{base}.#{r53_zone}, creating it.")
             create_txt_record = change_batch_template.dup
+            create_txt_record[:change_batch][:changes][0] = {}
             create_txt_record[:change_batch][:changes][0][:action] = "UPSERT"
             create_txt_record[:change_batch][:changes][0][:resource_record_set] = {}
             create_txt_record[:change_batch][:changes][0][:resource_record_set][:name] = "#{base}.#{r53_zone}"
