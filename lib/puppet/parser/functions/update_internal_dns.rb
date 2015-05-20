@@ -29,7 +29,7 @@ module Puppet::Parser::Functions
         Puppet.send(:debug, "r53_get_record returned #{txt_record}")
         Puppet.send(:debug, "r53_get_record returned #{txt_record.class}")
 
-        if txt_record.class == Integer
+        if txt_record.class == Fixnum
           if txt_record == 0
             Puppet.send(:notice, "No TXT exists for #{base}.#{r53_zone}, creating it.")
             create_txt_record = change_batch_template.dup
