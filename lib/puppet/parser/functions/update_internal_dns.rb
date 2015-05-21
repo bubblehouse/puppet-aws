@@ -67,8 +67,9 @@ module Puppet::Parser::Functions
           Puppet.send(:debug, "Retrieved TXT record: #{txt_record.to_s}")
 
           # Delete the old TXT record
-          delete_original_txt = txt_record.to_hash
+          delete_original_txt = Marshal.load(change_template)
           delete_original_txt[:action] = "DELETE"
+          delete_original_txt[:resource_record_set] = Marshal.load(Marshal.dump(txt_record))
           change_batch[:change_batch][:changes].push(delete_original_txt)
 
           # Check for the current A record
@@ -83,8 +84,7 @@ module Puppet::Parser::Functions
             # Is the current A record still correct?
             if a_record[:resource_record_set][:resource_records].first.value != Facter.value('ipaddress')
               # If not, delete it and create a new one.
-              delete_original_a = a_record.to_hash
-              delete_original_a[:result] = nil
+              delete_original_a = Marshal.load(Marshal.dump(a_record))
               delete_original_a[:action] = "DELETE"
               change_batch[:change_batch][:changes].push(delete_original_a)
 
