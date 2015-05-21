@@ -102,7 +102,7 @@ module Puppet::Parser::Functions
           new_txt[:resource_record_set][:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')}\""})
 
           # Loop through original TXT record and check if they all still exist.
-          txt_record[:resource_records].each{|record|
+          txt_record[:record][:resource_records].each{|record|
             Puppet.send(:debug, "Processing record: #{record}")
             region, instance_id, cname = *record[:value].slice(1..-2).split(',')
             Puppet.send(:debug, "Verifying existing of #{instance_id} - #{cname} in #{region}.")
