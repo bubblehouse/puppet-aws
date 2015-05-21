@@ -115,22 +115,22 @@ module Puppet::Parser::Functions
             else
               check_for_a_record = function_r53_get_record([zone.id, cname, "A"])
               if check_for_a_record[:result] == 0
-                terminated_instance = check_for_a_record[:record]
+                terminated_instance = Marshal.load(Marshal.dump(check_for_a_record[:record]))
                 terminated_instance[:action] = "DELETE"
                 change_batch[:change_batch][:changes].push(terminated_instance)
               end
 
-              check_for_cname_record = function_r53_get_record([zone.id, cname, "CNAME"])
-              if check_for_cname_record[:result] == 0
-                terminated_instance = Marshal.load(Marshal.dump(check_for_cname_record[:record]))
-                terminated_instance[:action] = "DELETE"
-                change_batch[:change_batch][:changes].push(terminated_instance)
-              end
+              #check_for_cname_record = function_r53_get_record([zone.id, cname, "CNAME"])
+              #if check_for_cname_record[:result] == 0
+              #  terminated_instance = Marshal.load(Marshal.dump(check_for_cname_record[:record]))
+              #  terminated_instance[:action] = "DELETE"
+              #  change_batch[:change_batch][:changes].push(terminated_instance)
+              #end
 
             end
           }
 
-          change_batch[:change_batch][:changes].push(change)
+          change_batch[:change_batch][:changes].push(new_txt)
 
         end
         Puppet.send(:debug, "Compiled change request: #{change_batch}")
