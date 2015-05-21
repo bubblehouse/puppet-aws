@@ -103,6 +103,7 @@ module Puppet::Parser::Functions
 
           # Loop through original TXT record and check if they all still exist.
           txt_record[:resource_records].each{|record|
+            Puppet.send(:debug, "Processing record: #{record}")
             region, instance_id, cname = *record[:value].split(',').slice(2..-2)
             Puppet.send(:debug, "Verifying existing of #{instance_id} - #{cname} in #{region}.")
 
