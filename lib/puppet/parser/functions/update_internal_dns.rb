@@ -25,16 +25,6 @@ module Puppet::Parser::Functions
           }
         }
 
-        def change_template
-          {
-            :action => "CREATE",
-            :resource_record_set => {
-              :ttl => 600,
-              :resource_records => []
-            }
-          }
-        end
-
         txt_record   = function_r53_get_record([zone.id, base, "TXT"])
         a_record     = function_r53_get_record([zone.id, hostname, "A"])
         cname_record = function_r53_get_record([zone.id, base, "CNAME"])
@@ -45,20 +35,20 @@ module Puppet::Parser::Functions
 
         if txt_record[:result] == 1
             Puppet.send(:notice, "No TXT exists for #{base}.#{r53_zone}, creating it.")
-            change = change_template()
+            change = {action: "CREATE", resource_record_set: {ttl:600, :resource_records => []}}
             change[:resource_record_set][:name] = "#{base}.#{zone.name}"
             change[:resource_record_set][:type] = "TXT"
             change[:resource_record_set][:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')},#{Facter.value('hostname')}\""})
             change_batch[:change_batch][:changes].push(change)
 
-            change = change_template()
+            change = {action: "CREATE", resource_record_set: {ttl:600, :resource_records => []}}
             change[:resource_record_set][:name] = "#{hostname}.#{zone.name}"
             change[:resource_record_set][:type] = "A"
             change[:resource_record_set][:resource_records].push({value: "#{Facter.value('ipaddress')}" })
             change_batch[:change_batch][:changes].push(change)
 
             if hostname != base
-              change = change_template()
+              change = {action: "CREATE", resource_record_set: {ttl:600, :resource_records => []}}
               change[:resource_record_set][:name] = "#{base}.#{zone.name}"
               change[:resource_record_set][:type] = "CNAME"
               change[:resource_record_set][:resource_records].push({value: "#{hostname}.#{zone.name}" })
@@ -69,15 +59,13 @@ module Puppet::Parser::Functions
           Puppet.send(:debug, "Retrieved TXT record: #{txt_record.to_s}")
 
           # Delete the old TXT record
-          delete_original_txt = change_template()
-          delete_original_txt[:action] = "DELETE"
-          delete_original_txt[:resource_record_set] = Marshal.load(Marshal.dump(txt_record[:record]))
+          delete_original_txt = {action: "DELETE", resource_record_set: Marshal.load(Marshal.dump(txt_record[:record]))}
           change_batch[:change_batch][:changes].push(delete_original_txt)
 
           # Check for the current A record
           if a_record[:result] == 1
             # Create the A record
-            change = change_template()
+            change = {action: "CREATE", resource_record_set: {ttl:600, :resource_records => []}}
             change[:resource_record_set][:name] = "#{hostname}.#{zone.name}"
             change[:resource_record_set][:type] = "A"
             change[:resource_record_set][:resource_records].push({value: "#{Facter.value('ipaddress')}" })
@@ -86,8 +74,7 @@ module Puppet::Parser::Functions
             # Is the current A record still correct?
             if a_record[:resource_record_set][:resource_records].first.value != Facter.value('ipaddress')
               # If not, delete it and create a new one.
-              delete_original_a = Marshal.load(Marshal.dump(a_record[:record]))
-              delete_original_a[:action] = "DELETE"
+              delete_original_a = {action: "DELETE", resource_record_set: Marshal.load(Marshal.dump(a_record[:record]))}
               change_batch[:change_batch][:changes].push(delete_original_a)
 
               new_a = a_record.to_hash
@@ -98,7 +85,7 @@ module Puppet::Parser::Functions
           end
 
           # Start compiling the new TXT record
-          new_txt = change_template()
+          new_txt = {action: "CREATE", resource_record_set: {ttl:600, :resource_records => []}}
           new_txt[:resource_record_set][:name] = "#{base}.#{zone.name}"
           new_txt[:resource_record_set][:type] = "TXT"
           new_txt[:resource_record_set][:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')}\""})
@@ -117,8 +104,7 @@ module Puppet::Parser::Functions
             else
               check_for_a_record = function_r53_get_record([zone.id, cname, "A"])
               if check_for_a_record[:result] == 0
-                terminated_instance = Marshal.load(Marshal.dump(check_for_a_record[:record]))
-                terminated_instance[:action] = "DELETE"
+                terminated_instance = {action: "DELETE", resource_record_set: Marshal.load(Marshal.dump(check_for_a_record[:record]))}
                 change_batch[:change_batch][:changes].push(terminated_instance)
               end
 
