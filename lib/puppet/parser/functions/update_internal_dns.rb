@@ -69,7 +69,7 @@ module Puppet::Parser::Functions
           # Delete the old TXT record
           delete_original_txt = Marshal.load(change_template)
           delete_original_txt[:action] = "DELETE"
-          delete_original_txt[:resource_record_set] = Marshal.load(Marshal.dump(txt_record))
+          delete_original_txt[:resource_record_set] = Marshal.load(Marshal.dump(txt_record[:record]))
           change_batch[:change_batch][:changes].push(delete_original_txt)
 
           # Check for the current A record
@@ -84,7 +84,7 @@ module Puppet::Parser::Functions
             # Is the current A record still correct?
             if a_record[:resource_record_set][:resource_records].first.value != Facter.value('ipaddress')
               # If not, delete it and create a new one.
-              delete_original_a = Marshal.load(Marshal.dump(a_record))
+              delete_original_a = Marshal.load(Marshal.dump(a_record[:record]))
               delete_original_a[:action] = "DELETE"
               change_batch[:change_batch][:changes].push(delete_original_a)
 
@@ -115,14 +115,14 @@ module Puppet::Parser::Functions
             else
               check_for_a_record = function_r53_get_record([zone.id, cname, "A"])
               if check_for_a_record[:result] == 0
-                terminated_instance = check_for_a_record
+                terminated_instance = check_for_a_record[:record]
                 terminated_instance[:action] = "DELETE"
                 change_batch[:change_batch][:changes].push(terminated_instance)
               end
 
               check_for_cname_record = function_r53_get_record([zone.id, cname, "CNAME"])
               if check_for_cname_record[:result] == 0
-                terminated_instance = check_for_cname_record.to_hash
+                terminated_instance = Marshal.load(Marshal.dump(check_for_cname_record[:record]))
                 terminated_instance[:action] = "DELETE"
                 change_batch[:change_batch][:changes].push(terminated_instance)
               end

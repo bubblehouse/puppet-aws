@@ -22,8 +22,10 @@ module Puppet::Parser::Functions
         return_value = {:result => 1}
       elsif r53_record.count == 1
         Puppet.send(:debug, "Located record #{name} of type #{type} in zone #{zone_id}.")
-        return_value = r53_record.first.to_hash
-        return_value[:result] = 0
+        return_value = {
+          result: 0,
+          record: r53_record.first.to_hash
+        }
       else
         Puppet.send(:debug, "More than one record #{name} of type #{type} in zone #{zone_id}. Strictly speaking, this should never happen.")
         return_value = {:result => 2}
