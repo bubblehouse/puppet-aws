@@ -76,7 +76,7 @@ module Puppet::Parser::Functions
           if a_record[:result] == 1
             # Create the A record
             change = Marshal.load(change_template)
-            change[:resource_record_set][:name] = "#{base}.#{zone.name}"
+            change[:resource_record_set][:name] = "#{hostname}.#{zone.name}"
             change[:resource_record_set][:type] = "A"
             change[:resource_record_set][:resource_records].push({value: "#{Facter.value('ipaddress')}" })
             change_batch[:change_batch][:changes].push(change)
