@@ -1,5 +1,3 @@
-require 'securerandom'
-
 module Puppet::Parser::Functions
   newfunction(:update_internal_dns) do |args|
     r53_zone, base, hostname = *args
@@ -39,9 +37,9 @@ module Puppet::Parser::Functions
         a_record     = function_r53_get_record([zone.id, hostname, "A"])
         cname_record = function_r53_get_record([zone.id, base, "CNAME"])
 
-        Puppet.send(:debug, "r53_get_record returned #{txt_record}")
-        Puppet.send(:debug, "r53_get_record returned #{a_record}")
-        Puppet.send(:debug, "r53_get_record returned #{cname_record}")
+        Puppet.send(:debug, "r53_get_record returned TXT  : #{txt_record}")
+        Puppet.send(:debug, "r53_get_record returned A    :#{a_record}")
+        Puppet.send(:debug, "r53_get_record returned CNAME: #{cname_record}")
 
         if txt_record[:result] == 1
             Puppet.send(:notice, "No TXT exists for #{base}.#{r53_zone}, creating it.")
@@ -106,6 +104,7 @@ module Puppet::Parser::Functions
           # Loop through original TXT record and check if they all still exist.
           txt_record[:resource_records].each{|record|
             region, instance_id, cname = *record[:value].split(',').slice(2..-2)
+            Puppet.send(:debug, "Verifying existing of #{instance_id} - #{cname} in #{region}.")
 
             # If it still exists, keep it in the new TXT record.
             if Aws::EC2::Instance.new(id: instance_id, region: region).exists?
