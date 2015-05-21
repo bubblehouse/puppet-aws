@@ -83,7 +83,7 @@ module Puppet::Parser::Functions
             change_batch[:change_batch][:changes].push(change)
           elsif a_record[:result] == 0
             # Is the current A record still correct?
-            if a_record.resource_record_set.resource_records.first.value != Facter.value('ipaddress')
+            if a_record[:resource_record_set][:resource_records].first.value != Facter.value('ipaddress')
               # If not, delete it and create a new one.
               delete_original_a = a_record.to_hash
               delete_original_a[:result] = nil
@@ -104,8 +104,8 @@ module Puppet::Parser::Functions
           new_txt[:resource_record_set][:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')}\""})
 
           # Loop through original TXT record and check if they all still exist.
-          txt_record.resource_records.each{|record|
-            region, instance_id, cname = *record.value.split(',').slice(2..-2)
+          txt_record[:resource_records].each{|record|
+            region, instance_id, cname = *record[:value].split(',').slice(2..-2)
 
             # If it still exists, keep it in the new TXT record.
             if Aws::EC2::Instance.new(id: instance_id, region: region).exists?
@@ -115,7 +115,7 @@ module Puppet::Parser::Functions
             else
               check_for_a_record = function_r53_get_record([zone.id, cname, "A"])
               if check_for_a_record[:result] == 0
-                terminated_instance = check_for_a_record.to_hash
+                terminated_instance = check_for_a_record
                 terminated_instance[:action] = "DELETE"
                 change_batch[:change_batch][:changes].push(terminated_instance)
               end
