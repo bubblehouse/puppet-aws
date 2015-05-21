@@ -17,19 +17,21 @@ module Puppet::Parser::Functions
         (rec[:type] == type ) 
       }
 
-      if (r53_record.count == 0)
+      if r53_record.count == 0
         Puppet.send(:debug, "Unable to locate record #{name} of type #{type} in zone #{zone_id}.")
-        r53_record = 0
+        r53_record = {:result => 1}
       elsif r53_record.count == 1
         Puppet.send(:debug, "Located record #{name} of type #{type} in zone #{zone_id}.")
+        r53_record = r53_record.first
+        r53_record[:result] = 0
       else
         Puppet.send(:debug, "More than one record #{name} of type #{type} in zone #{zone_id}. Strictly speaking, this should never happen.")
-        r53_record = 2
+        r53_record = {:result => 2}
       end
 
     rescue Aws::Route53::Errors
       Puppet.send(:warn, "Unable to complete Route53 request for getting record #{name} of type #{type} in zone #{zone_id} due to #{e}")
-      r53_record = 3
+      r53_record = {:result => 3}
     end
 
     r53_record
