@@ -2,7 +2,9 @@
 
 class aws::foreman::config inherits aws::foreman {
   include foreman::plugin::default_hostgroup
-  
+
+  ensure_packages('ruby-hammer-cli-foreman')
+
   augeas { "foreman-puppet.conf":
     context   => '/files/etc/puppet/puppet.conf',
     changes   => [
@@ -26,8 +28,8 @@ class aws::foreman::config inherits aws::foreman {
       "mod '${aws::foreman::base_module_vendor}-${aws::foreman::base_module_name}',",
       "  :git => '${aws::foreman::base_module_repo}'"
     ], "\n"),
-    owner => 'root', 
-    group => 'root', 
+    owner => 'root',
+    group => 'root',
     mode => '0644'
   }
 
@@ -40,12 +42,12 @@ class aws::foreman::config inherits aws::foreman {
       "gem 'librarian-puppet'",
       "gem 'aws-sdk', '>=2.0.6.pre'"
     ], "\n"),
-    owner => 'root', 
-    group => 'root', 
+    owner => 'root',
+    group => 'root',
     mode => '0644',
     notify => Exec['clear-old-librarian']
   }
-  
+
   exec { "clear-old-librarian":
     command => "/bin/rm -rf .tmp .librarian Puppetfile.lock Gemfile.lock",
     cwd => "/etc/puppet",
@@ -58,7 +60,7 @@ class aws::foreman::config inherits aws::foreman {
     cwd => "/etc/puppet",
     creates => "/usr/local/bin/librarian-puppet",
   }
-  
+
   exec { "librarian-init":
     command => "/bin/echo n | /usr/local/bin/librarian-puppet init",
     cwd => "/etc/puppet",
@@ -70,7 +72,7 @@ class aws::foreman::config inherits aws::foreman {
     require => Exec['librarian-bundle-install'],
     notify => Exec['librarian-install']
   }
-  
+
   exec { "librarian-install":
     command => "/usr/local/bin/librarian-puppet install --verbose",
     cwd => "/etc/puppet",
@@ -79,5 +81,20 @@ class aws::foreman::config inherits aws::foreman {
       "HOME=/root/"
     ],
     refreshonly => true
+  }
+
+  exec { 'apipie-cache':
+    command => 'foreman-rake apipie:cache',
+    path => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+    user => 'root',
+    creates => '/var/lib/foreman/public/apipie-cache',
+    requires => Package['ruby-hammer-cli-foreman'],
+    notify => Exec['create-smart-proxy']
+  }
+
+  exec { 'create-smart-proxy':
+    command => "hammer proxy create --name ${aws::bootstrap::instance_fqdn} --url https://${aws::bootstrap::instance_fqdn}:8443",
+    refreshonly => true,
+    path => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   }
 }
