@@ -104,7 +104,7 @@ module Puppet::Parser::Functions
 
             # If it still exists, keep it in the new TXT record.
             if Aws::EC2::Instance.new(id: instance_id, region: region).exists?
-              change[:resource_record_set][:resource_records].push({value: "\"#{region},#{instance_id}')}\""})
+              new_txt[:resource_record_set][:resource_records].push({value: "\"#{region},#{instance_id}')}\""})
 
             # If it doesn't, delete the associated A and CNAME records and leave it out of the new TXT
             else
