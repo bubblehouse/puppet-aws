@@ -26,13 +26,13 @@ module Puppet::Parser::Functions
           }
         }
 
-        txt_record   = function_r53_get_record([zone.id, "#{base}.#{prefix}", "TXT"])
-        a_record     = function_r53_get_record([zone.id, hostname, "A"])
-        cname_record = function_r53_get_record([zone.id, base, "CNAME"])
+        txt_record  = function_r53_get_record([zone.id, "#{base}.#{prefix}", "TXT"])
+        a_record    = function_r53_get_record([zone.id, hostname, "A"])
+        base_record = function_r53_get_record([zone.id, base, "A"])
 
         Puppet.send(:debug, "r53_get_record returned TXT  : #{txt_record}")
         Puppet.send(:debug, "r53_get_record returned A    :#{a_record}")
-        Puppet.send(:debug, "r53_get_record returned CNAME: #{cname_record}")
+        Puppet.send(:debug, "r53_get_record returned Base : #{base_record}")
 
         if txt_record[:result] == 1
             Puppet.send(:notice, "No TXT exists for #{base}.#{r53_zone}, creating it.")
@@ -61,9 +61,9 @@ module Puppet::Parser::Functions
                 action: "CREATE",
                 resource_record_set: {
                   name: "#{base}.#{zone.name}",
-                  type: "CNAME",
+                  type: "A",
                   ttl: 600,
-                  resource_records: [{value: "#{hostname}.#{zone.name}" }]
+                  resource_records: [{value: "#{Facter.value('ipaddress')}"}]
                 }
               })
             end
@@ -104,7 +104,7 @@ module Puppet::Parser::Functions
             end
           end
 
-          # Start compiling the new TXT record and CNAME
+          # Start compiling the new TXT record and base
           new_txt = {
             action: "CREATE",
             resource_record_set: {
@@ -115,11 +115,11 @@ module Puppet::Parser::Functions
             }
           }
 
-          new_cname = {
+          new_base = {
             action: "CREATE",
             resource_record_set: {
               name: "#{base}.#{zone.name}",
-              type: "cname",
+              type: "A",
               ttl: 600,
               resource_records: []
             }
@@ -132,13 +132,14 @@ module Puppet::Parser::Functions
             Puppet.send(:debug, "Verifying existing of #{instance_id} - #{cname} in #{region}.")
 
             # If it still exists, keep it in the new TXT and CNAME records.
-            if Aws::EC2::Instance.new(id: instance_id, region: region).exists?
+            instance = Aws::EC2::Instance.new(id: instance_id, region: region)
+            if instance.exists?
               new_txt[:resource_record_set][:resource_records].push(record)
               if hostname != base
-                new_cname[:resource_record_set][:resource_records].push({value: cname })
+                new_base[:resource_record_set][:resource_records].push({value: instance.private_ip_address })
               end
 
-            # If it doesn't, delete the associated A and CNAME records and leave it out of the new TXT
+            # If it doesn't, delete the associated A record and leave it out of the new TXT and base.
             else
               check_for_a_record = function_r53_get_record([zone.id, cname, "A"])
               if check_for_a_record[:result] == 0
