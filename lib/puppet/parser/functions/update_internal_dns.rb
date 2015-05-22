@@ -133,7 +133,7 @@ module Puppet::Parser::Functions
 
             # If it still exists, keep it in the new TXT and CNAME records.
             if Aws::EC2::Instance.new(id: instance_id, region: region).exists?
-              new_txt[:resource_record_set][:resource_records].push({value: record })
+              new_txt[:resource_record_set][:resource_records].push(record)
               if hostname != base
                 new_cname[:resource_record_set][:resource_records].push({value: cname })
               end
