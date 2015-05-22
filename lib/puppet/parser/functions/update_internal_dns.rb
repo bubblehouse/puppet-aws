@@ -1,6 +1,7 @@
 module Puppet::Parser::Functions
   newfunction(:update_internal_dns) do |args|
     r53_zone, base, hostname = *args
+    prefix = "dns_metadata"
     region = Facter.value(:ec2_placement_availability_zone).chop
     r53 = Aws::Route53::Client.new(region:region)
     begin
@@ -25,7 +26,7 @@ module Puppet::Parser::Functions
           }
         }
 
-        txt_record   = function_r53_get_record([zone.id, base, "TXT"])
+        txt_record   = function_r53_get_record([zone.id, "#{base}.#{prefix}", "TXT"])
         a_record     = function_r53_get_record([zone.id, hostname, "A"])
         cname_record = function_r53_get_record([zone.id, base, "CNAME"])
 
@@ -38,7 +39,7 @@ module Puppet::Parser::Functions
             change_batch[:change_batch][:changes].push({
               action: "CREATE",
               resource_record_set: {
-                name: "#{base}.#{zone.name}",
+                name: "#{base}.#{prefix}.#{zone.name}",
                 type: "TXT",
                 ttl: 600,
                 resource_records: [{value: "\"#{region},#{Facter.value('ec2_instance_id')},#{Facter.value('hostname')}\""}]
@@ -102,7 +103,7 @@ module Puppet::Parser::Functions
           new_txt = {
             action: "CREATE",
             resource_record_set: {
-              name: "#{base}.#{zone.name}",
+              name: "#{base}.#{prefix}.#{zone.name}",
               type: "TXT",
               ttl: 600,
               resource_records: []
