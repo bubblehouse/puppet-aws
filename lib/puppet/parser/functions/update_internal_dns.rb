@@ -152,7 +152,7 @@ module Puppet::Parser::Functions
           }
 
           # If there are changes, delete the old TXT record and create the new one.
-          if new_txt != txt_record[:record]
+          if new_txt[:resource_record_set] != txt_record[:record]
             change_batch[:change_batch][:changes].push({
               action: "DELETE",
               resource_record_set: txt_record[:record]
@@ -162,7 +162,7 @@ module Puppet::Parser::Functions
           end
 
           # If there are changes, delete the old base record and create the new one.
-          if new_base != base_record[:record]
+          if new_base[:resource_record_set] != base_record[:record]
             change_batch[:change_batch][:changes].push({
               action: "DELETE",
               resource_record_set: base_record[:record]
