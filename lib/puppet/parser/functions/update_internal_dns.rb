@@ -87,7 +87,7 @@ module Puppet::Parser::Functions
             })
           elsif a_record[:result] == 0
             # Is the current A record still correct?
-            if a_record[:record][:resource_records].first.value != Facter.value('ipaddress')
+            if a_record[:record][:resource_records].first[:value] != Facter.value('ipaddress')
               # If not, delete it and create a new one.
               change_batch[:change_batch][:changes].push({
                 action: "DELETE",
