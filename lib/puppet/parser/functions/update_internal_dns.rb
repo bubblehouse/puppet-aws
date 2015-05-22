@@ -143,21 +143,40 @@ module Puppet::Parser::Functions
             else
               check_for_a_record = function_r53_get_record([zone.id, cname, "A"])
               if check_for_a_record[:result] == 0
-                terminated_instance = {action: "DELETE", resource_record_set: Marshal.load(Marshal.dump(check_for_a_record[:record]))}
-                change_batch[:change_batch][:changes].push(terminated_instance)
+                change_batch[:change_batch][:changes].push({
+                  action: "DELETE",
+                  resource_record_set: check_for_a_record[:record]
+                })
               end
             end
           }
 
-          # Delete the old TXT record
-          delete_original_txt = {action: "DELETE", resource_record_set: Marshal.load(Marshal.dump(txt_record[:record]))}
-          change_batch[:change_batch][:changes].push(delete_original_txt)
+          # If there are changes, delete the old TXT record and create the new one.
+          if new_txt != txt_record[:record]
+            change_batch[:change_batch][:changes].push({
+              action: "DELETE",
+              resource_record_set: txt_record[:record]
+            })
 
-          change_batch[:change_batch][:changes].push(new_txt)
+            change_batch[:change_batch][:changes].push(new_txt)
+          end
 
+          # If there are changes, delete the old base record and create the new one.
+          if new_base != base_record[:record]
+            change_batch[:change_batch][:changes].push({
+              action: "DELETE",
+              resource_record_set: base_record[:record]
+            })
+
+            change_batch[:change_batch][:changes].push(new_base)
+          end
         end
         Puppet.send(:debug, "Compiled change request: #{change_batch}")
-        r53.change_resource_record_sets(change_batch)
+        if change_batch[:change_batch][:changes].count > 0
+          r53.change_resource_record_sets(change_batch)
+        else
+          Puppet.send(:debug, "No changes to DNS, no update sent")
+        end
       end
     rescue => e
       Puppet.send(:warn, e)
