@@ -65,11 +65,17 @@ module Puppet::Parser::Functions
           # Check for the current A record
           if a_record[:result] == 1
             # Create the A record
-            change = {action: "CREATE", resource_record_set: {ttl:600, :resource_records => []}}
-            change[:resource_record_set][:name] = "#{hostname}.#{zone.name}"
-            change[:resource_record_set][:type] = "A"
-            change[:resource_record_set][:resource_records].push({value: "#{Facter.value('ipaddress')}" })
-            change_batch[:change_batch][:changes].push(change)
+            change_batch[:change_batch][:changes].push({
+              action: "CREATE",
+              resource_record_set: {
+                name: "#{hostname}.#{zone.name}",
+                ttl: 600,
+                type: "A",
+                resource_records: [
+                  {value: "#{Facter.value('ipaddress')}" }
+                ]
+              }
+            })
           elsif a_record[:result] == 0
             # Is the current A record still correct?
             if a_record[:resource_record_set][:resource_records].first.value != Facter.value('ipaddress')
