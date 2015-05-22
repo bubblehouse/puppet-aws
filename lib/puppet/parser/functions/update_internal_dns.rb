@@ -92,7 +92,7 @@ module Puppet::Parser::Functions
               delete_original_a = {action: "DELETE", resource_record_set: Marshal.load(Marshal.dump(a_record[:record]))}
               change_batch[:change_batch][:changes].push(delete_original_a)
 
-              new_a = a_record.to_hash
+              new_a = a_record[:record].to_hash
               new_a[:resource_record_set][:resource_records] = [{value: "#{Facter.value('ipaddress')}" }]
               new_a[:action] = "CREATE"
               change_batch[:change_batch][:changes].push(new_a)
