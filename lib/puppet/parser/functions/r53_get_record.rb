@@ -12,8 +12,9 @@ module Puppet::Parser::Functions
     region = Facter.value(:ec2_placement_availability_zone).chop
     r53 = Aws::Route53::Client.new(region:region)
     begin
+      zone_name  = r53.get_hosted_zone(id: zone_id).hosted_zone.name
       r53_record = r53.list_resource_record_sets(hosted_zone_id: zone_id, start_record_name: name, start_record_type: type)[:resource_record_sets].select{|rec| 
-        (rec[:name] =~ /^#{name}/) and 
+        (rec[:name] == "#{name}.#{zone_name}") and
         (rec[:type] == type ) 
       }
 
