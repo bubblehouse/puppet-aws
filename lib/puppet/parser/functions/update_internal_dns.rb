@@ -35,24 +35,36 @@ module Puppet::Parser::Functions
 
         if txt_record[:result] == 1
             Puppet.send(:notice, "No TXT exists for #{base}.#{r53_zone}, creating it.")
-            change = {action: "CREATE", resource_record_set: {ttl:600, :resource_records => []}}
-            change[:resource_record_set][:name] = "#{base}.#{zone.name}"
-            change[:resource_record_set][:type] = "TXT"
-            change[:resource_record_set][:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')},#{Facter.value('hostname')}\""})
-            change_batch[:change_batch][:changes].push(change)
+            change_batch[:change_batch][:changes].push({
+              action: "CREATE",
+              resource_record_set: {
+                name: "#{base}.#{zone.name}",
+                type: "TXT",
+                ttl: 600,
+                resource_records: [{value: "\"#{region},#{Facter.value('ec2_instance_id')},#{Facter.value('hostname')}\""}]
+              }
+            })
 
-            change = {action: "CREATE", resource_record_set: {ttl:600, :resource_records => []}}
-            change[:resource_record_set][:name] = "#{hostname}.#{zone.name}"
-            change[:resource_record_set][:type] = "A"
-            change[:resource_record_set][:resource_records].push({value: "#{Facter.value('ipaddress')}" })
-            change_batch[:change_batch][:changes].push(change)
+            change_batch[:change_batch][:changes].push({
+              action: "CREATE",
+              resource_record_set: {
+                name: "#{hostname}.#{zone.name}",
+                type: "A",
+                ttl: 600,
+                resource_records: [{value: "#{Facter.value('ipaddress')}"}]
+              }
+            })
 
             if hostname != base
-              change = {action: "CREATE", resource_record_set: {ttl:600, :resource_records => []}}
-              change[:resource_record_set][:name] = "#{base}.#{zone.name}"
-              change[:resource_record_set][:type] = "CNAME"
-              change[:resource_record_set][:resource_records].push({value: "#{hostname}.#{zone.name}" })
-              change_batch[:change_batch][:changes].push(change)
+              change_batch[:change_batch][:changes].push({
+                action: "CREATE",
+                resource_record_set: {
+                  name: "#{base}.#{zone.name}",
+                  type: "CNAME",
+                  ttl: 600,
+                  resource_records: [{value: "#{hostname}.#{zone.name}" }]
+                }
+              })
             end
 
         elsif txt_record[:result] == 0
@@ -90,11 +102,10 @@ module Puppet::Parser::Functions
             end
           end
 
-          # Start compiling the new TXT record
+          # Start compiling the new TXT record and CNAME
           new_txt = {action: "CREATE", resource_record_set: {ttl:600, :resource_records => []}}
           new_txt[:resource_record_set][:name] = "#{base}.#{zone.name}"
           new_txt[:resource_record_set][:type] = "TXT"
-          new_txt[:resource_record_set][:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')}\""})
 
           # Loop through original TXT record and check if they all still exist.
           txt_record[:record][:resource_records].each{|record|
@@ -104,7 +115,7 @@ module Puppet::Parser::Functions
 
             # If it still exists, keep it in the new TXT record.
             if Aws::EC2::Instance.new(id: instance_id, region: region).exists?
-              new_txt[:resource_record_set][:resource_records].push({value: "\"#{region},#{instance_id}')}\""})
+              new_txt[:resource_record_set][:resource_records].push({value: record })
 
             # If it doesn't, delete the associated A and CNAME records and leave it out of the new TXT
             else
