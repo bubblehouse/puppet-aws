@@ -70,10 +70,6 @@ module Puppet::Parser::Functions
         elsif txt_record[:result] == 0
           Puppet.send(:debug, "Retrieved TXT record: #{txt_record.to_s}")
 
-          # Delete the old TXT record
-          delete_original_txt = {action: "DELETE", resource_record_set: Marshal.load(Marshal.dump(txt_record[:record]))}
-          change_batch[:change_batch][:changes].push(delete_original_txt)
-
           # Check for the current A record
           if a_record[:result] == 1
             # Create the A record
@@ -103,9 +99,25 @@ module Puppet::Parser::Functions
           end
 
           # Start compiling the new TXT record and CNAME
-          new_txt = {action: "CREATE", resource_record_set: {ttl:600, :resource_records => []}}
-          new_txt[:resource_record_set][:name] = "#{base}.#{zone.name}"
-          new_txt[:resource_record_set][:type] = "TXT"
+          new_txt = {
+            action: "CREATE",
+            resource_record_set: {
+              name: "#{base}.#{zone.name}",
+              type: "TXT",
+              ttl: 600,
+              resource_records: []
+            }
+          }
+
+          new_cname = {
+            action: "CREATE",
+            resource_record_set: {
+              name: "#{base}.#{zone.name}",
+              type: "cname",
+              ttl: 600,
+              resource_records: []
+            }
+          }
 
           # Loop through original TXT record and check if they all still exist.
           txt_record[:record][:resource_records].each{|record|
@@ -113,9 +125,12 @@ module Puppet::Parser::Functions
             region, instance_id, cname = *record[:value].slice(1..-2).split(',')
             Puppet.send(:debug, "Verifying existing of #{instance_id} - #{cname} in #{region}.")
 
-            # If it still exists, keep it in the new TXT record.
+            # If it still exists, keep it in the new TXT and CNAME records.
             if Aws::EC2::Instance.new(id: instance_id, region: region).exists?
               new_txt[:resource_record_set][:resource_records].push({value: record })
+              if hostname != base
+                new_cname[:resource_record_set][:resource_records].push({value: cname })
+              end
 
             # If it doesn't, delete the associated A and CNAME records and leave it out of the new TXT
             else
@@ -124,16 +139,12 @@ module Puppet::Parser::Functions
                 terminated_instance = {action: "DELETE", resource_record_set: Marshal.load(Marshal.dump(check_for_a_record[:record]))}
                 change_batch[:change_batch][:changes].push(terminated_instance)
               end
-
-              #check_for_cname_record = function_r53_get_record([zone.id, cname, "CNAME"])
-              #if check_for_cname_record[:result] == 0
-              #  terminated_instance = Marshal.load(Marshal.dump(check_for_cname_record[:record]))
-              #  terminated_instance[:action] = "DELETE"
-              #  change_batch[:change_batch][:changes].push(terminated_instance)
-              #end
-
             end
           }
+
+          # Delete the old TXT record
+          delete_original_txt = {action: "DELETE", resource_record_set: Marshal.load(Marshal.dump(txt_record[:record]))}
+          change_batch[:change_batch][:changes].push(delete_original_txt)
 
           change_batch[:change_batch][:changes].push(new_txt)
 
