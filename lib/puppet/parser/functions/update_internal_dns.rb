@@ -134,6 +134,7 @@ module Puppet::Parser::Functions
             # If it still exists, keep it in the new TXT and CNAME records.
             instance = Aws::EC2::Instance.new(id: instance_id, region: region)
             if instance.exists?
+              Puppet.send(:debug, "#{instance_id} - #{cname} in #{region} still exists.")
               new_txt[:resource_record_set][:resource_records].push(record)
               if hostname != base
                 new_base[:resource_record_set][:resource_records].push({value: instance.private_ip_address })
@@ -141,6 +142,7 @@ module Puppet::Parser::Functions
 
             # If it doesn't, delete the associated A record and leave it out of the new TXT and base.
             else
+              Puppet.send(:debug, "#{instance_id} - #{cname} in #{region} doesn't exist.")
               check_for_a_record = function_r53_get_record([zone.id, cname, "A"])
               if check_for_a_record[:result] == 0
                 change_batch[:change_batch][:changes].push({
@@ -152,7 +154,7 @@ module Puppet::Parser::Functions
           }
 
           # If there are changes, delete the old TXT record and create the new one.
-          if new_txt[:resource_record_set] != txt_record[:record]
+          if new_txt[:resource_record_set].sort != txt_record[:record][:resource_records][:resource_record_set].sort
             change_batch[:change_batch][:changes].push({
               action: "DELETE",
               resource_record_set: txt_record[:record]
@@ -176,6 +178,7 @@ module Puppet::Parser::Functions
         Puppet.send(:debug, "Compiled change request: #{change_batch}")
         if change_batch[:change_batch][:changes].count > 0
           r53.change_resource_record_sets(change_batch)
+          Puppet.send(:info, "Updating DNS...")
         else
           Puppet.send(:debug, "No changes to DNS, no update sent")
         end
