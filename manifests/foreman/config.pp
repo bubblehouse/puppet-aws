@@ -3,8 +3,6 @@
 class aws::foreman::config inherits aws::foreman {
   include foreman::plugin::default_hostgroup
 
-  ensure_packages('ruby-hammer-cli-foreman')
-
   augeas { "foreman-puppet.conf":
     context   => '/files/etc/puppet/puppet.conf',
     changes   => [
