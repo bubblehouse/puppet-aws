@@ -147,7 +147,7 @@ module Puppet::Parser::Functions
             else
               remove = true
             end
-            if remove == true
+            if remove
               Puppet.send(:debug, "#{instance_id} - #{cname} in #{region} doesn't exist or isn't running.")
               check_for_a_record = function_r53_get_record([zone.id, cname, "A"])
               if check_for_a_record[:result] == 0
@@ -159,7 +159,7 @@ module Puppet::Parser::Functions
             end
           }
 
-          new_txt[:resource_record_set][:resource_records].push({value: "\"#{region},#{Facter.value('ec2_instance_id')},#{Facter.value('hostname')}\""})
+          new_txt[:resource_record_set][:resource_records].push({value: "\"#{Facter.value(:aws_region)},#{Facter.value(:ec2_instance_id)},#{Facter.value(:hostname)}\""})
 
           # If there are changes, delete the old TXT record and create the new one.
           if new_txt[:resource_record_set].sort != txt_record[:record][:resource_records][:resource_record_set].sort
