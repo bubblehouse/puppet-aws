@@ -10,7 +10,7 @@ class aws::bootstrap::config inherits aws::bootstrap {
   }
   
   if ($aws::bootstrap::route53_internal_zone != nil) {
-      update_internal_dns($aws::bootstrap::route53_internal_zone, $aws::bootstrap::cfn_baseinstancetag, $aws::bootstrap::fqdn)
+      update_internal_dns($aws::bootstrap::route53_internal_zone, $aws::bootstrap::cfn_baseinstancetag, $aws::bootstrap::instance_name)
   }
 
   if ( $aws::bootstrap::role != nil) {
