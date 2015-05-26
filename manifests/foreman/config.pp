@@ -85,18 +85,26 @@ class aws::foreman::config inherits aws::foreman {
     refreshonly => true
   }
 
+  exec { 'hammer-gem-install':
+    command => 'gem install hammer_cli_foreman',
+    path    => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+    user    => 'root',
+    creates => '/usr/local/bin/hammer',
+    notify  => Exec['apipie-cache']
+  }
+
   exec { 'apipie-cache':
     command => 'foreman-rake apipie:cache',
-    path => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
-    user => 'root',
+    path    => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+    user    => 'root',
     creates => '/var/lib/foreman/public/apipie-cache',
-    requires => Package['ruby-hammer-cli-foreman'],
-    notify => Exec['create-smart-proxy']
+    require => Exec['hammer-gem-install'],
+    notify  => Exec['create-smart-proxy']
   }
 
   exec { 'create-smart-proxy':
-    command => "hammer proxy create --name ${aws::bootstrap::instance_fqdn} --url https://${aws::bootstrap::instance_fqdn}:8443",
+    command     => "hammer proxy create --name ${aws::bootstrap::instance_fqdn} --url https://${aws::bootstrap::instance_fqdn}:8443",
     refreshonly => true,
-    path => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+    path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   }
 }
