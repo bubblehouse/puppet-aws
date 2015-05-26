@@ -160,7 +160,7 @@ module Puppet::Parser::Functions
           new_txt[:resource_record_set][:resource_records].push({value: "\"#{Facter.value(:aws_region)},#{Facter.value(:ec2_instance_id)},#{Facter.value(:hostname)}\""})
 
           # If there are changes, delete the old TXT record and create the new one.
-          if new_txt[:resource_record_set].sort != txt_record[:record][:resource_records][:resource_record_set].sort
+          if new_txt[:resource_record_set].sort != txt_record[:record][:resource_records].sort
             change_batch[:change_batch][:changes].push({
               action: "DELETE",
               resource_record_set: txt_record[:record]
