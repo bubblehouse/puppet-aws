@@ -133,18 +133,16 @@ module Puppet::Parser::Functions
 
             # If it still exists, keep it in the new TXT and CNAME records.
             instance = Aws::EC2::Instance.new(id: instance_id, region: region)
-            if instance.exists?
+            begin
               if instance.state.name == "running"
                 Puppet.send(:debug, "#{instance_id} - #{cname} in #{region} still exists.")
                 new_txt[:resource_record_set][:resource_records].push(record)
                 if hostname != base
                   new_base[:resource_record_set][:resource_records].push({value: instance.private_ip_address })
                 end
-              else
-                remove = true
               end
             # If it doesn't, delete the associated A record and leave it out of the new TXT and base.
-            else
+            rescue
               remove = true
             end
             if remove
