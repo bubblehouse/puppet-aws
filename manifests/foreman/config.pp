@@ -3,6 +3,10 @@
 class aws::foreman::config inherits aws::foreman {
   include foreman::plugin::default_hostgroup
 
+  if ($aws::bootstrap::route53_internal_zone != nil) {
+      update_internal_dns($aws::bootstrap::route53_internal_zone, $aws::bootstrap::cfn_baseinstancetag, $aws::bootstrap::instance_name)
+  }
+
   augeas { "foreman-puppet.conf":
     context   => '/files/etc/puppet/puppet.conf',
     changes   => [
