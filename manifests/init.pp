@@ -3,7 +3,10 @@ class aws {
     fail("Can't find EC2 instance ID fact, something is wrong.")
   }
   
-  include apt
+  if($osfamily == 'Debian'){
+    include apt
+  }
+
   include staging
   
   ensure_resource(service, 'ssh', {})

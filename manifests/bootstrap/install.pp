@@ -3,23 +3,17 @@
 class aws::bootstrap::install(
   $puppetmaster = false
 ) inherits aws::bootstrap {
-  include aws::install::ec2netutils
-  
-  apt::source {
-    'puppetlabs-main':
-      location   => 'http://apt.puppetlabs.com/',
-      release => 'trusty',
-      repos => 'main',
-      key => '1054B7A24BD6EC30',
-      key_server => 'pgp.mit.edu';
-    'puppetlabs-deps':
-      location   => 'http://apt.puppetlabs.com/',
-      release => 'trusty',
-      repos => 'dependencies',
-      key => '1054B7A24BD6EC30',
-      key_server => 'pgp.mit.edu';
+  if($operatingsystem == 'Ubuntu'){
+    include aws::install::ec2netutils
   }
-
+  
+  ensure_packages(["unzip", "ntp"])
+  
+  $ntp_service = $osfamily ? {
+    'Debian' => 'ntp',
+    'RedHat' => 'ntpd'
+  }
+  
   if($puppetmaster){
     exec { "puppetmaster-cert":
       command => "/usr/bin/puppet cert --generate --dns_alt_names localhost,${aws::bootstrap::puppetmaster_hostname},${aws::bootstrap::instance_fqdn} ${aws::bootstrap::instance_fqdn}",
@@ -34,11 +28,7 @@ class aws::bootstrap::install(
       server_foreman_url => "https://${aws::bootstrap::instance_fqdn}",
       server_foreman_ssl_cert => "/var/lib/puppet/ssl/certs/${aws::bootstrap::instance_fqdn}.pem",
       server_foreman_ssl_key => "/var/lib/puppet/ssl/private_keys/${aws::bootstrap::instance_fqdn}.pem",
-      require => [
-        Exec['puppetmaster-cert'],
-        Apt::Source['puppetlabs-main'],
-        Apt::Source['puppetlabs-deps']
-      ]
+      require => Exec['puppetmaster-cert']
     }
   }
   else {
@@ -46,24 +36,39 @@ class aws::bootstrap::install(
       server => false,
       puppetmaster => $aws::bootstrap::puppetmaster_hostname,
       agent_template => "aws/bootstrap/puppet.erb.conf",
-      require => [
-        Apt::Source['puppetlabs-main'],
-        Apt::Source['puppetlabs-deps']
-      ]
     }
   }
-
-  ensure_packages(["python-pip", "update-notifier-common", "ntp",
-      "unzip", "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
-    ensure => installed
-  })
   
-  package { "awscli":
-    ensure => latest,
-    provider => pip,
-    require => Package['python-pip']
+  case $osfamily {
+    'Debian': {
+      ensure_packages(["python-pip", "update-notifier-common",
+          "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
+        ensure => installed
+      })
+      
+      package { "awscli":
+        ensure => latest,
+        provider => pip,
+        require => Package['python-pip']
+      }
+    }
+    'RedHat': {
+      ensure_packages(["perl-DateTime", "perl-Sys-Syslog", "perl-libwww-perl"], {
+        ensure => installed
+      })
+      
+      file { "/usr/bin/pip-python":
+        ensure => link,
+        target => "/usr/bin/pip"
+      }->
+      
+      package { "awscli":
+        ensure => latest,
+        provider => pip
+      }
+    }
   }
-
+  
   if($aws::bootstrap::deploy_key_s3_url != nil){
     exec { "deploy-key":
       command => "/usr/local/bin/aws s3 cp ${aws::bootstrap::deploy_key_s3_url} /root/.ssh/id_rsa",
@@ -145,7 +150,7 @@ class aws::bootstrap::install(
     creates => "/usr/local/aws-scripts-mon"
   }
   
-  service { "ntp":
+  service { $ntp_service:
     ensure => running,
     enable => true,
     require => Package['ntp']
