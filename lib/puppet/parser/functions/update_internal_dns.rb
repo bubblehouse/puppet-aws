@@ -2,7 +2,7 @@ module Puppet::Parser::Functions
   newfunction(:update_internal_dns) do |args|
     r53_zone, base, hostname = *args
     prefix = "dns_metadata"
-    region = Facter.value(:ec2_region).chop
+    region = Facter.value(:aws_region)
     r53 = Aws::Route53::Client.new(region:region)
     begin
       zone_id = function_r53_get_zone_id([r53_zone])
