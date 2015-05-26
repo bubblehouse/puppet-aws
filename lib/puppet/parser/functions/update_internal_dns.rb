@@ -157,7 +157,9 @@ module Puppet::Parser::Functions
             end
           }
 
-          new_txt[:resource_record_set][:resource_records].push({value: "\"#{Facter.value(:aws_region)},#{Facter.value(:ec2_instance_id)},#{Facter.value(:hostname)}\""})
+          if new_txt[:resource_record_set][:resource_records].select{|rec| rec[:value].slice(1..-2).split(',')[1] == Facter.value(:ec2_instance_id)}.count == 0
+            new_txt[:resource_record_set][:resource_records].push({value: "\"#{Facter.value(:aws_region)},#{Facter.value(:ec2_instance_id)},#{Facter.value(:hostname)}\""})
+          end
 
           # If there are changes, delete the old TXT record and create the new one.
           if new_txt[:resource_record_set].sort != txt_record[:record][:resource_records].sort
