@@ -162,7 +162,7 @@ module Puppet::Parser::Functions
           end
 
           # If there are changes, delete the old TXT record and create the new one.
-          if new_txt[:resource_record_set].sort != txt_record[:record][:resource_records].sort
+          if new_txt[:resource_record_set][:resource_records].sort != txt_record[:record][:resource_records].sort
             change_batch[:change_batch][:changes].push({
               action: "DELETE",
               resource_record_set: txt_record[:record]
