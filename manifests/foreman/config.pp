@@ -98,7 +98,10 @@ class aws::foreman::config inherits aws::foreman {
     path    => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
     user    => 'root',
     creates => '/var/lib/foreman/public/apipie-cache',
-    require => Exec['hammer-gem-install'],
+    require => [
+      Exec['hammer-gem-install'],
+      Class['foreman::plugin::default_hostgroup']
+    ],
     notify  => Exec['create-smart-proxy']
   }
 
