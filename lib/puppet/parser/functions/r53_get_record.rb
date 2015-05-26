@@ -13,7 +13,7 @@ module Puppet::Parser::Functions
     r53 = Aws::Route53::Client.new(region:region)
     begin
       zone_name  = r53.get_hosted_zone(id: zone_id).hosted_zone.name
-      r53_record = r53.list_resource_record_sets(hosted_zone_id: zone_id, start_record_name: name, start_record_type: type)[:resource_record_sets].select{|rec| 
+      r53_record = r53.list_resource_record_sets(hosted_zone_id: zone_id, start_record_name: "#{name}.#{zone_name}", start_record_type: type)[:resource_record_sets].select{|rec|
         (rec[:name] == "#{name}.#{zone_name}") and
         (rec[:type] == type ) 
       }
