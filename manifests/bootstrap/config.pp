@@ -9,10 +9,6 @@ class aws::bootstrap::config inherits aws::bootstrap {
     ensure => directory
   }
   
-  if ($aws::bootstrap::route53_internal_zone != nil) {
-      update_internal_dns($aws::bootstrap::route53_internal_zone, $aws::bootstrap::cfn_baseinstancetag, $aws::bootstrap::instance_name)
-  }
-
   if ( $aws::bootstrap::role != nil) {
     file { "/etc/facter/facts.d/role.txt":
       ensure => file,
