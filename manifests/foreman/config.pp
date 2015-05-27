@@ -85,12 +85,24 @@ class aws::foreman::config inherits aws::foreman {
     refreshonly => true
   }
 
+  file { '/etc/hammer':
+    ensure => 'directory'
+  }->
+  file { '/etc/hammer/cli.modules.d':
+    ensure => 'directory'
+  }
+
   exec { 'hammer-gem-install':
     command => 'gem install hammer_cli_foreman',
     path    => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
     user    => 'root',
     creates => '/usr/local/bin/hammer',
     notify  => Exec['apipie-cache']
+  }
+
+  file { '/etc/hammer/cli.modules.d/foreman.yml':
+    ensure => link,
+    target => '/var/lib/gems/1.9.1/gems/hammer_cli_foreman-0.2.0/config/foreman.yml'
   }
 
   exec { 'apipie-cache':
@@ -100,7 +112,8 @@ class aws::foreman::config inherits aws::foreman {
     creates => '/var/lib/foreman/public/apipie-cache',
     require => [
       Exec['hammer-gem-install'],
-      Class['foreman::plugin::default_hostgroup']
+      Class['foreman::plugin::default_hostgroup'],
+      File['/etc/hammer/cli.modules.d/foreman.yml']
     ],
     notify  => Exec['create-smart-proxy']
   }
