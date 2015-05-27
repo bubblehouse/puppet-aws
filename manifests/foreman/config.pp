@@ -104,6 +104,12 @@ class aws::foreman::config inherits aws::foreman {
     notify  => Exec['apipie-cache']
   }
 
+  file_line {'add-foreman-admin-to-hammer-conf':
+    path  => '/var/lib/gems/1.9.1/gems/hammer_cli_foreman-0.2.0/config/foreman.yml',
+    match => ":password:",
+    line  => "  :password: ${aws::foreman::admin_password}"
+  }
+
   file { '/etc/hammer/cli.modules.d/foreman.yml':
     ensure => link,
     target => '/var/lib/gems/1.9.1/gems/hammer_cli_foreman-0.2.0/config/foreman.yml'
@@ -123,13 +129,14 @@ class aws::foreman::config inherits aws::foreman {
       Class['foreman::plugin::default_hostgroup'],
       File['/etc/hammer/cli.modules.d/foreman.yml']
     ]
-  }~>
+  }
 
   exec { 'restart-apache-to-get-foreman-up':
-    command => '/etc/init.d/apache2 restart && /bin/sleep 10',
-    user    => 'root',
+    command     => '/etc/init.d/apache2 restart && /bin/sleep 10',
+    user        => 'root',
+    require     => Exec['apipie-cache'],
     refreshonly => true
-  }~>
+  }
 
   exec { 'create-smart-proxy':
     command     => "hammer -u admin -p ${aws::foreman::admin_password} proxy create --name ${aws::bootstrap::instance_fqdn} --url https://${aws::bootstrap::instance_fqdn}:8443",
@@ -138,8 +145,10 @@ class aws::foreman::config inherits aws::foreman {
       "USER=root",
       "HOME=/root/"
     ],
+    require     => Exec['restart-apache-to-get-foreman-up'],
+    notify      => Service['apache2'],
     path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  }~>
+  }
 
   exec { 'import-clases-to-smart-proxy':
     command     => "hammer -u admin -p ${aws::foreman::admin_password} proxy import-classes --name ${aws::bootstrap::instance_fqdn}",
@@ -148,8 +157,10 @@ class aws::foreman::config inherits aws::foreman {
       "USER=root",
       "HOME=/root/"
     ],
+    require     => Exec['restart-apache-to-get-foreman-up'],
+    notify      => Service['apache2'],
     path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  }~>
+  }
 
   exec { 'foreman-settings-force_hostgroup_match':
     command     => "hammer -u admin -p ${aws::foreman::admin_password} settings set --name force_hostgroup_match --value true",
@@ -158,8 +169,10 @@ class aws::foreman::config inherits aws::foreman {
       "USER=root",
       "HOME=/root/"
     ],
+    require     => Exec['restart-apache-to-get-foreman-up'],
+    notify      => Service['apache2'],
     path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  }~>
+  }
 
   exec { 'foreman-settings-force_hostgroup_match_only_new':
     command     => "hammer -u admin -p ${aws::foreman::admin_password} settings set --name force_hostgroup_match_only_new --value false",
@@ -168,8 +181,10 @@ class aws::foreman::config inherits aws::foreman {
       "USER=root",
       "HOME=/root/"
     ],
+    require     => Exec['restart-apache-to-get-foreman-up'],
+    notify      => Service['apache2'],
     path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  }~>
+  }
 
   exec { 'foreman-settings-update_environment_from_facts':
     command     => "hammer -u admin -p ${aws::foreman::admin_password} settings set --name update_environment_from_facts --value true",
@@ -178,6 +193,7 @@ class aws::foreman::config inherits aws::foreman {
       "USER=root",
       "HOME=/root/"
     ],
+    require     => Exec['restart-apache-to-get-foreman-up'],
     notify      => Service['apache2'],
     path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   }
