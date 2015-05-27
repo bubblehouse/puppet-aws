@@ -122,9 +122,14 @@ class aws::foreman::config inherits aws::foreman {
       Exec['hammer-gem-install'],
       Class['foreman::plugin::default_hostgroup'],
       File['/etc/hammer/cli.modules.d/foreman.yml']
-    ],
-    notify  => Exec['create-smart-proxy']
-  }
+    ]
+  }~>
+
+  exec { 'restart-apache-to-get-foreman-up':
+    command => '/etc/init.d/apache2 restart && /bin/sleep 10',
+    user    => 'root',
+    refreshonly => true
+  }~>
 
   exec { 'create-smart-proxy':
     command     => "hammer -u admin -p ${aws::foreman::admin_password} proxy create --name ${aws::bootstrap::instance_fqdn} --url https://${aws::bootstrap::instance_fqdn}:8443",
