@@ -1,9 +1,12 @@
 module Puppet::Parser::Functions
   newfunction(:update_internal_dns) do |args|
     r53_zone, base, hostname = *args
-    prefix = "dns_metadata"
-    region = Facter.value(:aws_region)
-    r53 = Aws::Route53::Client.new(region:region)
+
+    prefix      = "dns_metadata"
+    default_ttl = 60
+    region      = Facter.value(:aws_region)
+    r53         = Aws::Route53::Client.new(region:region)
+
     begin
       zone_id = function_r53_get_zone_id([r53_zone])
 
@@ -41,7 +44,7 @@ module Puppet::Parser::Functions
               resource_record_set: {
                 name: "#{base}.#{prefix}.#{zone.name}",
                 type: "TXT",
-                ttl: 600,
+                ttl: default_ttl,
                 resource_records: [{value: "\"#{region},#{Facter.value('ec2_instance_id')},#{Facter.value('hostname')}\""}]
               }
             })
@@ -51,7 +54,7 @@ module Puppet::Parser::Functions
               resource_record_set: {
                 name: "#{hostname}.#{zone.name}",
                 type: "A",
-                ttl: 600,
+                ttl: default_ttl,
                 resource_records: [{value: "#{Facter.value('ipaddress')}"}]
               }
             })
@@ -62,7 +65,7 @@ module Puppet::Parser::Functions
                 resource_record_set: {
                   name: "#{base}.#{zone.name}",
                   type: "A",
-                  ttl: 600,
+                  ttl: default_ttl,
                   resource_records: [{value: "#{Facter.value('ipaddress')}"}]
                 }
               })
@@ -78,7 +81,7 @@ module Puppet::Parser::Functions
               action: "CREATE",
               resource_record_set: {
                 name: "#{hostname}.#{zone.name}",
-                ttl: 600,
+                ttl: default_ttl,
                 type: "A",
                 resource_records: [
                   {value: "#{Facter.value('ipaddress')}" }
@@ -110,7 +113,7 @@ module Puppet::Parser::Functions
             resource_record_set: {
               name: "#{base}.#{prefix}.#{zone.name}",
               type: "TXT",
-              ttl: 600,
+              ttl: default_ttl,
               resource_records: []
             }
           }
@@ -120,7 +123,7 @@ module Puppet::Parser::Functions
             resource_record_set: {
               name: "#{base}.#{zone.name}",
               type: "A",
-              ttl: 600,
+              ttl: default_ttl,
               resource_records: []
             }
           }
