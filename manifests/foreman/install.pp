@@ -8,9 +8,9 @@ class aws::foreman::install inherits aws::foreman {
     owner => 'puppet',
     group => 'root'
   }
-  
+
   $certname = downcase($aws::bootstrap::instance_fqdn)
-  
+
   class { '::foreman':
     repo => '1.7',
     admin_password => $aws::foreman::admin_password,
@@ -22,7 +22,7 @@ class aws::foreman::install inherits aws::foreman {
     websockets_ssl_cert => "/var/lib/puppet/ssl/certs/${certname}.pem",
     require => File["/etc/puppet/environments/${aws::foreman::foreman_environment}/modules"]
   }
-  
+
   class { '::foreman_proxy':
     repo => '1.7',
     trusted_hosts => [$aws::bootstrap::instance_fqdn],
@@ -34,5 +34,5 @@ class aws::foreman::install inherits aws::foreman {
     ssl_cert => "/var/lib/puppet/ssl/certs/${certname}.pem",
     require => File["/etc/puppet/environments/${aws::foreman::foreman_environment}/modules"]
   }
-  
+
 }
