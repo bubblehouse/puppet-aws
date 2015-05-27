@@ -96,6 +96,10 @@ class aws::foreman::config inherits aws::foreman {
     command => 'gem install hammer_cli_foreman',
     path    => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
     user    => 'root',
+    environment => [
+      "USER=root",
+      "HOME=/root/"
+    ],
     creates => '/usr/local/bin/hammer',
     notify  => Exec['apipie-cache']
   }
@@ -110,6 +114,10 @@ class aws::foreman::config inherits aws::foreman {
     path    => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
     user    => 'root',
     creates => '/var/lib/foreman/public/apipie-cache',
+    environment => [
+      "USER=root",
+      "HOME=/root/"
+    ],
     require => [
       Exec['hammer-gem-install'],
       Class['foreman::plugin::default_hostgroup'],
@@ -121,6 +129,10 @@ class aws::foreman::config inherits aws::foreman {
   exec { 'create-smart-proxy':
     command     => "hammer proxy create --name ${aws::bootstrap::instance_fqdn} --url https://${aws::bootstrap::instance_fqdn}:8443",
     refreshonly => true,
+    environment => [
+      "USER=root",
+      "HOME=/root/"
+    ],
     path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   }
 }
