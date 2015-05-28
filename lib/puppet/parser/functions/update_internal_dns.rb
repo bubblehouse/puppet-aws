@@ -4,7 +4,7 @@ module Puppet::Parser::Functions
 
     prefix      = "dns_metadata"
     default_ttl = 60
-    region      = Facter.value(:aws_region)
+    region      = lookupvar('aws_region')
     r53         = Aws::Route53::Client.new(region:region)
 
     begin
@@ -45,7 +45,7 @@ module Puppet::Parser::Functions
                 name: "#{base}.#{prefix}.#{zone.name}",
                 type: "TXT",
                 ttl: default_ttl,
-                resource_records: [{value: "\"#{region},#{Facter.value('ec2_instance_id')},#{Facter.value('hostname')}\""}]
+                resource_records: [{value: "\"#{region},#{lookupvar('ec2_instance_id')},#{lookupvar('hostname')}\""}]
               }
             })
 
@@ -55,7 +55,7 @@ module Puppet::Parser::Functions
                 name: "#{hostname}.#{zone.name}",
                 type: "A",
                 ttl: default_ttl,
-                resource_records: [{value: "#{Facter.value('ipaddress')}"}]
+                resource_records: [{value: "#{lookupvar('ipaddress')}"}]
               }
             })
 
@@ -66,7 +66,7 @@ module Puppet::Parser::Functions
                   name: "#{base}.#{zone.name}",
                   type: "A",
                   ttl: default_ttl,
-                  resource_records: [{value: "#{Facter.value('ipaddress')}"}]
+                  resource_records: [{value: "#{lookupvar('ipaddress')}"}]
                 }
               })
             end
@@ -84,13 +84,13 @@ module Puppet::Parser::Functions
                 ttl: default_ttl,
                 type: "A",
                 resource_records: [
-                  {value: "#{Facter.value('ipaddress')}" }
+                  {value: "#{lookupvar('ipaddress')}" }
                 ]
               }
             })
           elsif a_record[:result] == 0
             # Is the current A record still correct?
-            if a_record[:record][:resource_records].first[:value] != Facter.value('ipaddress')
+            if a_record[:record][:resource_records].first[:value] != lookupvar('ipaddress')
               # If not, delete it and create a new one.
               change_batch[:change_batch][:changes].push({
                 action: "DELETE",
@@ -102,7 +102,7 @@ module Puppet::Parser::Functions
                 resource_record_set: a_record[:record].clone
               }
 
-              new_a[:resource_record_set][:resource_records] = [{value: "#{Facter.value('ipaddress')}" }]
+              new_a[:resource_record_set][:resource_records] = [{value: "#{lookupvar('ipaddress')}" }]
               change_batch[:change_batch][:changes].push(new_a)
             end
           end
@@ -160,8 +160,8 @@ module Puppet::Parser::Functions
             end
           }
 
-          if new_txt[:resource_record_set][:resource_records].select{|rec| rec[:value].slice(1..-2).split(',')[1] == Facter.value(:ec2_instance_id)}.count == 0
-            new_txt[:resource_record_set][:resource_records].push({value: "\"#{Facter.value(:aws_region)},#{Facter.value(:ec2_instance_id)},#{Facter.value(:hostname)}\""})
+          if new_txt[:resource_record_set][:resource_records].select{|rec| rec[:value].slice(1..-2).split(',')[1] == lookupvar('ec2_instance_id')}.count == 0
+            new_txt[:resource_record_set][:resource_records].push({value: "\"#{lookupvar('aws_region')},#{lookupvar('ec2_instance_id')},#{lookupvar('hostname')}\""})
           end
 
           # If there are changes, delete the old TXT record and create the new one.
