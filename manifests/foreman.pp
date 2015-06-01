@@ -27,12 +27,13 @@
 #
 
 class aws::foreman(
-  $admin_password = $aws::foreman::params::admin_password,
-  $base_module_vendor = $aws::foreman::params::base_module_vendor,
-  $base_module_name = $aws::foreman::params::base_module_name,
-  $base_module_repo = $aws::foreman::params::base_module_repo,
+  $admin_password      = $aws::foreman::params::admin_password,
+  $base_module_vendor  = $aws::foreman::params::base_module_vendor,
+  $base_module_name    = $aws::foreman::params::base_module_name,
+  $base_module_repo    = $aws::foreman::params::base_module_repo,
+  $base_module_branch  = $aws::foreman::params::base_module_branch,
   $foreman_environment = $aws::foreman::params::foreman_environment,
-  $autosign_glob = $aws::foreman::params::autosign_glob
+  $autosign_glob       = $aws::foreman::params::autosign_glob
 ) inherits aws::foreman::params {
   anchor { 'aws::foreman::begin': } ->
   class { '::aws::bootstrap': puppetmaster => true } ->

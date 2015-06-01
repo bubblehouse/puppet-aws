@@ -28,7 +28,8 @@ class aws::foreman::config inherits aws::foreman {
       "forge 'https://forgeapi.puppetlabs.com'",
       "",
       "mod '${aws::foreman::base_module_vendor}-${aws::foreman::base_module_name}',",
-      "  :git => '${aws::foreman::base_module_repo}'"
+      "  :git => '${aws::foreman::base_module_repo}',",
+      "  :ref => '${aws::foreman::base_module_branch}'"
     ], "\n"),
     owner => 'root',
     group => 'root',
