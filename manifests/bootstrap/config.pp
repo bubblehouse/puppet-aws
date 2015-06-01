@@ -4,11 +4,11 @@ class aws::bootstrap::config inherits aws::bootstrap {
   if( ! aws_has_tag($::ec2_instance_id, "Name", $aws::bootstrap::instance_name)){
     aws_create_tag($::ec2_instance_id, "Name", $aws::bootstrap::instance_name)
   }
-  
+
   file { ["/etc/facter", "/etc/facter/facts.d"]:
     ensure => directory
   }
-  
+
   if ( $aws::bootstrap::role != nil) {
     file { "/etc/facter/facts.d/role.txt":
       ensure => file,
@@ -22,7 +22,7 @@ class aws::bootstrap::config inherits aws::bootstrap {
     content => "environment=${aws::bootstrap::environment}",
     require => File['/etc/facter/facts.d']
   }
-  
+
   file { "/etc/awslogs-agent.conf":
     ensure => present,
     replace => false,
@@ -50,18 +50,18 @@ class aws::bootstrap::config inherits aws::bootstrap {
     ], "\n"),
     notify => Service['awslogs']
   }->
-  
+
   exec { "awslogs-agent-setup":
     command => "/usr/bin/python /opt/staging/aws/awslogs-agent-setup.py -n -r ${::aws_region} -c /etc/awslogs-agent.conf",
     creates => "/etc/init.d/awslogs",
     notify => Service['awslogs']
   }
-  
+
   service { 'awslogs':
     ensure => running,
     enable => true
-  }  
-  
+  }
+
   exec { "configure-hostname":
     command => "/bin/hostname -b ${aws::bootstrap::instance_fqdn}",
     unless => "/usr/bin/test \"${aws::bootstrap::instance_fqdn}\" == \"$(/bin/hostname -f)\""
@@ -90,12 +90,12 @@ class aws::bootstrap::config inherits aws::bootstrap {
       ensure => file,
       content => "${aws::bootstrap::instance_fqdn}"
   }
-  
+
   file_line { "/etc/environment":
     path => "/etc/environment",
     line => "AWS_DEFAULT_REGION=${::aws_region}"
   }
-  
+
   augeas { "base-puppet.conf":
     context   => '/files/etc/puppet/puppet.conf',
     changes   => [
@@ -105,20 +105,20 @@ class aws::bootstrap::config inherits aws::bootstrap {
         "set main/stringify_facts false"
       ]
   }
-  
+
   cron { "puppet-agent":
     command => "/usr/bin/puppet agent --test &> /dev/null",
     user    => root,
     minute  => '*/30'
   }
-  
+
   if(str2bool($aws::bootstrap::static_volume_size)) {
     $cloudwatch_cmd = '/usr/bin/perl /usr/local/aws-scripts-mon/mon-put-instance-data.pl --mem-util --disk-space-util --disk-path=/ --disk-path=/media/static --from-cron'
   }
   else {
     $cloudwatch_cmd = '/usr/bin/perl /usr/local/aws-scripts-mon/mon-put-instance-data.pl --mem-util --disk-space-util --disk-path=/ --from-cron'
   }
-  
+
   cron { "cloudwatch":
     command => $cloudwatch_cmd,
     user    => root,

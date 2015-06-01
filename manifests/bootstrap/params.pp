@@ -16,4 +16,5 @@ class aws::bootstrap::params {
   $static_volume_tag        = nil
   $puppetmaster             = false
   $puppetmaster_hostname    = "puppet"
+  $puppetport               = 8140
 }

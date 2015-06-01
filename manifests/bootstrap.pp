@@ -43,7 +43,8 @@ class aws::bootstrap(
   $static_volume_encryption = $aws::bootstrap::params::static_volume_encryption,
   $static_volume_tag = $aws::bootstrap::params::static_volume_tag,
   $puppetmaster = $aws::bootstrap::params::puppetmaster,
-  $puppetmaster_hostname = $aws::bootstrap::params::puppetmaster_hostname
+  $puppetmaster_hostname = $aws::bootstrap::params::puppetmaster_hostname,
+  $puppetport = $aws::bootstrap::params::puppetport
 ) inherits aws::bootstrap::params {
   include aws
   

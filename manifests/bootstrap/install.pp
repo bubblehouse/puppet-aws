@@ -6,20 +6,20 @@ class aws::bootstrap::install(
   if($operatingsystem == 'Ubuntu'){
     include aws::install::ec2netutils
   }
-  
+
   ensure_packages(["unzip", "ntp"])
-  
+
   $ntp_service = $osfamily ? {
     'Debian' => 'ntp',
     'RedHat' => 'ntpd'
   }
-  
+
   if($puppetmaster){
     exec { "puppetmaster-cert":
       command => "/usr/bin/puppet cert --generate --dns_alt_names localhost,${aws::bootstrap::puppetmaster_hostname},${aws::bootstrap::instance_fqdn} ${aws::bootstrap::instance_fqdn}",
       creates => "/var/lib/puppet/ssl/certs/${aws::bootstrap::instance_fqdn}.pem"
     }
-    
+
     class { '::puppet':
       server => true,
       puppetmaster => $aws::bootstrap::puppetmaster_hostname,
@@ -30,22 +30,20 @@ class aws::bootstrap::install(
       server_foreman_ssl_key => "/var/lib/puppet/ssl/private_keys/${aws::bootstrap::instance_fqdn}.pem",
       require => Exec['puppetmaster-cert']
     }
-  }
   else {
-    class { '::puppet':
-      server => false,
-      puppetmaster => $aws::bootstrap::puppetmaster_hostname,
-      agent_template => "aws/bootstrap/puppet.erb.conf",
+    file {'/etc/puppet/puppet.conf':
+      ensure  => present,
+      content => template("aws/bootstrap/puppet.erb.conf")
     }
   }
-  
+
   case $::osfamily {
     'Debian': {
       ensure_packages(["python-pip", "update-notifier-common",
           "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
         ensure => installed
       })
-      
+
       package { "awscli":
         ensure => latest,
         provider => pip,
@@ -65,12 +63,12 @@ class aws::bootstrap::install(
       ensure_packages(["perl-DateTime", $perlsyslog, "perl-libwww-perl"], {
         ensure => installed
       })
-      
+
       file { "/usr/bin/pip-python":
         ensure => link,
         target => "/usr/bin/pip"
       }->
-      
+
       package { "awscli":
         ensure => latest,
         provider => pip
@@ -78,14 +76,14 @@ class aws::bootstrap::install(
     }
     default: {}
   }
-  
+
   if($aws::bootstrap::deploy_key_s3_url != nil){
     exec { "deploy-key":
       command => "/usr/local/bin/aws s3 cp ${aws::bootstrap::deploy_key_s3_url} /root/.ssh/id_rsa",
       creates => "/root/.ssh/id_rsa",
       require => Package['awscli']
     }->
-    
+
     file { "/root/.ssh/id_rsa":
       ensure => present,
       replace => false,
@@ -93,7 +91,7 @@ class aws::bootstrap::install(
       group => root,
       mode => '0600'
     }
-    
+
     # Some very arbitrary combinations of SSH can fail because of strange MTUs
     # which may be exacerbated by running Git behind a load balancer or proxy.
     #  *  http://serverfault.com/questions/481966/why-is-sshd-hanging-at-server-accepts-key
@@ -142,24 +140,24 @@ class aws::bootstrap::install(
     source => "http://stedolan.github.io/jq/download/linux64/jq",
     target => "/usr/local/bin/jq"
   }->
-  
+
   file { "/usr/local/bin/jq":
     ensure => present,
     owner => 'root',
     group => 'root',
     mode => '0755'
   }
-  
+
   staging::file { "awslogs-agent-setup.py":
     source => "https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py"
   }
-  
+
   staging::deploy { "CloudWatchMonitoringScripts-1.2.1.zip":
     source => "http://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.1.zip",
     target => "/usr/local",
     creates => "/usr/local/aws-scripts-mon"
   }
-  
+
   service { $ntp_service:
     ensure => running,
     enable => true,
