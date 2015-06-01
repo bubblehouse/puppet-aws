@@ -126,6 +126,7 @@ class aws::foreman::config inherits aws::foreman {
       "USER=root",
       "HOME=/root/"
     ],
+    notify  => Exec['restart-apache-to-get-foreman-up'],
     require => [
       Exec['hammer-gem-install'],
       Class['foreman::plugin::default_hostgroup'],
