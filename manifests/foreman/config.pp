@@ -161,7 +161,7 @@ class aws::foreman::config inherits aws::foreman {
     path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   }
 
-  exec { 'import-clases-to-smart-proxy':
+  exec { 'import-classes-to-smart-proxy':
     command     => "hammer -u admin -p ${aws::foreman::admin_password} proxy import-classes --name ${aws::bootstrap::instance_fqdn}",
     refreshonly => true,
     environment => [
