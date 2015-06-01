@@ -54,10 +54,10 @@ class aws::bootstrap::install(
     }
     'RedHat': {
       case $::operatingsystemrelease {
-        /6\.\?[0-9]*/: {
+        /6\.[0-9]*/: {
           $perlsyslog = "perl-Unix-Syslog"
         }
-        /7\.\?[0-9]*/: {
+        /7\.[0-9]*/: {
           $perlsyslog = "perl-Sys-Syslog"
         }
         default: {}
