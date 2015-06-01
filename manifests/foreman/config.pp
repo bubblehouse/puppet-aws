@@ -138,6 +138,11 @@ class aws::foreman::config inherits aws::foreman {
     command     => '/etc/init.d/apache2 restart && /bin/sleep 10',
     user        => 'root',
     require     => Exec['apipie-cache'],
+    notify      => [
+      Exec['create-smart-proxy'],
+      Exec['foreman-settings-force_hostgroup_match'],
+      Exec['foreman-settings-update_environment_from_facts']
+    ],
     refreshonly => true
   }
 
@@ -149,7 +154,10 @@ class aws::foreman::config inherits aws::foreman {
       "HOME=/root/"
     ],
     require     => Exec['restart-apache-to-get-foreman-up'],
-    notify      => Service['apache2'],
+    notify      => [
+      Service['apache2'],
+      Exec['import-classes-to-smart-proxy']
+    ],
     path        => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   }
 
