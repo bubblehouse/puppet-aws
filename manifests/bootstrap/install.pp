@@ -39,7 +39,7 @@ class aws::bootstrap::install(
     }
   }
   
-  case $osfamily {
+  case $::osfamily {
     'Debian': {
       ensure_packages(["python-pip", "update-notifier-common",
           "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
@@ -53,7 +53,16 @@ class aws::bootstrap::install(
       }
     }
     'RedHat': {
-      ensure_packages(["perl-DateTime", "perl-Sys-Syslog", "perl-libwww-perl"], {
+      case $::operatingsystemrelease {
+        /6\.\?[0-9]*/: {
+          $perlsyslog = "perl-Unix-Syslog"
+        }
+        /7\.\?[0-9]*/: {
+          $perlsyslog = "perl-Sys-Syslog"
+        }
+        default: {}
+      }
+      ensure_packages(["perl-DateTime", $perlsyslog, "perl-libwww-perl"], {
         ensure => installed
       })
       
@@ -67,6 +76,7 @@ class aws::bootstrap::install(
         provider => pip
       }
     }
+    default: {}
   }
   
   if($aws::bootstrap::deploy_key_s3_url != nil){
