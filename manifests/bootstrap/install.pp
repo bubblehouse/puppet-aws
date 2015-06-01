@@ -30,6 +30,7 @@ class aws::bootstrap::install(
       server_foreman_ssl_key => "/var/lib/puppet/ssl/private_keys/${aws::bootstrap::instance_fqdn}.pem",
       require => Exec['puppetmaster-cert']
     }
+  }
   else {
     file {'/etc/puppet/puppet.conf':
       ensure  => present,
