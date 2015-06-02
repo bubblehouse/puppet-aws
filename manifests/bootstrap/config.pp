@@ -63,7 +63,7 @@ class aws::bootstrap::config inherits aws::bootstrap {
   }
 
   if $::osfamily == "Redhat" and $::operatingsystemrelease =~ /6\.[0-9]/ {
-    file_line {
+    file_line { 'redhat-hostname-file':
       path  => '/etc/sysconfig/network',
       match => 'HOSTNAME=',
       line  => "HOSTNAME=${aws::bootstrap::instance_fqdn}"
