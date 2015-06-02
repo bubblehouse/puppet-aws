@@ -62,9 +62,23 @@ class aws::bootstrap::config inherits aws::bootstrap {
     enable => true
   }
 
-  exec { "configure-hostname":
-    command => "/bin/hostname -b ${aws::bootstrap::instance_fqdn}",
-    unless => "/usr/bin/test \"${aws::bootstrap::instance_fqdn}\" == \"$(/bin/hostname -f)\""
+  if $::osfamily == "Redhat" and $::operatingsystemrelease =~ /6\.[0-9]/ {
+    file_line {
+      path  => '/etc/sysconfig/network',
+      match => 'HOSTNAME=',
+      line  => "HOSTNAME=${aws::bootstrap::instance_fqdn}"
+    }
+
+    exec { "configure-hostname":
+      command => "/bin/hostname ${aws::bootstrap::instance_fqdn}",
+      unless  => "/usr/bin/test \"${aws::bootstrap::instance_fqdn}\" == \"$(/bin/hostname -f)\""
+    }
+  }
+  else {
+    exec { "configure-hostname":
+      command => "/bin/hostname -b ${aws::bootstrap::instance_fqdn}",
+      unless  => "/usr/bin/test \"${aws::bootstrap::instance_fqdn}\" == \"$(/bin/hostname -f)\""
+    }
   }
 
   case $osfamily {
