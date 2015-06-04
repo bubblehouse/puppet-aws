@@ -42,7 +42,7 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
     ec2_associate_address($::ec2_instance_id, $aws::bootstrap::eip_allocation_id)
   }
 
-  if( str2bool($aws::bootstrap::static_volume_size)){
+  if( $aws::bootstrap::static_volume_size != "0" ){
     if(! ec2_volume_attached($::ec2_instance_id, $aws::bootstrap::resources::volume_id, "/dev/sdf")){
       ec2_attach_volume($::ec2_instance_id, $aws::bootstrap::resources::volume_id, "/dev/sdf")
     }
