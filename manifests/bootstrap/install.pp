@@ -9,6 +9,10 @@ class aws::bootstrap::install(
 
   ensure_packages(["unzip", "ntp"])
 
+  if( $aws::bootstrap::static_volume_size != "0" ){
+    ensure_resource(file, $aws::bootstrap::static_volume_mountpoint, {ensure => directory})
+  }
+
   $ntp_service = $osfamily ? {
     'Debian' => 'ntp',
     'RedHat' => 'ntpd'

@@ -55,8 +55,6 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
       }
     }
     
-    ensure_resource(file, $aws::bootstrap::static_volume_mountpoint, {ensure => directory})
-    
     mount { $aws::bootstrap::static_volume_mountpoint:
       ensure => mounted,
       atboot => yes,
