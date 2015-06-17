@@ -28,5 +28,8 @@
   }, {
     "name": "meltwater/cpan",
     "version_requirement": "1.0.1"
+  }, {
+    "name": "garethr/docker",
+    "version_requirement": "4.0.2"
   }]
 }

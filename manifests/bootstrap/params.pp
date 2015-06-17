@@ -4,6 +4,7 @@ class aws::bootstrap::params {
   $environment              = "${::cfn_puppetenvironment}"
   $instance_name            = "${::hostname}"
   $instance_fqdn            = "${::fqdn}"
+  $ecs_cluster_name         = nil
   $is_nat                   = false
   $nat_cidr_range           = nil
   $eni_interface            = 'eth1'

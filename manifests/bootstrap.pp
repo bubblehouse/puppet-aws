@@ -32,6 +32,7 @@ class aws::bootstrap(
   $route53_internal_zone = $aws::bootstrap::params::route53_internal_zone,
   $instance_name = $aws::bootstrap::params::instance_name,
   $instance_fqdn = $aws::bootstrap::params::instance_fqdn,
+  $ecs_cluster_name = $aws::bootstrap::params::ecs_cluster_name,
   $is_nat = $aws::bootstrap::params::is_nat,
   $eni_interface = $aws::bootstrap::params::eni_interface,
   $nat_cidr_range = $aws::bootstrap::params::nat_cidr_range,

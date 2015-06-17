@@ -42,6 +42,12 @@ class aws::bootstrap::install(
     }
   }
 
+  if($aws::bootstrap::ecs_cluster_name != nil){
+    class { "aws::install::ecs":
+      cluster_name => $aws::bootstrap::ecs_cluster_name
+    }
+  }
+
   case $::osfamily {
     'Debian': {
       ensure_packages(["python-pip", "update-notifier-common",
