@@ -25,5 +25,8 @@
   }, {
     "name": "fiddyspence/sysctl",
     "version_requirement": "1.1.0"
+  }, {
+    "name": "meltwater/cpan",
+    "version_requirement": "1.0.1"
   }]
 }

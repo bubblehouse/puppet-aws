@@ -59,13 +59,24 @@ class aws::bootstrap::install(
       case $::operatingsystemrelease {
         /6\.[0-9]*/: {
           $perlsyslog = "perl-Unix-Syslog"
+          
+          ensure_packages(["perl-Digest-SHA"], {
+            ensure => installed
+          })
+          
+          include cpan
+          cpan { ["Bundle::LWP", "LWP", "LWP::Protocol::https"]:
+            ensure  => present,
+            require => Class['::cpan'],
+            force   => true
+          }
         }
         /7\.[0-9]*/: {
           $perlsyslog = "perl-Sys-Syslog"
         }
         default: {}
       }
-      ensure_packages(["perl-DateTime", $perlsyslog, "perl-libwww-perl"], {
+      ensure_packages(["perl-DateTime", $perlsyslog], {
         ensure => installed
       })
 
