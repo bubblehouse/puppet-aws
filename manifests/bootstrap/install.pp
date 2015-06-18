@@ -43,9 +43,11 @@ class aws::bootstrap::install(
   }
 
   if($aws::bootstrap::ecs_cluster_name != nil){
+    anchor { 'ecs-first': }->
     class { "aws::install::ecs":
       cluster_name => $aws::bootstrap::ecs_cluster_name
-    }
+    }->
+    anchor { 'ecs-last': }
   }
 
   case $::osfamily {
