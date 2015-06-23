@@ -60,7 +60,10 @@ class aws::bootstrap::attachments inherits aws::bootstrap {
       atboot => yes,
       device => "/dev/xvdf",
       fstype => auto,
-      options => "defaults,nobootwait,nofail",
+      options => $osfamily ? {
+        'RedHat' => "defaults,nofail",
+        default => "defaults,nobootwait,nofail"
+      },
       dump => 0,
       pass => 2
     }
