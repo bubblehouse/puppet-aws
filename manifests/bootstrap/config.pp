@@ -135,7 +135,7 @@ class aws::bootstrap::config inherits aws::bootstrap {
 
   cron { "cloudwatch":
     command => $cloudwatch_cmd,
-    environment => 'PERL_LWP_SSL_VERIFY_HOSTNAME=0'
+    environment => 'PERL_LWP_SSL_VERIFY_HOSTNAME=0',
     user    => root,
     minute  => '*/5'
   }
