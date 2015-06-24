@@ -6,8 +6,8 @@ class aws::install::ecs($cluster_name) {
   
   docker::run { 'ecs-agent':
     image   => 'amazon/amazon-ecs-agent:latest',
-    ports => ['51678', '51678']
-    expose => ['51678', '51678']
+    ports => ['51678', '51678'],
+    expose => ['51678', '51678'],
     volumes => [
       "/var/run/docker.sock:/var/run/docker.sock"
       "/var/log/ecs/:/log"
