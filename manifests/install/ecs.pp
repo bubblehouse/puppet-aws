@@ -11,10 +11,10 @@ class aws::install::ecs {
       email    => $aws::bootstrap::ecs_docker_email
     }
     $auth_data = join([
-      "ECS_ENGINE_AUTH_DATA={\"${aws::bootstrap::ecs_docker_host}\":{",
-      "\"username\":\"${aws::bootstrap::ecs_docker_username}\",",
-      "\"password\":\"${aws::bootstrap::ecs_docker_password}\",",
-      "\"email\":\"${aws::bootstrap::ecs_docker_email}\"}}"
+      "ECS_ENGINE_AUTH_DATA={\\\"${aws::bootstrap::ecs_docker_host}\\\":{",
+      "\\\"username\\\":\\\"${aws::bootstrap::ecs_docker_username}\\\",",
+      "\\\"password\\\":\\\"${aws::bootstrap::ecs_docker_password}\\\",",
+      "\\\"email\\\":\\\"${aws::bootstrap::ecs_docker_email}\\\"}}"
     ], "")
 
   }
