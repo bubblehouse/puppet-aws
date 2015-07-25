@@ -1,7 +1,15 @@
-class aws::install::ecs($cluster_name) {
+class aws::install::ecs {
   class { 'docker':
     manage_kernel => false,
     docker_users => ['ubuntu']
+  }
+  
+  if($aws::bootstrap::ecs_docker_host != "" and $aws::bootstrap::ecs_docker_host != nil){
+    docker::registry { $aws::bootstrap::ecs_docker_host:
+      username => $aws::bootstrap::ecs_docker_username,
+      password => $aws::bootstrap::ecs_docker_password,
+      email    => $aws::bootstrap::ecs_docker_email
+    }
   }
   
   docker::run { 'ecs-agent':
@@ -17,7 +25,7 @@ class aws::install::ecs($cluster_name) {
       "ECS_LOGFILE=/log/ecs-agent.log",
       "ECS_LOGLEVEL=info",
       "ECS_DATADIR=/data",
-      "ECS_CLUSTER=${cluster_name}"
+      "ECS_CLUSTER=${aws::bootstrap::ecs_cluster_name}"
     ]
   }
 }

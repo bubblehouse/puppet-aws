@@ -5,6 +5,10 @@ class aws::bootstrap::params {
   $instance_name            = "${::hostname}"
   $instance_fqdn            = "${::fqdn}"
   $ecs_cluster_name         = nil
+  $ecs_docker_host          = ""
+  $ecs_docker_username      = ""
+  $ecs_docker_email         = ""
+  $ecs_docker_password      = ""
   $is_nat                   = false
   $nat_cidr_range           = nil
   $eni_interface            = 'eth1'
