@@ -186,7 +186,7 @@ class aws::foreman::config inherits aws::foreman {
   }
 
   exec { 'foreman-settings-force_hostgroup_match_only_new':
-    command     => "hammer -u admin -p ${aws::foreman::admin_password} settings set --name force_hostgroup_match_only_new --value true",
+    command     => "hammer -u admin -p ${aws::foreman::admin_password} settings set --name force_hostgroup_match_only_new --value false",
     refreshonly => true,
     environment => [
       "USER=root",
