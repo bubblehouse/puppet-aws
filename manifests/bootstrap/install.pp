@@ -50,7 +50,7 @@ class aws::bootstrap::install(
 
   case $::osfamily {
     'Debian': {
-      ensure_packages(["python-pip", "update-notifier-common",
+      ensure_packages(["python-pip", "update-notifier-common", "libdatetime-perl",
           "libwww-perl", "libcrypt-ssleay-perl", "libswitch-perl"], {
         ensure => installed
       })
