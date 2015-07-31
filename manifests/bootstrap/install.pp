@@ -42,10 +42,8 @@ class aws::bootstrap::install(
     }
   }
 
-  if($aws::bootstrap::ecs_cluster_name != nil and $aws::bootstrap::ecs_cluster_name != ""){
-    class { "aws::install::ecs":
-      cluster_name => $aws::bootstrap::ecs_cluster_name
-    }
+  if($aws::bootstrap::ecs_cluster_name != nil){
+    include aws::install::ecs
   }
 
   case $::osfamily {
