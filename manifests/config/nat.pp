@@ -19,6 +19,12 @@ class aws::config::nat {
     ec2_modify_instance_attribute($::ec2_instance_id, 'sourceDestCheck', false)
   }
   
+  exec { "set-eth1-mtu":
+    command => "ip link set dev eth1 mtu 1500",
+    unless => "test $(facter mtu_eth1) == 1500",
+    path => ["/usr/bin", "/sbin"]
+  }
+  
   package { "iptables-persistent":
     ensure => installed
   }
