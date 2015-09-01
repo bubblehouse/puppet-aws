@@ -17,6 +17,7 @@ module Puppet::Parser::Functions
       instances = resp.auto_scaling_groups[0].instances
       instances.select!{|i| i.health_status == "Healthy"}
       instances.map!{|i| Aws::EC2::Instance.new(i.instance_id, client: ec2).private_ip_address }
+      instances.sort_by! {|instances| instances.split('.').map{ |octet| octet.to_i} }
 
       instances
     rescue => e
