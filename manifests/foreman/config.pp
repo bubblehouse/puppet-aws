@@ -109,7 +109,7 @@ class aws::foreman::config inherits aws::foreman {
     path    => '/var/lib/gems/1.9.1/gems/hammer_cli_foreman-0.2.0/config/foreman.yml',
     match   => ":password:",
     require => Exec['hammer-gem-install'],
-    line    => "  :password: ${aws::foreman::admin_password}"
+    line    => "  :password: '${aws::foreman::admin_password}'"
   }
 
   file { '/etc/hammer/cli.modules.d/foreman.yml':
@@ -147,7 +147,7 @@ class aws::foreman::config inherits aws::foreman {
   }
 
   exec { 'create-smart-proxy':
-    command     => "hammer -u admin -p ${aws::foreman::admin_password} proxy create --name ${aws::bootstrap::instance_fqdn} --url https://${aws::bootstrap::instance_fqdn}:8443",
+    command     => "hammer -u admin -p '${aws::foreman::admin_password}' proxy create --name ${aws::bootstrap::instance_fqdn} --url https://${aws::bootstrap::instance_fqdn}:8443",
     refreshonly => true,
     environment => [
       "USER=root",
@@ -162,7 +162,7 @@ class aws::foreman::config inherits aws::foreman {
   }
 
   exec { 'import-classes-to-smart-proxy':
-    command     => "hammer -u admin -p ${aws::foreman::admin_password} proxy import-classes --name ${aws::bootstrap::instance_fqdn}",
+    command     => "hammer -u admin -p '${aws::foreman::admin_password}' proxy import-classes --name ${aws::bootstrap::instance_fqdn}",
     refreshonly => true,
     environment => [
       "USER=root",
@@ -174,7 +174,7 @@ class aws::foreman::config inherits aws::foreman {
   }
 
   exec { 'foreman-settings-force_hostgroup_match':
-    command     => "hammer -u admin -p ${aws::foreman::admin_password} settings set --name force_hostgroup_match --value true",
+    command     => "hammer -u admin -p '${aws::foreman::admin_password}' settings set --name force_hostgroup_match --value true",
     refreshonly => true,
     environment => [
       "USER=root",
@@ -186,7 +186,7 @@ class aws::foreman::config inherits aws::foreman {
   }
 
   exec { 'foreman-settings-force_hostgroup_match_only_new':
-    command     => "hammer -u admin -p ${aws::foreman::admin_password} settings set --name force_hostgroup_match_only_new --value false",
+    command     => "hammer -u admin -p '${aws::foreman::admin_password}' settings set --name force_hostgroup_match_only_new --value false",
     refreshonly => true,
     environment => [
       "USER=root",
@@ -198,7 +198,7 @@ class aws::foreman::config inherits aws::foreman {
   }
 
   exec { 'foreman-settings-update_environment_from_facts':
-    command     => "hammer -u admin -p ${aws::foreman::admin_password} settings set --name update_environment_from_facts --value true",
+    command     => "hammer -u admin -p '${aws::foreman::admin_password}' settings set --name update_environment_from_facts --value true",
     refreshonly => true,
     environment => [
       "USER=root",
