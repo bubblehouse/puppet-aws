@@ -124,7 +124,9 @@ module Puppet::Parser::Functions
               name: "#{base}.#{zone.name}",
               type: "A",
               ttl: default_ttl,
-              resource_records: []
+              resource_records: [
+                {value: "#{lookupvar('ipaddress')}" }
+              ]
             }
           }
 
