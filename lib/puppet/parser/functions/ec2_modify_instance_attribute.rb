@@ -1,5 +1,5 @@
 module Puppet::Parser::Functions
-  newfunction(:ec2_modify_instance_attributes) do |args|
+  newfunction(:ec2_modify_instance_attribute) do |args|
     instance_id, attribute, value = *args
     region = Facter.value(:ec2_placement_availability_zone).chop
     ec2 = Aws::EC2::Client.new(region:region)
