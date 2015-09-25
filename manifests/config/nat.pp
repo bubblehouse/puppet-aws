@@ -16,7 +16,7 @@ class aws::config::nat {
 
 
   if($aws::bootstrap::eni_id == nil){
-    ec2_modify_instance_attribute($::ec2_instance_id, 'sourceDestCheck', false)
+    ec2_modify_instance_attribute($::ec2_instance_id, 'sourceDestCheck', 'false')
   }
   
   exec { "set-eth1-mtu":
