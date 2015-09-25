@@ -39,6 +39,7 @@ class aws::install::ecs {
       "ECS_CLUSTER=${aws::bootstrap::ecs_cluster_name}",
       "ECS_ENGINE_AUTH_TYPE=docker",
       $auth_data
-    ]
+    ],
+    require => Class['docker']
   }
 }
