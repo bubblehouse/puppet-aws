@@ -40,6 +40,6 @@ class aws::install::ecs {
       "ECS_ENGINE_AUTH_TYPE=docker",
       $auth_data
     ],
-    require  => Docker::Run['ecs-agent']
+    require  => Docker::Registry["${aws::bootstrap::ecs_docker_host}"]
   }
 }
