@@ -9,7 +9,7 @@ class aws::install::ecs {
       username => $aws::bootstrap::ecs_docker_username,
       password => $aws::bootstrap::ecs_docker_password,
       email    => $aws::bootstrap::ecs_docker_email,
-      require  => Class['docker']
+      before   => Docker::Run['ecs-agent']
     }
     $auth_data = join([
       "ECS_ENGINE_AUTH_DATA={\\\"${aws::bootstrap::ecs_docker_host}\\\":{",
@@ -39,7 +39,6 @@ class aws::install::ecs {
       "ECS_CLUSTER=${aws::bootstrap::ecs_cluster_name}",
       "ECS_ENGINE_AUTH_TYPE=docker",
       $auth_data
-    ],
-    require  => Docker::Registry["${aws::bootstrap::ecs_docker_host}"]
+    ]
   }
 }
