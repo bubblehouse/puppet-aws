@@ -8,6 +8,8 @@
 
 module Puppet::Parser::Functions
   newfunction(:r53_get_record, :type => :rvalue) do |args|
+    require 'aws-sdk'
+    
     zone_id, name, type = *args
     region = Facter.value(:ec2_placement_availability_zone).chop
     r53 = Aws::Route53::Client.new(region:region)
