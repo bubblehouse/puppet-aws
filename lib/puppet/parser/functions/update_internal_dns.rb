@@ -2,6 +2,8 @@ module Puppet::Parser::Functions
   newfunction(:update_internal_dns) do |args|
     r53_zone, base, hostname = *args
 
+    require 'aws-sdk'
+
     prefix      = "dns_metadata"
     default_ttl = 60
     region      = lookupvar('aws_region')
@@ -114,7 +116,7 @@ module Puppet::Parser::Functions
               name: "#{base}.#{prefix}.#{zone.name}",
               type: "TXT",
               ttl: default_ttl,
-              resource_records: []
+              resource_records: [{value: "\"#{region},#{lookupvar('ec2_instance_id')},#{lookupvar('hostname')}\""}]
             }
           }
 
@@ -133,31 +135,33 @@ module Puppet::Parser::Functions
           # Loop through original TXT record and check if they all still exist.
           txt_record[:record][:resource_records].each{|record|
             region, instance_id, cname = *record[:value].slice(1..-2).split(',')
-            Puppet.send(:debug, "Verifying existing of #{instance_id} - #{cname} in #{region}.")
-            remove = false
+            if instance_id != lookupvar('ec2_instance_id')
+              Puppet.send(:debug, "Verifying existing of #{instance_id} - #{cname} in #{region}.")
+              remove = false
 
-            # If it still exists, keep it in the new TXT and CNAME records.
-            instance = Aws::EC2::Instance.new(id: instance_id, region: region)
-            begin
-              if instance.state.name == "running"
-                Puppet.send(:debug, "#{instance_id} - #{cname} in #{region} still exists.")
-                new_txt[:resource_record_set][:resource_records].push(record)
-                if hostname != base
-                  new_base[:resource_record_set][:resource_records].push({value: instance.private_ip_address })
+              # If it still exists, keep it in the new TXT and CNAME records.
+              instance = Aws::EC2::Instance.new(id: instance_id, region: region)
+              begin
+                if instance.state.name == "running"
+                  Puppet.send(:debug, "#{instance_id} - #{cname} in #{region} still exists.")
+                  new_txt[:resource_record_set][:resource_records].push(record)
+                  if hostname != base
+                    new_base[:resource_record_set][:resource_records].push({value: instance.private_ip_address })
+                  end
                 end
+              # If it doesn't, delete the associated A record and leave it out of the new TXT and base.
+              rescue
+                remove = true
               end
-            # If it doesn't, delete the associated A record and leave it out of the new TXT and base.
-            rescue
-              remove = true
-            end
-            if remove
-              Puppet.send(:debug, "#{instance_id} - #{cname} in #{region} doesn't exist or isn't running.")
-              check_for_a_record = function_r53_get_record([zone.id, cname, "A"])
-              if check_for_a_record[:result] == 0
-                change_batch[:change_batch][:changes].push({
-                  action: "DELETE",
-                  resource_record_set: check_for_a_record[:record]
-                })
+              if remove
+                Puppet.send(:debug, "#{instance_id} - #{cname} in #{region} doesn't exist or isn't running.")
+                check_for_a_record = function_r53_get_record([zone.id, cname, "A"])
+                if check_for_a_record[:result] == 0
+                  change_batch[:change_batch][:changes].push({
+                    action: "DELETE",
+                    resource_record_set: check_for_a_record[:record]
+                  })
+                end
               end
             end
           }
