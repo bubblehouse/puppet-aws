@@ -179,6 +179,8 @@ module Puppet::Parser::Functions
 
           # If there are changes, delete the old base record and create the new one.
           if hostname != base
+            Puppet.send(:debug, "update_internal_dns: base_record - #{base_record}")
+            Puppet.send(:debug, "update_internal_dns: new_base - #{new_base}")
             if base_record[:record].nil?
               change_batch[:change_batch][:changes].push(new_base)  
             else
