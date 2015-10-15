@@ -188,6 +188,8 @@ module Puppet::Parser::Functions
 
                 change_batch[:change_batch][:changes].push(new_base)
               end
+            else
+              change_batch[:change_batch][:changes].push(new_base)  
             end
           end
         end
