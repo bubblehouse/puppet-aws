@@ -176,7 +176,7 @@ module Puppet::Parser::Functions
           # end
 
           # If there are changes, delete the old TXT record and create the new one.
-          Puppet.send(:notice, "update_internal_dns: comparison #{new_txt[:resource_record_set][:resource_records].sort} - #{txt_record[:record][:resource_records].sort}")
+          Puppet.send(:notice, "update_internal_dns: comparison #{new_txt[:resource_record_set][:resource_records]} - #{txt_record[:record][:resource_records]}")
           if new_txt[:resource_record_set][:resource_records].sort != txt_record[:record][:resource_records].sort
             change_batch[:change_batch][:changes].push({
               action: "DELETE",
