@@ -86,7 +86,7 @@ module Puppet::Parser::Functions
                 ttl: default_ttl,
                 type: "A",
                 resource_records: [
-                  {value: "#{lookupvar('ipaddress')}" }
+                  {value: "#{lookupvar('ipaddress_eth0')}" }
                 ]
               }
             })
@@ -127,7 +127,7 @@ module Puppet::Parser::Functions
               type: "A",
               ttl: default_ttl,
               resource_records: [
-                {value: "#{lookupvar('ipaddress')}" }
+                {value: "#{lookupvar('ipaddress_eth0')}" }
               ]
             }
           }
