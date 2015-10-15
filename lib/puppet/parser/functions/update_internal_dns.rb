@@ -62,7 +62,7 @@ module Puppet::Parser::Functions
                 name: "#{hostname}.#{zone.name}",
                 type: "A",
                 ttl: default_ttl,
-                resource_records: [{value: "#{lookupvar('ipaddress')}"}]
+                resource_records: [{value: "#{lookupvar('ipaddress_eth0')}"}]
               }
             })
 
@@ -73,7 +73,7 @@ module Puppet::Parser::Functions
                   name: "#{base}.#{zone.name}",
                   type: "A",
                   ttl: default_ttl,
-                  resource_records: [{value: "#{lookupvar('ipaddress')}"}]
+                  resource_records: [{value: "#{lookupvar('ipaddress_eth0')}"}]
                 }
               })
             end
@@ -98,7 +98,7 @@ module Puppet::Parser::Functions
             })
           elsif a_record[:result] == 0
             # Is the current A record still correct?
-            if a_record[:record][:resource_records].first[:value] != lookupvar('ipaddress')
+            if a_record[:record][:resource_records].first[:value] != lookupvar('ipaddress_eth0')
               # If not, delete it and create a new one.
               change_batch[:change_batch][:changes].push({
                 action: "DELETE",
@@ -110,7 +110,7 @@ module Puppet::Parser::Functions
                 resource_record_set: a_record[:record].clone
               }
 
-              new_a[:resource_record_set][:resource_records] = [{value: "#{lookupvar('ipaddress')}" }]
+              new_a[:resource_record_set][:resource_records] = [{value: "#{lookupvar('ipaddress_eth0')}" }]
               change_batch[:change_batch][:changes].push(new_a)
             end
           end
