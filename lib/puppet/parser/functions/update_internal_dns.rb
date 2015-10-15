@@ -184,7 +184,7 @@ module Puppet::Parser::Functions
             if base_record[:record].nil?
               change_batch[:change_batch][:changes].push(new_base)  
             else
-              if new_base[:resource_record_set][:resource_records].map{|a| a[:value]}.sort != base_record[:record].map{|a| a[:value]}.sort
+              if new_base[:resource_record_set][:resource_records].map{|a| a[:value]}.sort != base_record[:record][:resource_records].map{|a| a[:value]}.sort
                 change_batch[:change_batch][:changes].push({
                   action: "DELETE",
                   resource_record_set: base_record[:record]
