@@ -152,9 +152,9 @@ module Puppet::Parser::Functions
                   Puppet.send(:notice, "update_internal_dns: #{instance_id} - #{cname} in #{region} still exists.")
                   # Puppet.send(:debug, "update_internal_dns: #{instance_id} - #{cname} in #{region} still exists.")
                   new_txt[:resource_record_set][:resource_records].push(record)
-                  if hostname != base
+                  # if hostname != base
                     new_base[:resource_record_set][:resource_records].push({value: instance.private_ip_address })
-                  end
+                  # end
                 end
               # If it doesn't, delete the associated A record and leave it out of the new TXT and base.
               rescue
