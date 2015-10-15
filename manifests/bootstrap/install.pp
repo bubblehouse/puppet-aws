@@ -20,10 +20,13 @@ class aws::bootstrap::install(
 
   if($puppetmaster){
     $puppet_domains = ["localhost", $aws::bootstrap::puppetmaster_hostname, $aws::bootstrap::instance_fqdn]
-    if(! member($puppet_domains, 'puppet')){
-      concat($puppet_domains, "puppet")
+    if(member($puppet_domains, 'puppet')){
+      $domain_list = $puppet_domains
     }
-    $dns_alt_names = join($puppet_domains, ",")
+    else{
+      $domain_list = concat($puppet_domains, "puppet")
+    }
+    $dns_alt_names = join($domain_list, ",")
     
     exec { "puppetmaster-cert":
       command => "/usr/bin/puppet cert --generate --dns_alt_names ${dns_alt_names} ${aws::bootstrap::instance_fqdn}",
