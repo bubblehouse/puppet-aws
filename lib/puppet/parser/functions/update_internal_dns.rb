@@ -144,11 +144,10 @@ module Puppet::Parser::Functions
             if instance_id != lookupvar('ec2_instance_id')
               Puppet.send(:notice, "update_internal_dns: Verifying existing of #{instance_id} - #{cname} in #{region}.")
               # Puppet.send(:debug, "update_internal_dns: Verifying existing of #{instance_id} - #{cname} in #{region}.")
-              remove = false
 
               # If it still exists, keep it in the new TXT and CNAME records.
-              instance = Aws::EC2::Instance.new(id: instance_id, region: region)
               begin
+                instance = Aws::EC2::Instance.new(id: instance_id, region: region)
                 if instance.state.name == "running"
                   Puppet.send(:notice, "update_internal_dns: #{instance_id} - #{cname} in #{region} still exists.")
                   # Puppet.send(:debug, "update_internal_dns: #{instance_id} - #{cname} in #{region} still exists.")
