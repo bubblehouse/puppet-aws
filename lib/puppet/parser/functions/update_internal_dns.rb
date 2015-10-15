@@ -179,13 +179,15 @@ module Puppet::Parser::Functions
 
           # If there are changes, delete the old base record and create the new one.
           if hostname != base
-            if new_base[:resource_record_set][:resource_records].map{|a| a[:value]}.sort != base_record[:record][:resource_records].map{|a| a[:value]}.sort
-              change_batch[:change_batch][:changes].push({
-                action: "DELETE",
-                resource_record_set: base_record[:record]
-              })
+            if base_record[:record]
+              if new_base[:resource_record_set][:resource_records].map{|a| a[:value]}.sort != base_record[:record].map{|a| a[:value]}.sort
+                change_batch[:change_batch][:changes].push({
+                  action: "DELETE",
+                  resource_record_set: base_record[:record]
+                })
 
-              change_batch[:change_batch][:changes].push(new_base)
+                change_batch[:change_batch][:changes].push(new_base)
+              end
             end
           end
         end
