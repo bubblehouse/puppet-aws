@@ -210,6 +210,7 @@ module Puppet::Parser::Functions
       end
     rescue => e
       Puppet.send(:warn, "update_internal_dns: #{e}" )
+      Puppet.send(:warn, "update_internal_dns: #{e.backtrace[0]}" )
     end
   end
 end
