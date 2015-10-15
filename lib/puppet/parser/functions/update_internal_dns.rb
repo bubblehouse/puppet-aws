@@ -22,7 +22,7 @@ module Puppet::Parser::Functions
       else
         Puppet.send(:notice, "update_internal_dns: Located Route53 Zone with DNS name of #{r53_zone} and id #{zone_id}.")
         zone = r53.get_hosted_zone(id: zone_id).hosted_zone
-        Puppet.send(:notice, "update_internal_dns: r53_get_hosted_zone returned #{zone}")
+        Puppet.send(:notice, "update_internal_dns: r53.get_hosted_zone returned #{zone}")
         # Puppet.send(:debug, "update_internal_dns: r53_get_hosted_zone returned #{zone}")
 
         change_batch = {
@@ -171,9 +171,9 @@ module Puppet::Parser::Functions
             end
           }
 
-          if new_txt[:resource_record_set][:resource_records].select{|rec| rec[:value].slice(1..-2).split(',')[1] == lookupvar('ec2_instance_id')}.count == 0
-            new_txt[:resource_record_set][:resource_records].push({value: "\"#{lookupvar('aws_region')},#{lookupvar('ec2_instance_id')},#{lookupvar('hostname')}\""})
-          end
+          # if new_txt[:resource_record_set][:resource_records].select{|rec| rec[:value].slice(1..-2).split(',')[1] == lookupvar('ec2_instance_id')}.count == 0
+          #   new_txt[:resource_record_set][:resource_records].push({value: "\"#{lookupvar('aws_region')},#{lookupvar('ec2_instance_id')},#{lookupvar('hostname')}\""})
+          # end
 
           # If there are changes, delete the old TXT record and create the new one.
           Puppet.send(:notice, "update_internal_dns: comparison #{new_txt[:resource_record_set][:resource_records].sort} - #{txt_record[:record][:resource_records].sort}")
