@@ -13,17 +13,17 @@ module Puppet::Parser::Functions
       zone_id = function_r53_get_zone_id([r53_zone])
 
       if (zone_id == 0)
-        Puppet.send(:notice, "No zones with the DNS name of #{r53_zone}, taking no action.")
+        Puppet.send(:notice, "update_internal_dns: No zones with the DNS name of #{r53_zone}, taking no action.")
       elsif zone_id == 2
-        Puppet.send(:notice, "More than one zone with the DNS name of #{r53_zone}, taking no action.")
-        Puppet.send(:notice, "r53_get_zone_id returned #{zone_id}")
-        # Puppet.send(:debug, "r53_get_zone_id returned #{zone_id}")
+        Puppet.send(:notice, "update_internal_dns: More than one zone with the DNS name of #{r53_zone}, taking no action.")
+        Puppet.send(:notice, "update_internal_dns: r53_get_zone_id returned #{zone_id}")
+        # Puppet.send(:debug, "update_internal_dns: r53_get_zone_id returned #{zone_id}")
         zone_id = nil
       else
-        Puppet.send(:notice, "Located Route53 Zone with DNS name of #{r53_zone} and id #{zone_id}.")
+        Puppet.send(:notice, "update_internal_dns: Located Route53 Zone with DNS name of #{r53_zone} and id #{zone_id}.")
         zone = r53.get_hosted_zone(id: zone_id).hosted_zone
-        Puppet.send(:notice, "r53_get_hosted_zone returned #{zone}")
-        # Puppet.send(:debug, "r53_get_hosted_zone returned #{zone}")
+        Puppet.send(:notice, "update_internal_dns: r53_get_hosted_zone returned #{zone}")
+        # Puppet.send(:debug, "update_internal_dns: r53_get_hosted_zone returned #{zone}")
 
         change_batch = {
           :hosted_zone_id => zone.id,
@@ -37,15 +37,15 @@ module Puppet::Parser::Functions
         a_record    = function_r53_get_record([zone.id, hostname, "A"])
         base_record = function_r53_get_record([zone.id, base, "A"])
 
-        Puppet.send(:notice, "r53_get_record returned TXT  : #{txt_record}")
-        # Puppet.send(:debug, "r53_get_record returned TXT  : #{txt_record}")
-        Puppet.send(:notice, "r53_get_record returned A    :#{a_record}")
-        # Puppet.send(:debug, "r53_get_record returned A    :#{a_record}")
-        Puppet.send(:notice, "r53_get_record returned Base : #{base_record}")
-        # Puppet.send(:debug, "r53_get_record returned Base : #{base_record}")
+        Puppet.send(:notice, "update_internal_dns: r53_get_record returned TXT  : #{txt_record}")
+        # Puppet.send(:debug, "update_internal_dns: r53_get_record returned TXT  : #{txt_record}")
+        Puppet.send(:notice, "update_internal_dns: r53_get_record returned A    :#{a_record}")
+        # Puppet.send(:debug, "update_internal_dns: r53_get_record returned A    :#{a_record}")
+        Puppet.send(:notice, "update_internal_dns: r53_get_record returned Base : #{base_record}")
+        # Puppet.send(:debug, "update_internal_dns: r53_get_record returned Base : #{base_record}")
 
         if txt_record[:result] == 1
-            Puppet.send(:notice, "No TXT exists for #{base}.#{r53_zone}, creating it.")
+            Puppet.send(:notice, "update_internal_dns: No TXT exists for #{base}.#{r53_zone}, creating it.")
             change_batch[:change_batch][:changes].push({
               action: "CREATE",
               resource_record_set: {
@@ -79,8 +79,8 @@ module Puppet::Parser::Functions
             end
 
         elsif txt_record[:result] == 0
-          Puppet.send(:notice, "Retrieved TXT record: #{txt_record.to_s}")
-          # Puppet.send(:debug, "Retrieved TXT record: #{txt_record.to_s}")
+          Puppet.send(:notice, "update_internal_dns: Retrieved TXT record: #{txt_record.to_s}")
+          # Puppet.send(:debug, "update_internal_dns: Retrieved TXT record: #{txt_record.to_s}")
 
           # Check for the current A record
           if a_record[:result] == 1
@@ -142,16 +142,16 @@ module Puppet::Parser::Functions
           txt_record[:record][:resource_records].each{|record|
             region, instance_id, cname = *record[:value].slice(1..-2).split(',')
             if instance_id != lookupvar('ec2_instance_id')
-              Puppet.send(:notice, "Verifying existing of #{instance_id} - #{cname} in #{region}.")
-              # Puppet.send(:debug, "Verifying existing of #{instance_id} - #{cname} in #{region}.")
+              Puppet.send(:notice, "update_internal_dns: Verifying existing of #{instance_id} - #{cname} in #{region}.")
+              # Puppet.send(:debug, "update_internal_dns: Verifying existing of #{instance_id} - #{cname} in #{region}.")
               remove = false
 
               # If it still exists, keep it in the new TXT and CNAME records.
               instance = Aws::EC2::Instance.new(id: instance_id, region: region)
               begin
                 if instance.state.name == "running"
-                  Puppet.send(:notice, "#{instance_id} - #{cname} in #{region} still exists.")
-                  # Puppet.send(:debug, "#{instance_id} - #{cname} in #{region} still exists.")
+                  Puppet.send(:notice, "update_internal_dns: #{instance_id} - #{cname} in #{region} still exists.")
+                  # Puppet.send(:debug, "update_internal_dns: #{instance_id} - #{cname} in #{region} still exists.")
                   new_txt[:resource_record_set][:resource_records].push(record)
                   if hostname != base
                     new_base[:resource_record_set][:resource_records].push({value: instance.private_ip_address })
@@ -159,11 +159,8 @@ module Puppet::Parser::Functions
                 end
               # If it doesn't, delete the associated A record and leave it out of the new TXT and base.
               rescue
-                remove = true
-              end
-              if remove
-                Puppet.send(:notice, "#{instance_id} - #{cname} in #{region} doesn't exist or isn't running.")
-                # Puppet.send(:debug, "#{instance_id} - #{cname} in #{region} doesn't exist or isn't running.")
+                Puppet.send(:notice, "update_internal_dns: #{instance_id} - #{cname} in #{region} doesn't exist or isn't running.")
+                # Puppet.send(:debug, "update_internal_dns: #{instance_id} - #{cname} in #{region} doesn't exist or isn't running.")
                 check_for_a_record = function_r53_get_record([zone.id, cname, "A"])
                 if check_for_a_record[:result] == 0
                   change_batch[:change_batch][:changes].push({
@@ -180,6 +177,7 @@ module Puppet::Parser::Functions
           end
 
           # If there are changes, delete the old TXT record and create the new one.
+          Puppet.send(:notice, "update_internal_dns: comparison #{new_txt[:resource_record_set][:resource_records].sort} - #{txt_record[:record][:resource_records].sort}")
           if new_txt[:resource_record_set][:resource_records].sort != txt_record[:record][:resource_records].sort
             change_batch[:change_batch][:changes].push({
               action: "DELETE",
@@ -201,18 +199,18 @@ module Puppet::Parser::Functions
             end
           end
         end
-        Puppet.send(:notice, "Compiled change request: #{change_batch}")
-        # Puppet.send(:debug, "Compiled change request: #{change_batch}")
+        Puppet.send(:notice, "update_internal_dns: Compiled change request: #{change_batch}")
+        # Puppet.send(:debug, "update_internal_dns: Compiled change request: #{change_batch}")
         if change_batch[:change_batch][:changes].count > 0
           r53.change_resource_record_sets(change_batch)
-          Puppet.send(:info, "Updating DNS...")
+          Puppet.send(:info, "update_internal_dns: Updating DNS...")
         else
-          Puppet.send(:notice, "No changes to DNS, no update sent")
-          # Puppet.send(:debug, "No changes to DNS, no update sent")
+          Puppet.send(:notice, "update_internal_dns: No changes to DNS, no update sent")
+          # Puppet.send(:debug, "update_internal_dns: No changes to DNS, no update sent")
         end
       end
     rescue => e
-      Puppet.send(:warn, e)
+      Puppet.send(:warn, "update_internal_dns: #{e}" )
     end
   end
 end
